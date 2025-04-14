@@ -1,0 +1,32 @@
+"use client";
+import EmailInput from "./Components/EmailInput";
+import PasswordInput from "./Components/PasswordInput";
+import useInput from "@/app/hooks/useInput";
+
+export default function Login() {
+  const [email, onEmailChange] = useInput();
+  const [password, onPasswordChange] = useInput();
+
+  return (
+    <div className="w-full flex justify-center items-center h-screen ">
+      <div className=" w-[420px] h-[394px] grid border-2 p-2 border-black">
+        <h2 className="font-semibold text-2xl">Log in to Koperasi</h2>
+        <form action="">
+          <div className="my-3">
+            <EmailInput value={email} onChange={onEmailChange} />
+            <PasswordInput value={password} onChange={onPasswordChange} />
+            <p className="w-full font-semibold text-[14px] text-right text-[#999999] mt-1.5">
+              Forgot Password?
+            </p>
+          </div>
+          <button className="bg-black text-white w-full h-[53px] rounded-xl py-16px cursor-pointer mt-3">
+            Log In
+          </button>
+        </form>
+        <h3 className="w-full text-center text-red-400">
+          Password you entered is incorrect
+        </h3>
+      </div>
+    </div>
+  );
+}
