@@ -1,4 +1,5 @@
 import useShow from "@/app/hooks/useShow";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function PasswordInput({ onPasswordChange, password }) {
   const [showPassword, togglePasswordVisibility] = useShow();
@@ -18,9 +19,9 @@ export default function PasswordInput({ onPasswordChange, password }) {
         <button
           type="button"
           onClick={togglePasswordVisibility}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer"
         >
-          👁️
+          {showPassword ? <Eye /> : <EyeOff />}
         </button>
       </div>
     </>
