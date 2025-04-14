@@ -1,6 +1,6 @@
 "use client";
-import EmailInput from "./Components/EmailInput";
-import PasswordInput from "./Components/PasswordInput";
+import EmailInput from "../../components/EmailInput";
+import PasswordInput from "../../components/PasswordInput";
 import useInput from "@/app/hooks/useInput";
 
 export default function Login() {
@@ -8,13 +8,17 @@ export default function Login() {
   const [password, onPasswordChange] = useInput();
 
   return (
-    <div className="w-full flex justify-center items-center h-screen ">
+    <div className="w-full flex justify-center items-center h-screen flex-col gap-13">
       <div className=" w-[420px] h-[394px] grid border-2 p-2 border-black">
         <h2 className="font-semibold text-2xl">Log in to Koperasi</h2>
         <form action="">
           <div className="my-3">
             <EmailInput value={email} onChange={onEmailChange} />
-            <PasswordInput value={password} onChange={onPasswordChange} />
+            <PasswordInput
+              value={password}
+              onChange={onPasswordChange}
+              label={"Password"}
+            />
             <p className="w-full font-semibold text-[14px] text-right text-[#999999] mt-1.5">
               Forgot Password?
             </p>
@@ -27,6 +31,12 @@ export default function Login() {
           Password you entered is incorrect
         </h3>
       </div>
+      <p className="text-[#999999]">
+        Don't have an account?{" "}
+        <a href="/Register" className="text-black">
+          Create one
+        </a>
+      </p>
     </div>
   );
 }

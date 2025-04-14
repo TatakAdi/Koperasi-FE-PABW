@@ -1,12 +1,12 @@
 import useShow from "@/app/hooks/useShow";
 import { Eye, EyeOff } from "lucide-react";
 
-export default function PasswordInput({ onPasswordChange, password }) {
+export default function PasswordInput({ onPasswordChange, password, label }) {
   const [showPassword, togglePasswordVisibility] = useShow();
 
   return (
     <>
-      <label htmlFor="password">Password</label>
+      <label htmlFor="password">{label}</label>
       <div className="relative">
         <input
           type={showPassword ? "text" : "password"}
