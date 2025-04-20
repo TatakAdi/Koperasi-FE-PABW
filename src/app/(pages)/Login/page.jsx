@@ -20,7 +20,12 @@ export default function Login() {
               label={"Password"}
             />
             <p className="w-full font-semibold text-[14px] text-right text-[#999999] mt-1.5">
+              <a
+                href="/ForgotPass"
+                className="text-[#999999] hover:text-red-500 transition-colors"
+              >
               Forgot Password?
+              </a>
             </p>
           </div>
           <button className="bg-black text-white w-full h-[53px] rounded-xl py-16px cursor-pointer mt-3">
