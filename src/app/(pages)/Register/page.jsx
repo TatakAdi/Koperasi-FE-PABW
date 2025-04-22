@@ -1,8 +1,8 @@
 "use client";
-import useInput from "@/app/hooks/useInput";
+import useInput from "../../hooks/useInput";
 import EmailInput from "../../components/EmailInput";
 import PasswordInput from "../../components/PasswordInput";
-import NameInput from "@/app/components/NameInput";
+import NameInput from "../../components/NameInput";
 
 export default function Register() {
   const [name, onNameChange] = useInput();
