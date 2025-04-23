@@ -1,26 +1,20 @@
 "use client";
 
 export async function login({ email, password }) {
-  await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/sanctum/csrf-cookie`, {
+  const response = await fetch(`/api/proxy/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email, password }),
     credentials: "include",
   });
-
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/login`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({ email, password }),
-    }
-  );
 
   const responseJson = await response.json();
 
   if (response.status !== 200) {
     alert(responseJson.message || "Login Gagal");
+    console.error(responseJson.message);
     return { error: true, data: null };
   }
 
@@ -28,13 +22,13 @@ export async function login({ email, password }) {
 }
 
 export async function getUserLogged() {
-  const response = await fetch(`${process.env.APP_URL}/user`, {
+  const response = await fetch(`/api/proxy/user`, {
     credentials: "include",
   });
 
   const responseJson = await response.json();
 
-  if (responseJson.status !== 200) {
+  if (response.status !== 200) {
     return { error: true, data: null };
   }
 

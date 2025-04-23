@@ -27,10 +27,10 @@ export default function Login() {
         <h2 className="font-semibold text-2xl">Log in to Koperasi</h2>
         <form action="" onSubmit={onSubmitEventHandler}>
           <div className="my-3">
-            <EmailInput value={email} onChange={onEmailChange} />
+            <EmailInput email={email} onEmailChange={onEmailChange} />
             <PasswordInput
-              value={password}
-              onChange={onPasswordChange}
+              password={password}
+              onPasswordChange={onPasswordChange}
               label={"Password"}
             />
             <p className="w-full font-semibold text-[14px] text-right text-[#999999] mt-1.5">
