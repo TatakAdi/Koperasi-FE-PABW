@@ -1,18 +1,24 @@
 "use client";
+import { useRouter } from "next/navigation";
 import EmailInput from "../../components/EmailInput";
 import PasswordInput from "../../components/PasswordInput";
 import useInput from "../../hooks/useInput";
 import { login } from "../../lib/api/login";
+import { useState } from "react";
 
 export default function Login() {
   const [email, onEmailChange] = useInput();
   const [password, onPasswordChange] = useInput();
+  const [isError, setIsError] = useState(false);
+  const router = useRouter();
 
   async function onLogin({ email, password }) {
-    const { error, data } = await login({ email, password });
+    const { error } = await login({ email, password });
 
     if (error) {
-      alert("Login Gagal");
+      setIsError(true);
+    } else {
+      router.push("/");
     }
   }
 
@@ -41,9 +47,11 @@ export default function Login() {
             Log In
           </button>
         </form>
-        <h3 className="w-full text-center text-red-400">
-          Password you entered is incorrect
-        </h3>
+        {isError ? (
+          <h3 className="w-full text-center text-red-400">
+            Password you entered is incorrect
+          </h3>
+        ) : null}
       </div>
       <p className="text-[#999999]">
         Don't have an account?{" "}

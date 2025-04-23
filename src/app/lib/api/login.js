@@ -13,11 +13,15 @@ export async function login({ email, password }) {
   const responseJson = await response.json();
 
   if (response.status !== 200) {
-    alert(responseJson.message || "Login Gagal");
+    alert("Login Gagal");
     console.error(responseJson.message);
     return { error: true, data: null };
   }
 
+  console.log("Headers from /api/proxy/login:");
+  for (let pair of response.headers.entries()) {
+    console.log(pair[0] + ": " + pair[1]);
+  }
   return { error: false, data: responseJson };
 }
 
@@ -26,11 +30,10 @@ export async function getUserLogged() {
     credentials: "include",
   });
 
-  const responseJson = await response.json();
-
-  if (response.status !== 200) {
+  if (!response.ok) {
     return { error: true, data: null };
   }
 
-  return { error: false, data: responseJson };
+  const data = await response.json();
+  return { error: false, data };
 }

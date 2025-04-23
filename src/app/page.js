@@ -10,17 +10,31 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    async function fetchUser() {
-      const { data } = await getUserLogged();
-      setAuthUser(data);
-    }
+    const getUser = async () => {
+      try {
+        const response = await fetch("/api/proxy/user", {
+          method: "GET",
+          credentials: "include",
+        });
 
-    fetchUser();
+        if (!response.ok) {
+          console.log("Token invalid");
+          return;
+        }
+        const user = await response.json();
+        console.log("User yang login: ", user);
+
+        router.push("/Welcome");
+      } catch (err) {
+        console.error("Gagal mengambil data user".err);
+      }
+    };
+    getUser();
   }, []);
 
-  if (authUser !== null) {
-    router.push("/Welcome");
-  }
+  // if (authUser !== null) {
+  //   router.push("/Welcome");
+  // }
 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">

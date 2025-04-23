@@ -15,8 +15,6 @@ export default async function handler(req, res) {
       }
     );
 
-    const cookie = csrf.headers.getSetCookie?.() ?? [];
-
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/login`,
       {
@@ -29,6 +27,11 @@ export default async function handler(req, res) {
         body: JSON.stringify(req.body),
       }
     );
+
+    const setCookie = response.headers.get("set-cookie");
+    if (setCookie) {
+      res.setHeader("Set-Cookie", setCookie);
+    }
 
     const contentType = response.headers.get("Content-Type");
 
