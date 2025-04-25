@@ -17,8 +17,8 @@ export default function PasswordInput({
           type={showPassword ? "text" : "password"}
           id="password"
           className={`block bg-[#F2F5F7] w-full h-[48px] rounded-xl py-[12px] pr-[12px] pl-[16px] ${
-            isError ? "border-2 border-red-400" : null
-          }`}
+            isError ? "border-2 border-red-400 " : null
+          } `}
           value={password}
           onChange={onPasswordChange}
           placeholder="password123"

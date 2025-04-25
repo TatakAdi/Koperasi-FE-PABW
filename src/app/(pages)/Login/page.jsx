@@ -5,6 +5,7 @@ import PasswordInput from "../../components/PasswordInput";
 import useInput from "../../hooks/useInput";
 import { login } from "../../lib/api/login";
 import { useState } from "react";
+import Image from "next/image";
 
 export default function Login() {
   const [email, onEmailChange] = useInput();
@@ -29,10 +30,15 @@ export default function Login() {
 
   return (
     <div className="w-full flex justify-center items-center h-screen flex-col gap-13">
-      <div className=" w-[420px] h-[394px] grid border-2 p-2 border-black">
-        <h2 className="font-semibold text-2xl">Log in to Koperasi</h2>
+      <div className=" w-[420px] h-[400px]  p-2 ">
+        <div>
+          <div className="w-[44px] h-[44px] relative mb-4">
+            <Image src="/logo.svg" alt="Logo" fill className="object-contain" />
+          </div>
+          <h2 className="font-semibold text-2xl">Log in to Koperasi</h2>
+        </div>
         <form action="" onSubmit={onSubmitEventHandler}>
-          <div className="my-3">
+          <div className="my-3 grid gap-1">
             <EmailInput email={email} onEmailChange={onEmailChange} />
             <PasswordInput
               password={password}
@@ -45,7 +51,7 @@ export default function Login() {
                 href="/ForgotPass"
                 className="text-[#999999] hover:text-red-500 transition-colors"
               >
-              Forgot Password?
+                Forgot Password?
               </a>
             </p>
           </div>
@@ -54,17 +60,17 @@ export default function Login() {
           </button>
         </form>
 
-        {isError ? (
-          <h3 className="w-full text-center text-red-400 bg-amber-500">
-            Password you entered is incorrect
-          </h3>
-        ) : (
-          <span className="bg-amber-500"></span>
-        )}
+        <h3
+          className={`w-full text-center text-red-400  ${
+            isError ? "visible" : "hidden"
+          } mt-2`}
+        >
+          Password you entered is incorrect
+        </h3>
       </div>
       <p className="text-[#999999]">
         Don't have an account?{" "}
-        <a href="/Register" className="text-black">
+        <a href="/Register" className="text-black hover:underline">
           Create one
         </a>
       </p>

@@ -13,7 +13,6 @@ export async function login({ email, password }) {
   const responseJson = await response.json();
 
   if (response.status !== 200) {
-    alert("Login Gagal");
     console.error(responseJson.message);
     return { error: true, data: null };
   }

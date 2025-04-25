@@ -3,6 +3,7 @@ import useInput from "../../hooks/useInput";
 import EmailInput from "../../components/EmailInput";
 import PasswordInput from "../../components/PasswordInput";
 import NameInput from "../../components/NameInput";
+import Image from "next/image";
 
 export default function Register() {
   const [name, onNameChange] = useInput();
@@ -12,7 +13,10 @@ export default function Register() {
 
   return (
     <div className="w-full flex justify-center items-center h-screen flex-col gap-13">
-      <div className=" w-[420px] h-[500px] grid border-2 p-2 border-black">
+      <div className=" w-[420px] h-[500px] grid p-2 ">
+        <div className="w-[44px] h-[44px] relative mb-4">
+          <Image src="/logo.svg" alt="Logo" fill className="object-contain" />
+        </div>
         <h2 className="font-semibold text-2xl">Register New Account</h2>
         <form action="">
           <div className="my-3 flex flex-col gap-1.5">
@@ -37,9 +41,9 @@ export default function Register() {
           </button>
         </form>
       </div>
-      <p className="text-[#999999]">
+      <p className="text-[#999999] mt-3">
         Already have an account?{" "}
-        <a href="/Login" className="text-black">
+        <a href="/Login" className="text-black hover:underline">
           Log in!
         </a>
       </p>
