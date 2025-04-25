@@ -38,6 +38,7 @@ export default function Login() {
               password={password}
               onPasswordChange={onPasswordChange}
               label={"Password"}
+              isError={isError}
             />
             <p className="w-full font-semibold text-[14px] text-right text-[#999999] mt-1.5">
               Forgot Password?
@@ -47,11 +48,14 @@ export default function Login() {
             Log In
           </button>
         </form>
+
         {isError ? (
-          <h3 className="w-full text-center text-red-400">
+          <h3 className="w-full text-center text-red-400 bg-amber-500">
             Password you entered is incorrect
           </h3>
-        ) : null}
+        ) : (
+          <span className="bg-amber-500"></span>
+        )}
       </div>
       <p className="text-[#999999]">
         Don't have an account?{" "}

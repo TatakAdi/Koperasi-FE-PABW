@@ -11,23 +11,16 @@ export default function Home() {
 
   useEffect(() => {
     const getUser = async () => {
-      try {
-        const response = await fetch("/api/proxy/user", {
-          method: "GET",
-          credentials: "include",
-        });
+      const { error, data } = await getUserLogged();
 
-        if (!response.ok) {
-          console.log("Token invalid");
-          return;
-        }
-        const user = await response.json();
-        console.log("User yang login: ", user);
-
-        router.push("/Welcome");
-      } catch (err) {
-        console.error("Gagal mengambil data user".err);
+      if (error) {
+        console.log("Token Invalid & Data user gagal terambil");
+        return;
       }
+
+      console.log("Data pengguna :", data);
+      setAuthUser(data);
+      router.push("/Welcome");
     };
     getUser();
   }, []);

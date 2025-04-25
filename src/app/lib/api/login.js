@@ -26,14 +26,23 @@ export async function login({ email, password }) {
 }
 
 export async function getUserLogged() {
-  const response = await fetch(`/api/proxy/user`, {
-    credentials: "include",
-  });
+  try {
+    const response = await fetch(`/api/proxy/user`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        Accept: "application/json",
+      },
+    });
 
-  if (!response.ok) {
+    if (!response.ok) {
+      return { error: true, data: null };
+    }
+
+    const data = await response.json();
+    return { error: false, data };
+  } catch (error) {
+    console.error(error);
     return { error: true, data: null };
   }
-
-  const data = await response.json();
-  return { error: false, data };
 }
