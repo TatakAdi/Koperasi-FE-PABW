@@ -1,5 +1,6 @@
+"use client";
 export async function registerPengguna({ fullname, email, password }) {
-  const response = await fetch(`/api/auth/register/pengguna`, {
+  const response = await fetch(`/api/proxy/registerPengguna`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -15,7 +16,7 @@ export async function registerPengguna({ fullname, email, password }) {
 
   const responseJson = await response.json();
 
-  if (responseJson.status !== "success") {
+  if (!response.ok) {
     console.error(responseJson.message);
     return { error: true };
   }
@@ -25,7 +26,7 @@ export async function registerPengguna({ fullname, email, password }) {
 
 export async function registerPenitip({ fullname, email, password }) {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/register/penitip`,
+    `${process.env.NEXT_PUBLIC_APP_URL}/api/proxy/registerPenitip`,
     {
       method: "POST",
       headers: {
@@ -43,7 +44,7 @@ export async function registerPenitip({ fullname, email, password }) {
 
   const responseJson = await response.json();
 
-  if (responseJson.status !== "success") {
+  if (!response.ok) {
     console.error(responseJson.message);
     return { error: true };
   }

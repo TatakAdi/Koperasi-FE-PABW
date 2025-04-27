@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export default function EmailVerifBox({ email }) {
   return (
     <div className="w-[420px]">

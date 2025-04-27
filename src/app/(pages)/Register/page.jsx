@@ -6,6 +6,7 @@ import NameInput from "../../components/NameInput";
 import Image from "next/image";
 import { useState } from "react";
 import { registerPengguna, registerPenitip } from "@/lib/api/register";
+import { useRouter } from "next/navigation";
 
 export default function Register() {
   const [fullname, onNameChange] = useInput();
@@ -13,6 +14,7 @@ export default function Register() {
   const [password, onPasswordChange] = useInput();
   const [confirmPassword, onConfirmPasswordChange] = useInput();
   const [isError, setIsError] = useState(false);
+  const router = useRouter();
 
   async function onRegister({ fullname, email, password }) {
     const emailDomain = email.split("@")[1];

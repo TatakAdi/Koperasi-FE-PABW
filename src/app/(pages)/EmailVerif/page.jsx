@@ -3,7 +3,7 @@ import Image from "next/image";
 import EmailVerifBox from "@/components/EmailVerifBox";
 import { useSearchParams } from "next/navigation";
 
-export default function EmailVerif({ email }) {
+export default function EmailVerif() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
 
