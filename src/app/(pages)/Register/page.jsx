@@ -8,25 +8,37 @@ import { useState } from "react";
 import { registerPengguna, registerPenitip } from "@/lib/api/register";
 
 export default function Register() {
-  const [name, onNameChange] = useInput();
+  const [fullname, onNameChange] = useInput();
   const [email, onEmailChange] = useInput();
   const [password, onPasswordChange] = useInput();
   const [confirmPassword, onConfirmPasswordChange] = useInput();
   const [isError, setIsError] = useState(false);
 
-  async function onRegister({ name, email, password }) {
+  async function onRegister({ fullname, email, password }) {
     const emailDomain = email.split("@")[1];
 
+    if (password !== confirmPassword) {
+      setIsError(true);
+      return;
+    }
+
+    let error;
+
     if (emailDomain.endsWith("itk.ac.id")) {
-      const { error } = await registerPengguna({ name, email, password });
+      ({ error } = await registerPengguna({ fullname, email, password }));
     } else {
-      const { error } = await registerPenitip({ name, email, password });
+      ({ error } = await registerPenitip({ fullname, email, password }));
+    }
+
+    if (!error) {
+      // kalau berhasil, langsung redirect ke halaman Email Verification
+      router.push(`/EmailVerif?email=${encodeURIComponent(email)}`);
     }
   }
 
   const onSubmitEventHandler = (event) => {
     event.preventDefault();
-    onRegister({ name, email, password });
+    onRegister({ fullname, email, password });
   };
 
   return (
@@ -36,9 +48,9 @@ export default function Register() {
           <Image src="/logo.svg" alt="Logo" fill className="object-contain" />
         </div>
         <h2 className="font-semibold text-2xl">Register New Account</h2>
-        <form action="">
+        <form action="" onSubmit={onSubmitEventHandler}>
           <div className="my-3 flex flex-col gap-1.5">
-            <NameInput name={name} onNameChange={onNameChange} />
+            <NameInput name={fullname} onNameChange={onNameChange} />
             <EmailInput email={email} onEmailChange={onEmailChange} />
             <PasswordInput
               password={password}
@@ -58,6 +70,13 @@ export default function Register() {
             Create Account
           </button>
         </form>
+        <h3
+          className={`w-full text-center text-red-400  ${
+            isError ? "visible" : "hidden"
+          } mt-2`}
+        >
+          The password you entered do not match
+        </h3>
       </div>
       <p className="text-[#999999] mt-3">
         Already have an account?{" "}
