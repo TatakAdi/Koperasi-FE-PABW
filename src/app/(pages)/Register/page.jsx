@@ -4,12 +4,30 @@ import EmailInput from "../../components/EmailInput";
 import PasswordInput from "../../components/PasswordInput";
 import NameInput from "../../components/NameInput";
 import Image from "next/image";
+import { useState } from "react";
+import { registerPengguna, registerPenitip } from "@/lib/api/register";
 
 export default function Register() {
   const [name, onNameChange] = useInput();
   const [email, onEmailChange] = useInput();
   const [password, onPasswordChange] = useInput();
   const [confirmPassword, onConfirmPasswordChange] = useInput();
+  const [isError, setIsError] = useState(false);
+
+  async function onRegister({ name, email, password }) {
+    const emailDomain = email.split("@")[1];
+
+    if (emailDomain.endsWith("itk.ac.id")) {
+      const { error } = await registerPengguna({ name, email, password });
+    } else {
+      const { error } = await registerPenitip({ name, email, password });
+    }
+  }
+
+  const onSubmitEventHandler = (event) => {
+    event.preventDefault();
+    onRegister({ name, email, password });
+  };
 
   return (
     <div className="w-full flex justify-center items-center h-screen flex-col gap-13">
