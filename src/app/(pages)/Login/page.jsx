@@ -10,14 +10,17 @@ import Image from "next/image";
 export default function Login() {
   const [email, onEmailChange] = useInput();
   const [password, onPasswordChange] = useInput();
-  const [isError, setIsError] = useState(false);
+  const [isPasswordWrong, setIsPasswordWrong] = useState(false);
+  const [status, setStatus] = useState("idle"); // idle or loading
   const router = useRouter();
 
   async function onLogin({ email, password }) {
+    setStatus("loading");
     const { error } = await login({ email, password });
 
     if (error) {
-      setIsError(true);
+      setIsPasswordWrong(true);
+      setStatus("idle");
     } else {
       router.push("/");
     }
@@ -44,7 +47,7 @@ export default function Login() {
               password={password}
               onPasswordChange={onPasswordChange}
               label={"Password"}
-              isError={isError}
+              isError={isPasswordWrong}
             />
             <p className="w-full font-semibold text-[14px] text-right text-[#999999] mt-1.5">
               <a
@@ -55,14 +58,23 @@ export default function Login() {
               </a>
             </p>
           </div>
-          <button className="bg-black text-white w-full h-[53px] rounded-xl py-16px cursor-pointer mt-3">
-            Log In
+          <button
+            disabled={status === "loading"}
+            className={`flex justify-center items-center bg-black text-white w-full h-[53px] rounded-xl py-16px mt-3 ${
+              status === "loading" ? "cursor-not-allowed" : "cursor-pointer"
+            }`}
+          >
+            {status === "loading" ? (
+              <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-white"></div>
+            ) : (
+              "Log in"
+            )}
           </button>
         </form>
 
         <h3
           className={`w-full text-center text-red-400  ${
-            isError ? "visible" : "hidden"
+            isPasswordWrong ? "visible" : "hidden"
           } mt-2`}
         >
           Password you entered is incorrect

@@ -14,13 +14,16 @@ export default function Register() {
   const [password, onPasswordChange] = useInput();
   const [confirmPassword, onConfirmPasswordChange] = useInput();
   const [isError, setIsError] = useState(false);
+  const [status, setStatus] = useState("idle");
   const router = useRouter();
 
   async function onRegister({ fullname, email, password }) {
+    setStatus("loading");
     const emailDomain = email.split("@")[1];
 
     if (password !== confirmPassword) {
       setIsError(true);
+      setStatus("idle");
       return;
     }
 
@@ -35,6 +38,9 @@ export default function Register() {
     if (!error) {
       // kalau berhasil, langsung redirect ke halaman Email Verification
       router.push(`/EmailVerif?email=${encodeURIComponent(email)}`);
+    } else {
+      setStatus("idle");
+      return;
     }
   }
 
@@ -68,8 +74,17 @@ export default function Register() {
               label={"Confirm Password"}
             />
           </div>
-          <button className="bg-black text-white w-full h-[53px] rounded-xl py-16px cursor-pointer mt-3">
-            Create Account
+          <button
+            disabled={status === "loading"}
+            className={`flex justify-center items-center bg-black text-white w-full h-[53px] rounded-xl py-16px mt-3 ${
+              status === "loading" ? "cursor-not-allowed" : "cursor-pointer"
+            }`}
+          >
+            {status === "loading" ? (
+              <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-white"></div>
+            ) : (
+              "Create Account"
+            )}
           </button>
         </form>
         <h3

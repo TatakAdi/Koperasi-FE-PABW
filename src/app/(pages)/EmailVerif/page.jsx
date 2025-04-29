@@ -12,7 +12,6 @@ export default function EmailVerif() {
   const router = useRouter();
 
   const [status, setStatus] = useState("loading"); // loading, success, error, idle
-  const [message, setMessage] = useState("");
 
   useEffect(() => {
     if (token) {
@@ -20,13 +19,13 @@ export default function EmailVerif() {
       verifyEmail(token).then((res) => {
         if (res.succes) {
           setStatus("success");
-          setMessage(res.message);
+          console.log(res.message);
           setTimeout(() => {
             router.push("/Login");
           }, 2000);
         } else {
           setStatus("error");
-          setMessage(res.message);
+          console.error(res.message);
         }
       });
     } else {
@@ -36,7 +35,7 @@ export default function EmailVerif() {
 
   return (
     <div className="w-full h-screen flex justify-center items-center">
-      <EmailVerifBox email={email} />
+      <EmailVerifBox email={email} status={status} />
     </div>
   );
 }
