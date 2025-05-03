@@ -14,7 +14,7 @@ export default function Navbar({
 }) {
   const router = useRouter();
   return (
-    <div className="flex justify-between items-center w-full bg-amber-700 h-[88px] px-6">
+    <div className="flex justify-between items-center w-full  h-[88px] px-6">
       <div className="w-[44px] h-[44px] relative">
         <Image src="/logo.svg" alt="Logo" fill className="object-contain" />
       </div>
@@ -23,16 +23,28 @@ export default function Navbar({
         onKeywordChange={onKeywordCahnge}
         toggleKeywordSearch={toggleKeywordSearch}
       />
-      <div className="flex justify-around items-center">
+      <div className="flex justify-around items-center gap-6 ">
         <div>
-          <button onClick={() => router.push("/checkout")}>
-            <ShoppingCart />
+          <button
+            onClick={() => router.push("/checkout")}
+            className="cursor-pointer"
+          >
+            <ShoppingCart size={24} stroke="black" fill="black" />
           </button>
         </div>
-        <p>/</p>
-        <div>
-          <Bell />
-        </div>{" "}
+        <span className="text-2xl text-[#E0E0E0] ">/</span>
+        <div className="flex justify-around items-center gap-4 ">
+          <Bell
+            size={24}
+            stroke="black"
+            fill="black"
+            className="cursor-pointer"
+          />
+          <div
+            id="profile"
+            className="rounded-full w-10 h-10 bg-gray-400 cursor-pointer"
+          ></div>
+        </div>
         {/* Notification & Profile Picture */}
       </div>
     </div>

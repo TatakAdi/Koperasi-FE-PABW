@@ -11,7 +11,7 @@ export default function SearchBar({
         type="text"
         name=""
         id=""
-        className="bg-[#F2F4F7] rounded-4xl w-[800px] font-normal text-base p-2.5"
+        className="bg-[#F2F4F7] rounded-4xl w-[800px] font-normal text-base px-5 py-3"
         placeholder="Cari Produk"
         value={keyword}
         onChange={onKeywordChange}
@@ -19,7 +19,7 @@ export default function SearchBar({
       <button
         type="button"
         onClick={toggleKeywordSearch}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer"
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer px-2.5 py-3"
       >
         <SearchIcon />
       </button>
