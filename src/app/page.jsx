@@ -1,0 +1,35 @@
+"use client";
+import Image from "next/image";
+import { getUserLogged } from "./lib/api/login";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+export default function Home() {
+  const [authUser, setAuthUser] = useState(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { error, data } = await getUserLogged();
+
+      if (error) {
+        console.log("Token Invalid & Data user gagal terambil");
+        return;
+      }
+
+      console.log("Data pengguna :", data);
+      setAuthUser(data);
+      router.push("/Welcome");
+    };
+    getUser();
+  }, []);
+
+  // if (authUser !== null) {
+  //   router.push("/Welcome");
+  // }
+
+  return (
+    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]"></div>
+  );
+}

@@ -9,6 +9,7 @@ export default function EmailVerif() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
   const token = searchParams.get("token");
+  const flow = searchParams.get("flow");
   const router = useRouter();
 
   const [status, setStatus] = useState("loading"); // loading, success, error, idle
@@ -21,7 +22,11 @@ export default function EmailVerif() {
           setStatus("success");
           console.log(res.message);
           setTimeout(() => {
-            router.push("/Login");
+            if (flow === "login") {
+              router.push("/");
+            } else {
+              router.push("/Login");
+            }
           }, 2000);
         } else {
           setStatus("error");

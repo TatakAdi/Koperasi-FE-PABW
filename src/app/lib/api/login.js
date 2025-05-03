@@ -14,14 +14,14 @@ export async function login({ email, password }) {
 
   if (response.status !== 200) {
     console.error(responseJson.message);
-    return { error: true, data: null };
+    return { error: true, data: null, status: response.status };
   }
 
   console.log("Headers from /api/proxy/login:");
   for (let pair of response.headers.entries()) {
     console.log(pair[0] + ": " + pair[1]);
   }
-  return { error: false, data: responseJson };
+  return { error: false, data: responseJson, status: response.status };
 }
 
 export async function getUserLogged() {

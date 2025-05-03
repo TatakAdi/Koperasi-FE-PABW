@@ -16,9 +16,11 @@ export default function Login() {
 
   async function onLogin({ email, password }) {
     setStatus("loading");
-    const { error } = await login({ email, password });
+    const { error, data, status } = await login({ email, password });
 
-    if (error) {
+    if (status === 403) {
+      router.push(`/EmailVerif?email=${encodeURIComponent(email)}&flow=login`);
+    } else if (error) {
       setIsPasswordWrong(true);
       setStatus("idle");
     } else {
@@ -80,12 +82,12 @@ export default function Login() {
           Password you entered is incorrect
         </h3>
       </div>
-      <p className="text-[#999999]">
+      {/* <p className="text-[#999999]">
         Don't have an account?{" "}
         <a href="/Register" className="text-black hover:underline">
           Create one
         </a>
-      </p>
+      </p> */}
     </div>
   );
 }
