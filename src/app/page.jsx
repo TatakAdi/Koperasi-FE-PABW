@@ -5,9 +5,11 @@ import { getUserLogged } from "./lib/api/login";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import SidePanel from "./components/SidePanel";
 
 export default function Home() {
   const [authUser, setAuthUser] = useState(null);
+  const [category, setCategory] = useState("food"); // Kategori : "food","Snack","drink"
   const router = useRouter();
 
   useEffect(() => {
@@ -33,6 +35,9 @@ export default function Home() {
   return (
     <div className="min-h-screen w-full font-[family-name:var(--font-geist-sans)] ">
       <Navbar />
+      <main>
+        <SidePanel category={category} />
+      </main>
     </div>
   );
 }
