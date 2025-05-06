@@ -18,12 +18,8 @@ export default function SidePanel({
   const activeCategoryBox = "bg-[#E9ECF1] text-[#199F48]";
 
   return (
-    <aside className="w-[296px] min-h-screen fixed bg-[#F2F4F7] mx-5">
-      <div
-        id="category"
-        className="m-2.5 grid gap-5 
-      "
-      >
+    <aside className="w-[296px] min-h-screen bg-[#F2F4F7]">
+      <div id="category" className="m-2.5 grid gap-5 flex-shrink-0">
         <span
           id="food"
           onClick={() => onCategoryChange("food")}
