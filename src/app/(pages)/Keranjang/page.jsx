@@ -66,7 +66,7 @@ export default function KeranjangPage() {
         <Sidebar onSelectCategory={setKategori} selectedCategory={kategori} />
         <main className="flex-1 bg-white">
           <section className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Keranjang Anda - {kategori}</h2>
+            <h2 className="text-xl font-semibold mb-4">Keranjang Anda</h2>
             <div className="space-y-4">
               {filteredProducts.map((product) => (
                 <CartItem
