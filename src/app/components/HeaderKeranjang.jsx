@@ -1,10 +1,16 @@
-import Image from 'next/image';
-import { Search } from 'lucide-react';
+import Image from "next/image";
+import { Search } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function HeaderKeranjang({ search, setSearch }) {
+  const router = useRouter();
+
   return (
     <header className="w-full bg-white shadow-none py-3 px-6 flex items-center justify-between">
-      <div className="flex items-center">
+      <div
+        className="flex items-center cursor-pointer"
+        onClick={() => router.push("/")}
+      >
         <Image src="/Logo.svg" alt="Logo" width={40} height={40} />
       </div>
 

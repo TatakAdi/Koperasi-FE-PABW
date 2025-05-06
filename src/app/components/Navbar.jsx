@@ -15,8 +15,16 @@ export default function Navbar({
   const router = useRouter();
   return (
     <div className="flex justify-between items-center w-full  h-[88px] px-6">
-      <div className="w-[44px] h-[44px] relative">
-        <Image src="/logo.svg" alt="Logo" fill className="object-contain" />
+      <div
+        className="w-[44px] h-[44px] relative cursor-pointer"
+        onClick={() => router.push("/")}
+      >
+        <Image
+          src="/logo.svg"
+          alt="Logo"
+          fill
+          className="object-contain cursor-pointer"
+        />
       </div>
       <SearchBar
         keyword={keyword}
@@ -26,7 +34,7 @@ export default function Navbar({
       <div className="flex justify-around items-center gap-6 ">
         <div>
           <button
-            onClick={() => router.push("/checkout")}
+            onClick={() => router.push("/Keranjang")}
             className="cursor-pointer"
           >
             <ShoppingCart size={24} stroke="black" fill="black" />
