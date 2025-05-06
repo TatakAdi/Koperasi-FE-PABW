@@ -1,10 +1,9 @@
 "use client";
-import Image from "next/image";
 import Navbar from "./components/Navbar";
 import { getUserLogged } from "./lib/api/login";
+import { getProduct } from "./lib/api/product";
 import { useEffect, useState } from "react";
 import produkData from "../../data/dummyProduk.json";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import SidePanel from "./components/SidePanel";
 import useInput from "./hooks/useInput";
@@ -38,8 +37,12 @@ export default function Home() {
 
   useEffect(() => {
     const fetchProduk = async () => {
-      const res = await fetch("/dummyProduk.json");
-      const data = await res.json();
+      const { error, data } = await getProduct();
+
+      if (error) {
+        console.error("Tidak dapat mengambil produk dari server");
+        return;
+      }
       setProduk(data);
     };
     fetchProduk();
@@ -56,16 +59,15 @@ export default function Home() {
       drink: 3,
     };
 
-    return produkData
+    return produk
       .filter((item) => item.category_id === categoryMap[category])
       .filter((item) => {
         const min = minPrice || 0;
         const max = maxPrice || Infinity;
         return item.price >= min && item.price <= max;
       })
-      .filter((item) => item.name.toLowerCase().includes(keyword.toLowerCase()))
-      .sort((a, b) =>
-        sellSort === "Terbanyak" ? b.stock - a.stock : a.stock - b.stock
+      .filter((item) =>
+        item.name.toLowerCase().includes(keyword.toLowerCase())
       );
   };
 
