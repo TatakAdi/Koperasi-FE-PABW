@@ -30,7 +30,6 @@ export default function Home() {
 
       console.log("Data pengguna :", data);
       setAuthUser(data);
-      router.push("/Welcome");
     };
     getUser();
   }, []);
