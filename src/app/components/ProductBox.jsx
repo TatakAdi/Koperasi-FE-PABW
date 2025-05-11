@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { PlusIcon } from "lucide-react";
 
 export default function ProductBox({ name, price }) {
+  const [isHover, setIsHover] = useState(false);
   return (
     <div className="w-[259px] h-fit rounded-lg border-1 border-[#d1d1d1] bg-white">
       <img
@@ -25,7 +27,26 @@ export default function ProductBox({ name, price }) {
               {price.toLocaleString("id-ID")}
             </span>
           </p>
-          <PlusIcon />
+          <div
+            onMouseEnter={() => setIsHover(true)}
+            onMouseLeave={() => setIsHover(false)}
+            className="inline-block cursor-pointer"
+          >
+            <div
+              className={`flex items-center justify-around rounded-full h-8 w-20 transition-all duration-300 ease-in-out ${
+                isHover ? "bg-[#199F48]" : "bg-inherit "
+              }`}
+            >
+              <p
+                className={`text-white font-medium mr-1 transition-opacity duration-300 ease-in-out ${
+                  isHover ? "opacity-100" : "opacity-0 overflow-hidden"
+                }`}
+              >
+                Beli
+              </p>
+              <PlusIcon stroke={!isHover ? "green" : "white"} />
+            </div>
+          </div>
         </div>
       </div>
     </div>
