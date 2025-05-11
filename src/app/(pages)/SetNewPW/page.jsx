@@ -1,11 +1,12 @@
 "use client";
 import { useState } from "react";
 import Image from "next/image";
-import PasswordInput from "@/app/components/PasswordInput";
+import PasswordInput from "@/components/PasswordInput";
+import useInput from "@/hooks/useInput";
 
 export default function SetNewPassword() {
-  const [newPassword, setNewPassword] = useState("");
-  const [repeatPassword, setRepeatPassword] = useState("");
+  const [newPassword, setNewPassword] = useInput();
+  const [repeatPassword, setRepeatPassword] = useInput();
   const [error, setError] = useState("");
 
   const handleSetPassword = () => {
@@ -23,32 +24,26 @@ export default function SetNewPassword() {
   return (
     <div className="w-full min-h-screen flex justify-center items-center p-4 bg-white">
       <div className="flex flex-col items-start w-full max-w-[420px]">
-      <div className="w-[44px] aspect-square relative mb-4">
-        <Image 
-            src="/logo.svg" 
-            alt="Logo" 
-            fill 
-            className="object-contain" 
-        />
-      </div>
+        <div className="w-[44px] aspect-square relative mb-4">
+          <Image src="/logo.svg" alt="Logo" fill className="object-contain" />
+        </div>
 
+        <h2 className="text-black text-[24px] font-semibold font-[Geist] leading-none mb-2">
+          Set a New Password
+        </h2>
 
-      <h2 className="text-black text-[24px] font-semibold font-[Geist] leading-none mb-2">
-        Set a New Password
-      </h2>
-
-
-      <p className="text-[#8F8F8F] text-[16px] font-normal font-[Geist] leading-none mb-6">
-        Your new password must be different from your previous ones.
-      </p>
-
+        <p className="text-[#8F8F8F] text-[16px] font-normal font-[Geist] leading-none mb-6">
+          Your new password must be different from your previous ones.
+        </p>
 
         <div className="w-full flex flex-col gap-4">
           <div>
-            <label className="text-black font-geist mb-1 block">New Password</label>
+            <label className="text-black font-geist mb-1 block">
+              New Password
+            </label>
             <PasswordInput
               value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
+              onChange={setNewPassword}
               placeholder="Enter new password"
             />
             <p className="text-sm text-gray-500 mt-1">
@@ -57,10 +52,12 @@ export default function SetNewPassword() {
           </div>
 
           <div>
-            <label className="text-black font-geist mb-1 block">New Password (Repeat)</label>
+            <label className="text-black font-geist mb-1 block">
+              New Password (Repeat)
+            </label>
             <PasswordInput
               value={repeatPassword}
-              onChange={(e) => setRepeatPassword(e.target.value)}
+              onChange={setRepeatPassword}
               placeholder="Repeat new password"
             />
           </div>

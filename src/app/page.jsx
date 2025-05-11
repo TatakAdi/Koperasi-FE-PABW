@@ -3,7 +3,6 @@ import Navbar from "./components/Navbar";
 import { getUserLogged } from "./lib/api/login";
 import { getProduct } from "./lib/api/product";
 import { useEffect, useState } from "react";
-import produkData from "../../data/dummyProduk.json";
 import { useRouter } from "next/navigation";
 import SidePanel from "./components/SidePanel";
 import useInput from "./hooks/useInput";
@@ -15,8 +14,9 @@ export default function Home() {
   const [produk, setProduk] = useState([]);
   const [minPrice, setMinPrice] = useInput();
   const [maxPrice, setMaxPrice] = useInput();
-  const [sellSort, setSellSort] = useState("Terbanyak");
   const [keyword, setKeyword] = useInput();
+  const [sellSort, setSellSort] = useState("Terbanyak");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -36,6 +36,7 @@ export default function Home() {
 
   useEffect(() => {
     const fetchProduk = async () => {
+      setIsLoading(true);
       const { error, data } = await getProduct();
 
       if (error) {
@@ -43,13 +44,10 @@ export default function Home() {
         return;
       }
       setProduk(data);
+      setIsLoading(false);
     };
     fetchProduk();
   }, []);
-
-  // if (authUser !== null) {
-  //   router.push("/Welcome");
-  // }
 
   const filteredContent = () => {
     const categoryMap = {
@@ -86,15 +84,22 @@ export default function Home() {
         />
         <div className="flex-grow">
           <p className="h-5 my-4">Minuman {">"} Minuman(19)</p>
-          <div className="flex-grow grid grid-cols-4 gap-4  ">
-            {filteredContent().map((produk) => (
-              <ProductBox
-                key={produk.id}
-                name={produk.name}
-                price={produk.price}
-              />
-            ))}
-          </div>
+          {!isLoading ? (
+            <div className="flex-grow grid grid-cols-4 gap-4  ">
+              {filteredContent().map((produk) => (
+                <ProductBox
+                  key={produk.id}
+                  name={produk.name}
+                  price={produk.price}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col justify-center items-center w-full h-dvh ">
+              <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-black"></div>
+              <p className="text-xl">Mohon Tunggu Sebentar</p>
+            </div>
+          )}
         </div>
       </main>
     </div>
