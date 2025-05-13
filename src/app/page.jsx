@@ -18,12 +18,23 @@ export default function Home() {
   const [minPrice, setMinPrice] = useInput();
   const [maxPrice, setMaxPrice] = useInput();
   const [keyword, setKeyword] = useInput();
-  const [sellSort, setSellSort] = useState("Terbanyak");
-  const [isLoading, setIsLoading] = useState(false);
+  const [sellSort, setSellSort] = useState("");
+  const [isLoading, setIsLoading] = useState(false); // Untuk Daftar Produk
+  const [isProductLoad, setIsProductLoad] = useState(false);
   const [isFocus, setIsFocus] = useState(false);
   const [selectedProduct, setSelectedProduk] = useState(null);
   const [order, onOrderChange] = useState(1);
   const router = useRouter();
+
+  const onPlusOrder = () => {
+    return onOrderChange((prevState) =>
+      Math.min(prevState + 1, productItem.stock)
+    );
+  };
+
+  const onMinOrder = () => {
+    return onOrderChange((prevState) => Math.max(prevState - 1, 1));
+  };
 
   useEffect(() => {
     const getUser = async () => {
@@ -57,6 +68,7 @@ export default function Home() {
 
   useEffect(() => {
     const productDetail = async () => {
+      setIsProductLoad(true);
       if (!selectedProduct) return;
 
       const { error, data } = await getProductId(selectedProduct);
@@ -65,8 +77,8 @@ export default function Home() {
         console.error("Gagal mengambil detail produk yang dipilih");
         return;
       }
-
       SetProductItem(data);
+      setIsProductLoad(false);
     };
     productDetail();
   }, [selectedProduct]);
@@ -85,15 +97,20 @@ export default function Home() {
         const max = maxPrice || Infinity;
         return item.price >= min && item.price <= max;
       })
-      .filter((item) =>
-        item.name.toLowerCase().includes(keyword.toLowerCase())
+      .filter((item) => item.name.toLowerCase().includes(keyword.toLowerCase()))
+      .sort((a, b) =>
+        sellSort === "Terbanyak" ? b.stock - a.stock : a.stock - b.stock
       );
   };
 
   return (
-    <div className="min-h-screen w-full font-[family-name:var(--font-geist-sans)] ">
+    <div className="min-h-screen h-screen w-full font-[family-name:var(--font-geist-sans)]  overflow-y-hidden">
       <Navbar keyword={keyword} onKeywordCahnge={setKeyword} />
-      <main className={`flex mx-5 gap-4 ${isFocus ? "-z-10" : "z-0"}`}>
+      <main
+        className={`flex mx-5 gap-4 ${
+          isFocus ? "-z-10" : "z-0"
+        } overflow-hidden h-[calc(100vh-88px)]`}
+      >
         <SidePanel
           category={category}
           onCategoryChange={setCategory}
@@ -104,7 +121,7 @@ export default function Home() {
           onMaxPriceChange={setMaxPrice}
           onMinPriceChange={setMinPrice}
         />
-        <div className="flex-grow">
+        <div className="flex-grow overflow-y-auto h-full">
           <p className="h-5 my-4">Minuman {">"} Minuman(19)</p>
           {!isLoading ? (
             <div className="flex-grow grid grid-cols-4 gap-4  ">
@@ -114,7 +131,7 @@ export default function Home() {
                   id={produk.id}
                   name={produk.name}
                   price={produk.price}
-                  stok={produk.stok}
+                  stock={produk.stock}
                   onClickFocus={(focus) => {
                     setSelectedProduk(produk.id);
                     setIsFocus(focus);
@@ -123,7 +140,7 @@ export default function Home() {
               ))}
             </div>
           ) : (
-            <div className="flex flex-col justify-center items-center w-full h-dvh ">
+            <div className="flex flex-col justify-center items-center w-full h-full">
               <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-black"></div>
               <p className="text-xl">Mohon Tunggu Sebentar</p>
             </div>
@@ -132,12 +149,16 @@ export default function Home() {
       </main>
       {isFocus && (
         <ProductFocusBox
-          key={produk.id}
+          key={productItem.id}
           name={productItem.name}
-          stok={productItem.stok}
+          stock={productItem.stock}
           order={order}
           onChangeorder={(e) => onOrderChange(Number(e.target.value))}
+          onResetValue={() => onOrderChange(1)}
+          onPlusOrder={onPlusOrder}
+          onMinOrder={onMinOrder}
           onFocusChange={setIsFocus}
+          productDataLoad={isProductLoad}
         />
       )}
     </div>

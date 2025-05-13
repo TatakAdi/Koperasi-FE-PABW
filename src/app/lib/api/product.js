@@ -32,5 +32,6 @@ export async function getProductId(id) {
     return { error: true, data: null, status: response.status };
   }
 
+  console.log(responseJson.data);
   return { error: false, data: responseJson.data, status: response.status };
 }

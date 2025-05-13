@@ -18,7 +18,7 @@ export default function SidePanel({
   const activeCategoryBox = "bg-[#E9ECF1] text-[#199F48]";
 
   return (
-    <aside className="w-[296px] min-h-screen bg-[#F2F4F7] ">
+    <aside className="w-[296px] min-h-screen bg-[#F2F4F7] sticky top-0 h-full">
       <div id="category" className="m-2.5 grid gap-5 flex-shrink-0">
         <span
           id="food"
@@ -80,9 +80,9 @@ export default function SidePanel({
                 <input
                   type="radio"
                   name="sales"
-                  value="terbanyak"
-                  checked={salesSort === "terbanyak"}
-                  onChange={() => setSalesSort("terbanyak")}
+                  value="Terbanyak"
+                  checked={salesSort === "Terbanyak"}
+                  onChange={() => setSalesSort("Terbanyak")}
                 />
                 Terbanyak
               </label>
@@ -90,9 +90,9 @@ export default function SidePanel({
                 <input
                   type="radio"
                   name="sales"
-                  value="tersedikit"
-                  checked={salesSort === "tersedikit"}
-                  onChange={() => setSalesSort("tersedikit")}
+                  value="Tersedikit"
+                  checked={salesSort === "Tersedikit"}
+                  onChange={() => setSalesSort("Tersedikit")}
                 />
                 Tersedikit
               </label>

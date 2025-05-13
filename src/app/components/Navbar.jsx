@@ -14,7 +14,7 @@ export default function Navbar({
 }) {
   const router = useRouter();
   return (
-    <div className="flex justify-between items-center w-full  h-[88px] px-6 sticky top-0 z-1 bg-white">
+    <div className="flex justify-between items-center w-full h-[88px] px-6 sticky top-0 z-1 bg-white">
       <div
         className="w-[44px] h-[44px] relative cursor-pointer"
         onClick={() => router.push("/")}

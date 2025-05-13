@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { PlusIcon } from "lucide-react";
 
-export default function ProductBox({ id, name, price, stok, onClickFocus }) {
+export default function ProductBox({ id, name, price, stock, onClickFocus }) {
   const [isHover, setIsHover] = useState(false);
   return (
     <div className="w-[259px] h-fit rounded-lg border-1 border-[#d1d1d1] bg-white">
@@ -17,7 +17,7 @@ export default function ProductBox({ id, name, price, stok, onClickFocus }) {
             Diperoleh dan diolah dari kedelai pilihan
           </p>
           {/*Deskripsi */}
-          <p className="font-normal text-sm text-[#737373]">Stok: {stok}</p>
+          <p className="font-normal text-sm text-[#737373]">Stok: {stock}</p>
           {/*Jumlah terjual */}
         </div>
         <div className="flex w-full  justify-between pb-4">
