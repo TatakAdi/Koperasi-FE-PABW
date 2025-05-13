@@ -2,21 +2,27 @@
 import Navbar from "./components/Navbar";
 import { getUserLogged } from "./lib/api/login";
 import { getProduct } from "./lib/api/product";
+import { getProductId } from "./lib/api/product";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import SidePanel from "./components/SidePanel";
 import useInput from "./hooks/useInput";
 import ProductBox from "./components/ProductBox";
+import ProductFocusBox from "./components/ProductFocusBox";
 
 export default function Home() {
   const [authUser, setAuthUser] = useState(null);
   const [category, setCategory] = useState("food"); // Kategori : "food","Snack","drink"
   const [produk, setProduk] = useState([]);
+  const [productItem, SetProductItem] = useState([]);
   const [minPrice, setMinPrice] = useInput();
   const [maxPrice, setMaxPrice] = useInput();
   const [keyword, setKeyword] = useInput();
   const [sellSort, setSellSort] = useState("Terbanyak");
   const [isLoading, setIsLoading] = useState(false);
+  const [isFocus, setIsFocus] = useState(false);
+  const [selectedProduct, setSelectedProduk] = useState(null);
+  const [order, onOrderChange] = useState(1);
   const router = useRouter();
 
   useEffect(() => {
@@ -49,6 +55,22 @@ export default function Home() {
     fetchProduk();
   }, []);
 
+  useEffect(() => {
+    const productDetail = async () => {
+      if (!selectedProduct) return;
+
+      const { error, data } = await getProductId(selectedProduct);
+
+      if (error) {
+        console.error("Gagal mengambil detail produk yang dipilih");
+        return;
+      }
+
+      SetProductItem(data);
+    };
+    productDetail();
+  }, [selectedProduct]);
+
   const filteredContent = () => {
     const categoryMap = {
       food: 1,
@@ -71,7 +93,7 @@ export default function Home() {
   return (
     <div className="min-h-screen w-full font-[family-name:var(--font-geist-sans)] ">
       <Navbar keyword={keyword} onKeywordCahnge={setKeyword} />
-      <main className=" flex mx-5 gap-4">
+      <main className={`flex mx-5 gap-4 ${isFocus ? "-z-10" : "z-0"}`}>
         <SidePanel
           category={category}
           onCategoryChange={setCategory}
@@ -89,8 +111,14 @@ export default function Home() {
               {filteredContent().map((produk) => (
                 <ProductBox
                   key={produk.id}
+                  id={produk.id}
                   name={produk.name}
                   price={produk.price}
+                  stok={produk.stok}
+                  onClickFocus={(focus) => {
+                    setSelectedProduk(produk.id);
+                    setIsFocus(focus);
+                  }}
                 />
               ))}
             </div>
@@ -102,6 +130,16 @@ export default function Home() {
           )}
         </div>
       </main>
+      {isFocus && (
+        <ProductFocusBox
+          key={produk.id}
+          name={productItem.name}
+          stok={productItem.stok}
+          order={order}
+          onChangeorder={(e) => onOrderChange(Number(e.target.value))}
+          onFocusChange={setIsFocus}
+        />
+      )}
     </div>
   );
 }
