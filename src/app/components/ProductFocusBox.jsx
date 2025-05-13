@@ -1,11 +1,10 @@
 import { MinusIcon, PilcrowSquare, PlusIcon } from "lucide-react";
 
 export default function ProductFocusBox({
-  id,
   name,
   stock,
   onFocusChange,
-  addCart,
+  addCartItem,
   order,
   productDataLoad,
   onChangeorder,
@@ -69,7 +68,7 @@ export default function ProductFocusBox({
           </button>
           <button
             className="text-[#fff] bg-[#199F48] rounded-lg w-[182px] py-2 cursor-pointer"
-            onClick={addCart}
+            onClick={() => addCartItem()}
           >
             Tambahkan
           </button>

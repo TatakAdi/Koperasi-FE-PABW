@@ -3,6 +3,7 @@ import Navbar from "./components/Navbar";
 import { getUserLogged } from "./lib/api/login";
 import { getProduct } from "./lib/api/product";
 import { getProductId } from "./lib/api/product";
+import { addCartItem } from "./lib/api/cart";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import SidePanel from "./components/SidePanel";
@@ -23,17 +24,17 @@ export default function Home() {
   const [isProductLoad, setIsProductLoad] = useState(false);
   const [isFocus, setIsFocus] = useState(false);
   const [selectedProduct, setSelectedProduk] = useState(null);
-  const [order, onOrderChange] = useState(1);
+  const [jumlah, onJumlahChange] = useState(1);
   const router = useRouter();
 
   const onPlusOrder = () => {
-    return onOrderChange((prevState) =>
+    return onJumlahChange((prevState) =>
       Math.min(prevState + 1, productItem.stock)
     );
   };
 
   const onMinOrder = () => {
-    return onOrderChange((prevState) => Math.max(prevState - 1, 1));
+    return onJumlahChange((prevState) => Math.max(prevState - 1, 1));
   };
 
   useEffect(() => {
@@ -82,6 +83,22 @@ export default function Home() {
     };
     productDetail();
   }, [selectedProduct]);
+
+  const addCartItemHandler = async () => {
+    const { error, data } = await addCartItem(authUser.id, selectedProduct, {
+      jumlah,
+    });
+
+    if (!authUser.id) {
+      alert("Maaf,anda belum login");
+      console.error("Pengguna belum melakukan login");
+      return;
+    }
+
+    if (error) {
+      console.error("Gagal menambahkan produk ke dalam keranjang");
+    }
+  };
 
   const filteredContent = () => {
     const categoryMap = {
@@ -152,9 +169,10 @@ export default function Home() {
           key={productItem.id}
           name={productItem.name}
           stock={productItem.stock}
-          order={order}
-          onChangeorder={(e) => onOrderChange(Number(e.target.value))}
-          onResetValue={() => onOrderChange(1)}
+          order={jumlah}
+          addCartItem={addCartItemHandler}
+          onChangeorder={(e) => onJumlahChange(Number(e.target.value))}
+          onResetValue={() => onJumlahChange(1)}
           onPlusOrder={onPlusOrder}
           onMinOrder={onMinOrder}
           onFocusChange={setIsFocus}
