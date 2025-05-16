@@ -1,17 +1,30 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export default function EmailVerif() {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const inputsRef = useRef([]);
+  const router = useRouter();
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const finalCode = code.join("");
-    console.log("Request submitted with codes:", finalCode);
-    // Lakukan API request di sini jika diperlukan
+    setLoading(true);
+    setError("");
+
+    // Simulasi API call
+    setTimeout(() => {
+      if (finalCode === "123456") {
+        console.log("Kode benar:", finalCode);
+        router.push("/SetNewPW");
+      } else {
+        setError("Invalid code. Please try again");
+      }
+      setLoading(false);
+    }, 1500);
   };
 
   useEffect(() => {
@@ -28,7 +41,6 @@ export default function EmailVerif() {
     setCode(newCode);
     setError("");
 
-    // Auto move to next input
     if (value && index < code.length - 1) {
       inputsRef.current[index + 1]?.focus();
     }
@@ -64,12 +76,17 @@ export default function EmailVerif() {
           ))}
         </div>
 
-        {loading && (
-          <p className="text-black text-sm mb-2">Checking your code...</p>
+        {error && (
+          <div className="flex items-start gap-2 text-red-600 text-sm mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M18 10A8 8 0 1 1 2 10a8 8 0 0 1 16 0ZM9 6a1 1 0 1 1 2 0v4a1 1 0 0 1-2 0V6Zm1 8a1.25 1.25 0 1 0 0-2.5A1.25 1.25 0 0 0 10 14Z" clipRule="evenodd" />
+            </svg>
+            <span>{error}</span>
+          </div>
         )}
 
-        {error && (
-          <p className="text-red-600 text-sm mb-2">{error}</p>
+        {loading && (
+          <p className="text-gray-600 text-sm mb-2">Checking your code...</p>
         )}
 
         <p className="text-[#8F8F8F] text-[14px] mt-2">
