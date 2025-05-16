@@ -47,7 +47,7 @@ export default function LocationStep({ orderType, onContinue, onCancel }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/20 flex justify-center items-center z-50 px-4" style={{ backdropFilter: 'blur(3px)' }}>
+    <div className="fixed inset-0 bg-white/10 flex justify-center items-center z-50 px-4" style={{ backdropFilter: 'blur(3px)' }}>
       <div
         className="w-full max-w-md bg-white rounded-2xl shadow-xl px-6 py-7 space-y-4 flex flex-col"
         style={{
