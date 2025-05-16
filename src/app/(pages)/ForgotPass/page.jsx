@@ -3,14 +3,31 @@ import EmailInput from "../../components/EmailInput";
 import useInput from "@/hooks/useInput";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { reqOTPCode } from "@/lib/api/reqOTPCode";
 
 export default function ForgotPass() {
-  const [email, onEmailChange] = useInput("starnig@star.com");
+  const [email, onEmailChange] = useInput();
+  const [status, setStatus] = useState("idle"); // 'idle or loading
   const router = useRouter();
 
-  const handleSubmit = () => {
+  async function emailVerif({ email }) {
+    setStatus("loading");
+    const { error, data, message } = await reqOTPCode({ email });
+
+    if (!error) {
+      sessionStorage.setItem("email", email);
+      router.push("/OTPCode");
+    } else {
+      console.error("Error message:", message);
+    }
+    setStatus("idle");
+  }
+
+  const handleSubmit = (event) => {
     // Simulasi pengiriman kode
-    router.push("/EmailVerif");
+    event.preventDefault();
+    emailVerif({ email: email });
   };
 
   return (
@@ -28,14 +45,17 @@ export default function ForgotPass() {
           Enter your email to receive a verification code.
         </p>
 
-        <form className="w-full flex flex-col gap-2">
-          <EmailInput value={email} onChange={onEmailChange} />
+        <form className="w-full flex flex-col gap-2" onSubmit={handleSubmit}>
+          <EmailInput email={email} onEmailChange={onEmailChange} />
           <button
-            type="button"
-            onClick={handleSubmit}
-            className="bg-black text-white w-full h-[53px] rounded-xl py-4 cursor-pointer hover:bg-gray-800 transition-colors"
+            disabled={status === "loading"}
+            className=" flex justify-center items-center bg-black text-white w-full h-[53px] rounded-xl py-4 cursor-pointer hover:bg-gray-800 transition-colors"
           >
-            Send Verification Code
+            {status === "loading" ? (
+              <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-white"></div>
+            ) : (
+              "Send Verivication Code"
+            )}
           </button>
         </form>
       </div>

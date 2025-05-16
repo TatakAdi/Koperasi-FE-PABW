@@ -9,6 +9,7 @@ export default function EmailVerif() {
   const [error, setError] = useState("");
   const inputsRef = useRef([]);
   const router = useRouter();
+  const email = sessionStorage.getItem("email");
 
   const handleSubmit = async () => {
     const finalCode = code.join("");
@@ -58,7 +59,7 @@ export default function EmailVerif() {
         </h2>
 
         <p className="text-[#8F8F8F] text-[16px] font-normal font-geist mb-6">
-          We’ve sent a code to <span className="text-black">starnig@star.com</span>
+          We’ve sent a code to <span className="text-black">{email}</span>
         </p>
 
         <div className="flex gap-3 items-center mb-4">
@@ -78,8 +79,17 @@ export default function EmailVerif() {
 
         {error && (
           <div className="flex items-start gap-2 text-red-600 text-sm mb-2">
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M18 10A8 8 0 1 1 2 10a8 8 0 0 1 16 0ZM9 6a1 1 0 1 1 2 0v4a1 1 0 0 1-2 0V6Zm1 8a1.25 1.25 0 1 0 0-2.5A1.25 1.25 0 0 0 10 14Z" clipRule="evenodd" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-5 h-5 mt-0.5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M18 10A8 8 0 1 1 2 10a8 8 0 0 1 16 0ZM9 6a1 1 0 1 1 2 0v4a1 1 0 0 1-2 0V6Zm1 8a1.25 1.25 0 1 0 0-2.5A1.25 1.25 0 0 0 10 14Z"
+                clipRule="evenodd"
+              />
             </svg>
             <span>{error}</span>
           </div>
@@ -92,7 +102,9 @@ export default function EmailVerif() {
         <p className="text-[#8F8F8F] text-[14px] mt-2">
           Can’t find your code? Check your spam folder. <br />
           Haven’t received the code?{" "}
-          <span className="text-black font-medium cursor-pointer">Get a new code</span>
+          <span className="text-black font-medium cursor-pointer">
+            Get a new code
+          </span>
         </p>
       </div>
     </div>

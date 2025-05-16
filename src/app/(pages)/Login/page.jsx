@@ -18,9 +18,7 @@ export default function Login() {
     setStatus("loading");
     const { error, data, status } = await login({ email, password });
 
-    if (status === 403) {
-      router.push(`/EmailVerif?email=${encodeURIComponent(email)}&flow=login`);
-    } else if (error) {
+    if (error) {
       setIsPasswordWrong(true);
       setStatus("idle");
     } else {
