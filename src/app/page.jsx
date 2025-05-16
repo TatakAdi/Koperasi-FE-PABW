@@ -1,6 +1,7 @@
 "use client";
 import Navbar from "./components/Navbar";
 import { getUserLogged } from "./lib/api/login";
+import { logout } from "./lib/api/logout";
 import { getProduct } from "./lib/api/product";
 import { getProductId } from "./lib/api/product";
 import { addCartItem } from "./lib/api/cart";
@@ -13,7 +14,7 @@ import ProductFocusBox from "./components/ProductFocusBox";
 
 export default function Home() {
   const [authUser, setAuthUser] = useState(null);
-  const [category, setCategory] = useState("food"); // Kategori : "food","Snack","drink"
+  const [category, setCategory] = useState(null); // Kategori : "food","Snack","drink"
   const [produk, setProduk] = useState([]);
   const [productItem, SetProductItem] = useState([]);
   const [minPrice, setMinPrice] = useInput();
@@ -26,6 +27,11 @@ export default function Home() {
   const [selectedProduct, setSelectedProduk] = useState(null);
   const [jumlah, onJumlahChange] = useState(1);
   const router = useRouter();
+
+  async function onLogoutHandler() {
+    await logout();
+    setAuthUser(null);
+  }
 
   const onPlusOrder = () => {
     return onJumlahChange((prevState) =>
@@ -122,7 +128,13 @@ export default function Home() {
 
   return (
     <div className="min-h-screen h-screen w-full font-[family-name:var(--font-geist-sans)]  overflow-y-hidden">
-      <Navbar keyword={keyword} onKeywordCahnge={setKeyword} />
+      <Navbar
+        keyword={keyword}
+        onKeywordCahnge={setKeyword}
+        authUser={authUser}
+        roles={authUser !== null && authUser.tipe}
+        logout={onLogoutHandler}
+      />
       <main
         className={`flex mx-5 gap-4 ${
           isFocus ? "-z-10" : "z-0"
@@ -142,19 +154,33 @@ export default function Home() {
           <p className="h-5 my-4">Minuman {">"} Minuman(19)</p>
           {!isLoading ? (
             <div className="flex-grow grid grid-cols-4 gap-4  ">
-              {filteredContent().map((produk) => (
-                <ProductBox
-                  key={produk.id}
-                  id={produk.id}
-                  name={produk.name}
-                  price={produk.price}
-                  stock={produk.stock}
-                  onClickFocus={(focus) => {
-                    setSelectedProduk(produk.id);
-                    setIsFocus(focus);
-                  }}
-                />
-              ))}
+              {category !== null
+                ? filteredContent().map((produk) => (
+                    <ProductBox
+                      key={produk.id}
+                      id={produk.id}
+                      name={produk.name}
+                      price={produk.price}
+                      stock={produk.stock}
+                      onClickFocus={(focus) => {
+                        setSelectedProduk(produk.id);
+                        setIsFocus(focus);
+                      }}
+                    />
+                  ))
+                : produk.map((produk) => (
+                    <ProductBox
+                      key={produk.id}
+                      id={produk.id}
+                      name={produk.name}
+                      price={produk.price}
+                      stock={produk.stock}
+                      onClickFocus={(focus) => {
+                        setSelectedProduk(produk.id);
+                        setIsFocus(focus);
+                      }}
+                    />
+                  ))}
             </div>
           ) : (
             <div className="flex flex-col justify-center items-center w-full h-full">

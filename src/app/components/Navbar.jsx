@@ -1,6 +1,8 @@
 "use client";
 import SearchBar from "./SearchBar";
 import Image from "next/image";
+import ProfilePicMenu from "./ProfilePicMenu";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ShoppingCart, Bell } from "lucide-react";
 
@@ -8,11 +10,18 @@ export default function Navbar({
   keyword,
   onKeywordCahnge,
   toggleKeywordSearch,
-  toggleCheckoutPanel,
   toggleNotificationPanel,
   authUser,
+  roles,
+  logout,
 }) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const router = useRouter();
+
+  const toggleMenu = () => {
+    setIsMenuOpen((prevState) => !prevState);
+  };
+
   return (
     <div className="flex justify-between items-center w-full h-[88px] px-6 sticky top-0 z-1 bg-white">
       <div
@@ -48,10 +57,28 @@ export default function Navbar({
             fill="black"
             className="cursor-pointer"
           />
-          <div
-            id="profile"
-            className="rounded-full w-10 h-10 bg-gray-400 cursor-pointer"
-          ></div>
+          <div className="relative">
+            <div
+              id="profile-ring"
+              onClick={toggleMenu}
+              className="flex justify-center items-center rounded-full hover:bg-[#199F48] cursor-pointer bg-inherit w-12 h-12"
+            >
+              <div
+                id="profile"
+                className="rounded-full w-10 h-10  bg-gray-400 cursor-pointer z-1"
+              ></div>
+            </div>
+            {/* Toggle Profile Menu */}
+            {isMenuOpen && (
+              <div className="absolute top-14 right-0 z-50">
+                <ProfilePicMenu
+                  authed={authUser}
+                  roles={roles}
+                  logout={logout}
+                />
+              </div>
+            )}
+          </div>
         </div>
         {/* Notification & Profile Picture */}
       </div>
