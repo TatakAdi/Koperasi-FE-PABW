@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Image from "next/image";
-import PasswordInput from "@/app/components/PasswordInput";
+import PasswordInput from "../../components/PasswordInput";
 
 export default function SetNewPassword() {
   const [newPassword, setNewPassword] = useState("");

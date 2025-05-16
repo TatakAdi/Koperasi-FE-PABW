@@ -1,10 +1,15 @@
 'use client';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import CartItem from '@/components/CartItem';
 import Header from '@/components/HeaderKeranjang';
+import CheckoutCard from '@/components/CheckoutCard';
+
 
 export default function KeranjangPage() {
+  const [showCheckout, setShowCheckout] = useState(false);
+  const router = useRouter();
   const [kategori, setKategori] = useState('Makanan Berat');
   const [selectedItems, setSelectedItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -97,7 +102,11 @@ export default function KeranjangPage() {
                   <p>Total ({selectedFiltered.length} Produk):</p>
                   <p className="font-bold text-lg">Rp. {total.toLocaleString('id-ID')}</p>
                 </div>
-                <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded">
+                <button
+                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded"
+                  onClick={() => setShowCheckout(true)}
+                  disabled={selectedItems.length === 0}
+                >
                   Checkout
                 </button>
               </div>
@@ -105,6 +114,17 @@ export default function KeranjangPage() {
           </section>
         </main>
       </div>
+      
+      {showCheckout && (
+        <CheckoutCard
+          total={total}
+          onCancel={() => setShowCheckout(false)}
+          onContinue={(type) => {
+            alert(`Pesanan dengan tipe: ${type} berhasil!`);
+            setShowCheckout(false);
+          }}
+        />
+      )}
     </div>
   );
 }
