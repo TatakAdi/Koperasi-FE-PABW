@@ -2,9 +2,16 @@
 import EmailInput from "../../components/EmailInput";
 import useInput from "@/hooks/useInput";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export default function ForgotPass() {
-  const [email, onEmailChange] = useInput();
+  const [email, onEmailChange] = useInput("starnig@star.com");
+  const router = useRouter();
+
+  const handleSubmit = () => {
+    // Simulasi pengiriman kode
+    router.push("/EmailVerif");
+  };
 
   return (
     <div className="w-full min-h-screen flex justify-center items-center p-4 bg-white">
@@ -25,6 +32,7 @@ export default function ForgotPass() {
           <EmailInput value={email} onChange={onEmailChange} />
           <button
             type="button"
+            onClick={handleSubmit}
             className="bg-black text-white w-full h-[53px] rounded-xl py-4 cursor-pointer hover:bg-gray-800 transition-colors"
           >
             Send Verification Code
