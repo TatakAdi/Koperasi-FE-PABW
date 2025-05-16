@@ -22,6 +22,7 @@ export default function Home() {
   const [keyword, setKeyword] = useInput();
   const [sellSort, setSellSort] = useState("");
   const [isLoading, setIsLoading] = useState(false); // Untuk Daftar Produk
+  const [isAddCartLoad, setIsAddCartLoad] = useState(false);
   const [isProductLoad, setIsProductLoad] = useState(false);
   const [isFocus, setIsFocus] = useState(false);
   const [selectedProduct, setSelectedProduk] = useState(null);
@@ -91,6 +92,7 @@ export default function Home() {
   }, [selectedProduct]);
 
   const addCartItemHandler = async () => {
+    setIsAddCartLoad(true);
     const { error, data } = await addCartItem(authUser.id, selectedProduct, {
       jumlah,
     });
@@ -98,12 +100,17 @@ export default function Home() {
     if (!authUser.id) {
       alert("Maaf,anda belum login");
       console.error("Pengguna belum melakukan login");
+      setIsAddCartLoad(false);
       return;
     }
 
     if (error) {
       console.error("Gagal menambahkan produk ke dalam keranjang");
+      setIsAddCartLoad(false);
+      return;
     }
+    setIsAddCartLoad(false);
+    setIsFocus(false);
   };
 
   const filteredContent = () => {
@@ -203,6 +210,7 @@ export default function Home() {
           onMinOrder={onMinOrder}
           onFocusChange={setIsFocus}
           productDataLoad={isProductLoad}
+          addCartItemLoad={isAddCartLoad}
         />
       )}
     </div>

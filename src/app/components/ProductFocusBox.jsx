@@ -11,6 +11,7 @@ export default function ProductFocusBox({
   onPlusOrder,
   onMinOrder,
   onResetValue,
+  addCartItemLoad,
 }) {
   return (
     <div className="fixed inset-0 bg-[rgba(255,255,255,0.3)] w-full h-screen flex justify-center items-center z-0">
@@ -67,10 +68,14 @@ export default function ProductFocusBox({
             Batal
           </button>
           <button
-            className="text-[#fff] bg-[#199F48] rounded-lg w-[182px] py-2 cursor-pointer"
+            className="flex justify-center items-center text-[#fff] bg-[#199F48] rounded-lg w-[182px] py-2 cursor-pointer"
             onClick={() => addCartItem()}
           >
-            Tambahkan
+            {!addCartItemLoad ? (
+              "Tambahkan"
+            ) : (
+              <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-white"></div>
+            )}
           </button>
         </div>
       </div>
