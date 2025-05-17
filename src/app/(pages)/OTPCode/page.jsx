@@ -2,10 +2,13 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { reqOTPCode } from "@/lib/api/reqOTPCode";
 
 export default function EmailVerif() {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
+  const [timer, setTimer] = useState(10);
+  const [showResend, setShowResend] = useState(false);
   const [error, setError] = useState("");
   const inputsRef = useRef([]);
   const router = useRouter();
@@ -27,6 +30,19 @@ export default function EmailVerif() {
       setLoading(false);
     }, 1500);
   };
+
+  // Delay mengirimkan code baru
+  useEffect(() => {
+    let countdown;
+    if (timer > 0) {
+      countdown = setTimeout(() => {
+        setTimer(timer - 1);
+      }, 1000);
+    } else {
+      setShowResend(true);
+    }
+    return () => clearTimeout(countdown);
+  }, [timer]);
 
   useEffect(() => {
     if (code.every((val) => val !== "")) {
@@ -102,9 +118,18 @@ export default function EmailVerif() {
         <p className="text-[#8F8F8F] text-[14px] mt-2">
           Can’t find your code? Check your spam folder. <br />
           Haven’t received the code?{" "}
-          <span className="text-black font-medium cursor-pointer">
-            Get a new code
-          </span>
+          {showResend ? (
+            <span
+              className="text-black font-medium cursor-pointer hover:underline"
+              onClick={() => reqOTPCode({ email })}
+            >
+              Get a new code
+            </span>
+          ) : (
+            <span className="text-black font-medium">
+              Resend code in 00:{timer.toString().padStart(2, "0")}
+            </span>
+          )}
         </p>
       </div>
     </div>
