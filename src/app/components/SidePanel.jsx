@@ -22,27 +22,31 @@ export default function SidePanel({
       <div id="category" className="m-2.5 grid gap-5 flex-shrink-0">
         <span
           id="food"
-          onClick={() => onCategoryChange("food")}
+          onClick={() => onCategoryChange("Makanan Berat")}
           className={`${categoryBox} ${
-            category === "food" ? activeCategoryBox : unactiveCategoryBox
+            category === "Makanan Berat"
+              ? activeCategoryBox
+              : unactiveCategoryBox
           }`}
         >
           Makanan Berat
         </span>
         <span
           id="snack"
-          onClick={() => onCategoryChange("snack")}
+          onClick={() => onCategoryChange("Makanan Ringan")}
           className={`${categoryBox} ${
-            category === "snack" ? activeCategoryBox : unactiveCategoryBox
+            category === "Makanan Ringan"
+              ? activeCategoryBox
+              : unactiveCategoryBox
           }`}
         >
           Makanan Ringan
         </span>
         <span
           id="drink"
-          onClick={() => onCategoryChange("drink")}
+          onClick={() => onCategoryChange("Minuman")}
           className={`${categoryBox} ${
-            category === "drink" ? activeCategoryBox : unactiveCategoryBox
+            category === "Minuman" ? activeCategoryBox : unactiveCategoryBox
           }`}
         >
           Minuman

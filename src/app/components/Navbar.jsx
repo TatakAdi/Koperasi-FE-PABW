@@ -11,6 +11,8 @@ export default function Navbar({
   onKeywordCahnge,
   toggleKeywordSearch,
   toggleNotificationPanel,
+  fullName,
+  email,
   authUser,
   roles,
   logout,
@@ -72,6 +74,8 @@ export default function Navbar({
             {isMenuOpen && (
               <div className="absolute top-14 right-0 z-50">
                 <ProfilePicMenu
+                  fullName={fullName}
+                  email={email}
                   authed={authUser}
                   roles={roles}
                   logout={logout}
