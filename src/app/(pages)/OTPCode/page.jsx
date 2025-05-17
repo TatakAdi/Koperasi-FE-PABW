@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { reqOTPCode } from "@/lib/api/reqOTPCode";
+import { verifyOtp } from "@/lib/api/verifyOtp";
 
 export default function EmailVerif() {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
@@ -20,13 +21,15 @@ export default function EmailVerif() {
     setError("");
 
     // Simulasi API call
-    setTimeout(() => {
-      if (finalCode === "123456") {
-        console.log("Kode benar:", finalCode);
+    setTimeout(async () => {
+      const result = await verifyOtp({ email, otp: finalCode });
+
+      if (result.success) {
         router.push("/SetNewPW");
       } else {
-        setError("Invalid code. Please try again");
+        setError("Invalid code. please try again");
       }
+
       setLoading(false);
     }, 1500);
   };
