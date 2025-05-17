@@ -93,17 +93,17 @@ export default function KeranjangPage() {
                     onChange={handleSelectAll}
                     checked={filteredProducts.every((p) => selectedItems.includes(p.id)) && filteredProducts.length > 0}
                   />
-                  <span className="ml-2">Pilih Semua ({filteredProducts.length})</span>
+                  <span className="ml-16">Pilih Semua ({filteredProducts.length})</span>
                 </label>
-                <button className="text-red-500" onClick={handleClearSelection}>Hapus Seleksi</button>
+                <button className="w-[262px] text-red-500" onClick={handleClearSelection}>Hapus Seleksi</button>
               </div>
               <div className="flex items-center gap-6">
-                <div className="text-right">
+                <div className="text-left w-[240px]">
                   <p>Total ({selectedFiltered.length} Produk):</p>
                   <p className="font-bold text-lg">Rp. {total.toLocaleString('id-ID')}</p>
                 </div>
                 <button
-                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded"
+                  className="w-[150px] bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded"
                   onClick={() => setShowCheckout(true)}
                   disabled={selectedItems.length === 0}
                 >
