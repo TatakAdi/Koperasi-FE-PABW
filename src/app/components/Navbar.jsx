@@ -31,7 +31,7 @@ export default function Navbar({
         onClick={() => router.push("/")}
       >
         <Image
-          src="/logo.svg"
+          src="/ITKLogo2.svg"
           alt="Logo"
           fill
           className="object-contain cursor-pointer"

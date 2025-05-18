@@ -36,7 +36,12 @@ export default function Login() {
       <div className=" w-[420px] h-[400px]  p-2 ">
         <div>
           <div className="w-[44px] h-[44px] relative mb-4">
-            <Image src="/logo.svg" alt="Logo" fill className="object-contain" />
+            <Image
+              src="/ITKLogo2.svg"
+              alt="Logo"
+              fill
+              className="object-contain"
+            />
           </div>
           <h2 className="font-semibold text-2xl">Log in to Koperasi</h2>
         </div>

@@ -34,7 +34,12 @@ export default function ForgotPass() {
     <div className="w-full min-h-screen flex justify-center items-center p-4 bg-white">
       <div className="flex flex-col items-start w-full max-w-[420px]">
         <div className="w-[44px] h-[44px] relative mb-4">
-          <Image src="/logo.svg" alt="Logo" fill className="object-contain" />
+          <Image
+            src="/ITKLogo2.svg"
+            alt="Logo"
+            fill
+            className="object-contain"
+          />
         </div>
 
         <h2 className="text-[#000] text-[24px] font-semibold font-geist mb-2">
