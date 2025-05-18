@@ -1,5 +1,5 @@
 "use client";
-import EmailInput from "../../components/EmailInput";
+import EmailInput from "../../components/inputForm/EmailInput";
 import useInput from "@/hooks/useInput";
 import Image from "next/image";
 import { useRouter } from "next/navigation";

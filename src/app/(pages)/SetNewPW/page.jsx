@@ -3,7 +3,7 @@ import { useState } from "react";
 import { changePassword } from "@/lib/api/changePassword";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import PasswordInput from "@/components/PasswordInput";
+import PasswordInput from "@/components/inputForm/PasswordInput";
 import useInput from "@/hooks/useInput";
 
 export default function SetNewPassword() {

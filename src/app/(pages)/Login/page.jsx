@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
-import EmailInput from "../../components/EmailInput";
-import PasswordInput from "../../components/PasswordInput";
+import EmailInput from "../../components/inputForm/EmailInput";
+import PasswordInput from "../../components/inputForm/PasswordInput";
 import useInput from "../../hooks/useInput";
 import { login } from "../../lib/api/login";
 import { useState } from "react";

@@ -1,4 +1,4 @@
-import useShow from "../hooks/useShow";
+import useShow from "../../hooks/useShow";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function PasswordInput({
