@@ -1,8 +1,7 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 
-export default function ConfirmationStep({ productName, quantity, total, onConfirm, onCancel }) {
+export default function TransferStep({ items = [], total, onContinue, onCancel }) {
   return (
     <div
       className="fixed inset-0 bg-white/10 flex justify-center items-center z-50 px-4"
@@ -11,12 +10,20 @@ export default function ConfirmationStep({ productName, quantity, total, onConfi
       <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md space-y-4">
         <h2 className="text-lg font-semibold">Konfirmasi Pembelian</h2>
 
-        <div className="space-y-1">
-          <p className="text-gray-600">{productName}</p>
-          <div className="flex justify-between">
-            <span>{quantity}x</span>
-            <span className="font-medium">Rp. {total.toLocaleString('id-ID')}</span>
-          </div>
+        <div className="space-y-2">
+          {items.length === 0 ? (
+            <p className="text-gray-500 text-center">Tidak ada barang yang dipilih.</p>
+          ) : (
+            items.map((item) => (
+              <div key={item.id} className="space-y-1">
+                <p className="text-gray-800">{item.name}</p>
+                <div className="flex justify-between">
+                  <span>{item.quantity}x</span>
+                  <span className="font-medium">Rp. {item.price.toLocaleString('id-ID')}</span>
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
         <hr className="my-2 border-gray-300" />
@@ -34,7 +41,7 @@ export default function ConfirmationStep({ productName, quantity, total, onConfi
             Kembali
           </button>
           <button
-            onClick={onConfirm}
+            onClick={onContinue}
             className="flex h-10 px-4 flex-1 justify-center items-center gap-1 rounded-lg bg-black text-white text-sm font-medium hover:bg-gray-800 transition"
           >
             Konfirmasi

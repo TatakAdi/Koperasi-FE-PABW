@@ -38,6 +38,7 @@ export default function PaymentMethodStep({ onContinue, onCancel }) {
             <option value="" disabled hidden>Pilih tipe pembayaran</option>
             <option value="Transfer">Transfer</option>
             <option value="COD">COD</option>
+            <option value="Iuran Sukarela">Iuran Sukarela</option>
           </select>
           <img
             src="/Frame.svg"
