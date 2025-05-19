@@ -14,7 +14,7 @@ export default function Navbar({
 }) {
   const router = useRouter();
   return (
-    <div className="flex justify-between items-center w-full  h-[88px] px-6">
+    <div className="flex justify-between items-center w-full h-[88px] px-6">
       <div className="w-[44px] h-[44px] relative">
         <Image src="/logo.svg" alt="Logo" fill className="object-contain" />
       </div>
