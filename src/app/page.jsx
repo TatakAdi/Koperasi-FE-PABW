@@ -175,6 +175,7 @@ export default function Home() {
         roles={authUser !== null && authUser.tipe}
         fullName={authUser !== null && authUser.fullname}
         email={authUser !== null && authUser.email}
+        saldo={authUser !== null && authUser.saldo}
         logout={onLogoutHandler}
       />
       <main

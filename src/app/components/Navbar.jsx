@@ -16,6 +16,7 @@ export default function Navbar({
   authUser,
   roles,
   logout,
+  saldo,
 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const router = useRouter();
@@ -78,6 +79,7 @@ export default function Navbar({
                   email={email}
                   authed={authUser}
                   roles={roles}
+                  saldo={saldo}
                   logout={logout}
                 />
               </div>
