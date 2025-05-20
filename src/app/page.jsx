@@ -27,6 +27,8 @@ export default function Home() {
   const [isFocus, setIsFocus] = useState(false);
   const [selectedProduct, setSelectedProduk] = useState(null);
   const [jumlah, onJumlahChange] = useState(1);
+  const [isSuccess, setIsSuccess] = useState(false); // Untuk notifikasi barang berhasil ke keranjang atau tidak
+  const [successMessage, setSuccessMessage] = useState("");
   const router = useRouter();
 
   async function onLogoutHandler() {
@@ -107,19 +109,23 @@ export default function Home() {
     });
 
     if (!authUser.id) {
-      alert("Maaf,anda belum login");
+      setSuccessMessage("Maaf,anda belum login");
       console.error("Pengguna belum melakukan login");
-      setIsAddCartLoad(false);
-      return;
     }
 
     if (error) {
       console.error("Gagal menambahkan produk ke dalam keranjang");
-      setIsAddCartLoad(false);
-      return;
+      setSuccessMessage("Maaf,produk gagal ditambahkan ke dalam keranjang");
     }
     setIsAddCartLoad(false);
-    setIsFocus(false);
+    setIsSuccess(true);
+    setSuccessMessage("Barang berhasil ditambahkan ke keranjang");
+
+    setTimeout(() => {
+      setIsSuccess(false);
+      setSuccessMessage("");
+      setIsFocus(false);
+    }, 2500);
   };
 
   const filteredContent = () => {
@@ -242,6 +248,8 @@ export default function Home() {
           onFocusChange={setIsFocus}
           productDataLoad={isProductLoad}
           addCartItemLoad={isAddCartLoad}
+          isSucced={isSuccess}
+          succedMessage={successMessage}
         />
       )}
     </div>
