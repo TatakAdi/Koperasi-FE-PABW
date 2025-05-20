@@ -119,11 +119,11 @@ export default function KeranjangPage() {
                     className={`w-[1084px] h-[120px] relative border-b border-[#e5e7eb] flex items-center ${selectedItems.includes(product.id) ? 'bg-[#e6f7ec]' : ''}`}
                   >
                     <div className="w-[360px] min-w-80 min-h-[120px] py-7 border-r border-[#e5e7eb] flex items-center gap-4">
-                      <input
-                        type="checkbox"
-                        checked={selectedItems.includes(product.id)}
-                        onChange={() => handleSelect(product.id)}
-                        className="w-6 h-6 accent-[#189e48] rounded-md border-2 border-[#189e48]"
+                      <img
+                        src={selectedItems.includes(product.id) ? "/checked_box.svg" : "/unchecked_box.svg"}
+                        alt={selectedItems.includes(product.id) ? "Checked" : "Unchecked"}
+                        className="w-6 h-6 cursor-pointer"
+                        onClick={() => handleSelect(product.id)}
                       />
                       <div className="flex items-center gap-4">
                         <img className="w-16 h-16 rounded-lg" src={product.image} alt={product.name} />
@@ -139,16 +139,20 @@ export default function KeranjangPage() {
                       </div>
                     </div>
                     <div className="flex-1 h-full px-4 py-7 border-r border-[#e5e7eb] flex justify-center items-center gap-3">
-                      <button
-                        className="w-6 h-6 flex items-center justify-center rounded-l-sm bg-[#f2f4f7] text-[#189e48] border"
-                        onClick={() => handleQuantityChange(product.id, -1)}
-                        disabled={product.quantity <= 1}
-                      >-</button>
+                      <img
+                        src="/minus.svg"
+                        alt="Kurangi"
+                        className={`w-6 h-6 cursor-pointer ${product.quantity <= 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        onClick={() => product.quantity > 1 && handleQuantityChange(product.id, -1)}
+                        style={{ pointerEvents: product.quantity <= 1 ? 'none' : 'auto' }}
+                      />
                       <div className="w-8 text-center text-base text-neutral-900">{product.quantity}</div>
-                      <button
-                        className="w-6 h-6 flex items-center justify-center rounded-r-sm bg-[#f2f4f7] text-[#189e48] border"
+                      <img
+                        src="/plus.svg"
+                        alt="Tambah"
+                        className="w-6 h-6 cursor-pointer"
                         onClick={() => handleQuantityChange(product.id, 1)}
-                      >+</button>
+                      />
                     </div>
                     <div className="w-[200px] h-full px-4 py-7 border-r border-[#e5e7eb] flex items-center justify-center">
                       <button
@@ -165,11 +169,15 @@ export default function KeranjangPage() {
               {hasSelectedItems && (
                 <div className="w-[1084px] h-12 flex items-center">
                   <div className="w-[360px] min-w-80 h-12 border-r border-[#e5e7eb] flex items-center gap-[106px]">
-                    <input
-                      type="checkbox"
-                      onChange={handleSelectAll}
-                      checked={filteredProducts.every((p) => selectedItems.includes(p.id)) && filteredProducts.length > 0}
-                      className="w-6 h-6 accent-[#189e48] rounded-md border-2 border-[#189e48]"
+                    <img
+                      src={
+                        filteredProducts.length > 0 && filteredProducts.every((p) => selectedItems.includes(p.id))
+                          ? "/checked_box.svg"
+                          : "/unchecked_box.svg"
+                      }
+                      alt="Pilih Semua"
+                      className="w-6 h-6 cursor-pointer"
+                      onClick={handleSelectAll}
                     />
                     <div className="text-base font-medium text-[#222] font-['Geist']">
                       Pilih Semua ({filteredProducts.length})
