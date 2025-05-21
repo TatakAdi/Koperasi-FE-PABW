@@ -2,20 +2,20 @@
 import Navbar from '@/components/Navbar';
 import SidePanel from '@/components/SidePanel';
 import CheckoutCard from '@/components/keranjang/CheckoutCard';
-import { getCartItems } from '@/lib/api/cart';
+import { deleteCartItem, getCartItems, updateCartItem } from '@/lib/api/cart';
 import { getUserLogged } from '@/lib/api/login';
 import { logout } from '@/lib/api/logout';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export default function KeranjangPage() {
   const [authUser, setAuthUser] = useState(null);
   const [showCheckout, setShowCheckout] = useState(false);
-  const [kategori, setKategori] = useState('Makanan Berat');
   const [selectedItems, setSelectedItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [products, setProducts] = useState([]);
   const router = useRouter();
+  const updateTimeout = useRef({});
 
   useEffect(() => {
     const getUser = async () => {
@@ -69,6 +69,18 @@ export default function KeranjangPage() {
           : item
       )
     );
+
+    // Clear timeout jika user masih klik
+    if (updateTimeout.current[id]) {
+      clearTimeout(updateTimeout.current[id]);
+    }
+
+    // Set timeout baru untuk update ke backend setelah 700ms tidak ada klik
+    updateTimeout.current[id] = setTimeout(async () => {
+      const product = products.find((item) => item.id === id);
+      if (!product || !authUser) return;
+      await updateCartItem(authUser.id, id, { jumlah: product.quantity });
+    }, 700);
   };
 
   const handleSelectAll = () => {
@@ -89,13 +101,15 @@ export default function KeranjangPage() {
     setSelectedItems([]);
   };
 
-  const handleDelete = (id) => {
-    setProducts((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, quantity: 1 } : item
-      )
-    );
-    setSelectedItems((prev) => prev.filter((itemId) => itemId !== id));
+  const handleDelete = async (id) => {
+    if (!authUser) return;
+    const { error } = await deleteCartItem(authUser.id, id);
+    if (!error) {
+      setProducts((prev) => prev.filter((item) => item.id !== id));
+      setSelectedItems((prev) => prev.filter((itemId) => itemId !== id));
+    } else {
+      alert("Gagal menghapus produk dari keranjang!");
+    }
   };
 
   return (
