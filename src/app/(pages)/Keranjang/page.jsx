@@ -100,7 +100,11 @@ export default function KeranjangPage() {
     }
   };
 
-  const handleClearSelection = () => {
+  const handleClearSelection = async () => {
+    // Hapus semua produk yang terseleksi satu per satu
+    for (const id of selectedItems) {
+      await handleDelete(id);
+    }
     setSelectedItems([]);
   };
 
