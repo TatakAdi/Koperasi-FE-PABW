@@ -22,3 +22,22 @@ export async function addCartItem(userId, productId, { jumlah }) {
   console.log("Produk berhasil ditambahkan ke keranjang");
   return { error: false, data: responseJson.data, status: response.status };
 }
+
+export async function getCartItems(userId) {
+  const response = await fetch(`/api/proxy/getCart?id_user=${userId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  const responseJson = await response.json();
+
+  if (response.status !== 200) {
+    console.error(responseJson.message);
+    return { error: true, data: null, status: response.status };
+  }
+
+  console.log(responseJson);
+  return { error: false, data: responseJson, status: response.status };
+}

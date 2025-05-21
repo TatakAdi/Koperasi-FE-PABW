@@ -1,29 +1,46 @@
 'use client';
-import CheckoutCard from '@/components/keranjang/CheckoutCard';
-import Header from '@/components/Navbar';
+import Navbar from '@/components/Navbar';
 import SidePanel from '@/components/SidePanel';
+import CheckoutCard from '@/components/keranjang/CheckoutCard';
+import { getCartItems } from '@/lib/api/cart';
+import { getUserLogged } from '@/lib/api/login';
+import { logout } from '@/lib/api/logout';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function KeranjangPage() {
+  const [authUser, setAuthUser] = useState(null);
   const [showCheckout, setShowCheckout] = useState(false);
-  const router = useRouter();
   const [kategori, setKategori] = useState('Makanan Berat');
   const [selectedItems, setSelectedItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [products, setProducts] = useState([
-    { id: 1, name: 'Nasi Ayam Geprek', category: 'Makanan Berat', price: 25000, quantity: 1, image: '/AyamGeprek.svg' },
-    { id: 2, name: 'Piscok Lumer asli Probolinggo Chef Nabil', category: 'Makanan Ringan', price: 17999999999, quantity: 1, image: '/PisCok.svg' },
-    { id: 3, name: 'Es Teh', category: 'Minuman', price: 5000, quantity: 1, image: '/EsTeh.svg' },
-    { id: 4, name: 'Keripik Singkong', category: 'Makanan Ringan', price: 10000, quantity: 1, image: '/KeripikSingkong.svg' },
-    { id: 5, name: 'Mie Goreng Jawa', category: 'Makanan Berat', price: 30000, quantity: 1, image: '/MieJawa.svg' },
-  ]);
+  const [products, setProducts] = useState([]);
+  const router = useRouter();
 
-  const filteredProducts = products.filter(
-    (item) =>
-      // item.category === kategori && // Ini buat kategorikan sesuai sidebar
-      item.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    const getUser = async () => {
+      const { error, data } = await getUserLogged();
+      if (error) return;
+      setAuthUser(data);
+
+      const cartRes = await getCartItems(data.id);
+      console.log("cartRes", cartRes); // Tambahkan ini
+      if (!cartRes.error && cartRes.data && cartRes.data.items) {
+        setProducts(
+          cartRes.data.items.map(item => ({
+            ...item,
+            quantity: item.jumlah
+          }))
+        );
+      }
+    };
+    getUser();
+  }, []);
+
+  async function onLogoutHandler() {
+      await logout();
+      setAuthUser(null);
+    }
 
   const selectedFiltered = products.filter((item) =>
     selectedItems.includes(item.id)
@@ -55,7 +72,7 @@ export default function KeranjangPage() {
   };
 
   const handleSelectAll = () => {
-    const idsInView = filteredProducts.map((p) => p.id);
+    const idsInView = products.map((p) => p.id);
     const isAllSelected = idsInView.every((id) =>
       selectedItems.includes(id)
     );
@@ -83,10 +100,15 @@ export default function KeranjangPage() {
 
   return (
     <div className="min-h-screen">
-      <Header searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-      <div className="flex">
-        {/* <Sidebar onSelectCategory={setKategori} selectedCategory={kategori} /> */}
-        <SidePanel/>
+      <Navbar
+        keyword={searchTerm}
+        onKeywordCahnge={setSearchTerm}
+        authUser={authUser}
+        roles={authUser !== null && authUser.tipe}
+        logout={onLogoutHandler}
+      />
+        <div className="flex">
+        <SidePanel />
         <main className="flex-1 bg-white flex flex-col items-start">
           <section className="w-[1124px] min-h-[932px] px-5 py-4 bg-white rounded-xl inline-flex flex-col justify-start items-start gap-4 overflow-hidden mt-8">
             <div className="inline-flex justify-start items-start gap-4">
@@ -94,7 +116,6 @@ export default function KeranjangPage() {
             </div>
             <div className="flex-1 flex flex-col justify-start items-start gap-12">
               <div className="flex flex-col justify-start items-start">
-                {/* Header */}
                 <div className="w-[1084px] h-14 relative border-b border-[#e5e7eb] overflow-hidden">
                   <div className="w-[1084px] max-w-[1084px] left-0 top-0 absolute inline-flex justify-start items-center">
                     <div className="w-[360px] h-14 min-w-80 border-r border-[#e5e7eb] flex justify-start items-center gap-[106px]">
@@ -112,8 +133,7 @@ export default function KeranjangPage() {
                     </div>
                   </div>
                 </div>
-                {/* Items */}
-                {filteredProducts.map((product) => (
+                {products.map((product) => (
                   <div
                     key={product.id}
                     className={`w-[1084px] h-[120px] relative border-b border-[#e5e7eb] flex items-center ${selectedItems.includes(product.id) ? 'bg-[#e6f7ec]' : ''}`}
@@ -165,13 +185,12 @@ export default function KeranjangPage() {
                   </div>
                 ))}
               </div>
-              {/* Footer */}
               {hasSelectedItems && (
                 <div className="w-[1084px] h-12 flex items-center">
                   <div className="w-[360px] min-w-80 h-12 border-r border-[#e5e7eb] flex items-center gap-[106px]">
                     <img
                       src={
-                        filteredProducts.length > 0 && filteredProducts.every((p) => selectedItems.includes(p.id))
+                        products.length > 0 && products.every((p) => selectedItems.includes(p.id))
                           ? "/checked_box.svg"
                           : "/unchecked_box.svg"
                       }
@@ -180,7 +199,7 @@ export default function KeranjangPage() {
                       onClick={handleSelectAll}
                     />
                     <div className="text-base font-medium text-[#222] font-['Geist']">
-                      Pilih Semua ({filteredProducts.length})
+                      Pilih Semua ({products.length})
                     </div>
                   </div>
                   <div className="w-[262px] h-12 px-4 border-r border-[#e5e7eb] flex items-center justify-center">
