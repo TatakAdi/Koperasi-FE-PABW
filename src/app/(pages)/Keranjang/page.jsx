@@ -199,7 +199,7 @@ export default function KeranjangPage() {
                     </div>
                     <div className="w-[200px] h-full px-4 py-7 border-r border-[#e5e7eb] flex items-center justify-center">
                       <button
-                        className="text-base font-medium text-[#e74c3c] font-['Geist']"
+                        className="text-base font-medium text-[#e74c3c] font-['Geist'] cursor-pointer"
                         onClick={() => handleDelete(product.id)}
                       >
                         Hapus
@@ -227,7 +227,7 @@ export default function KeranjangPage() {
                   </div>
                   <div className="w-[262px] h-12 px-4 border-r border-[#e5e7eb] flex items-center justify-center">
                     <button
-                      className="text-base font-medium text-[#e74c3c] font-['Geist']"
+                      className="text-base font-medium text-[#e74c3c] font-['Geist'] cursor-pointer"
                       onClick={handleClearSelection}
                     >
                       Hapus Seleksi
@@ -242,7 +242,7 @@ export default function KeranjangPage() {
                   </div>
                   <div className="w-[200px] h-12 flex items-center justify-center">
                     <button
-                      className="w-full h-10 bg-[#189e48] rounded-lg text-white font-medium font-['Geist']"
+                      className="w-full h-10 bg-[#189e48] rounded-lg text-white font-medium font-['Geist'] cursor-pointer"
                       onClick={() => setShowCheckout(true)}
                     >
                       Checkout
