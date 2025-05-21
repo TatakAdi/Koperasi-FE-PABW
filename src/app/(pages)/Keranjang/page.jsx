@@ -62,25 +62,28 @@ export default function KeranjangPage() {
   };
 
   const handleQuantityChange = (id, delta) => {
-    setProducts((prev) =>
-      prev.map((item) =>
+    setProducts((prev) => {
+      const updated = prev.map((item) =>
         item.id === id
           ? { ...item, quantity: Math.max(1, item.quantity + delta) }
           : item
-      )
-    );
+      );
 
-    // Clear timeout jika user masih klik
-    if (updateTimeout.current[id]) {
-      clearTimeout(updateTimeout.current[id]);
-    }
+      // Debounce update ke backend
+      if (updateTimeout.current[id]) {
+        clearTimeout(updateTimeout.current[id]);
+      }
 
-    // Set timeout baru untuk update ke backend setelah 700ms tidak ada klik
-    updateTimeout.current[id] = setTimeout(async () => {
-      const product = products.find((item) => item.id === id);
-      if (!product || !authUser) return;
-      await updateCartItem(authUser.id, id, { jumlah: product.quantity });
-    }, 700);
+      // Ambil quantity terbaru dari hasil update
+      const newQuantity = updated.find((item) => item.id === id)?.quantity;
+
+      updateTimeout.current[id] = setTimeout(async () => {
+        if (!authUser) return;
+        await updateCartItem(authUser.id, id, { jumlah: newQuantity });
+      }, 700);
+
+      return updated;
+    });
   };
 
   const handleSelectAll = () => {
@@ -184,8 +187,10 @@ export default function KeranjangPage() {
                       <img
                         src="/plus.svg"
                         alt="Tambah"
-                        className="w-6 h-6 cursor-pointer"
-                        onClick={() => handleQuantityChange(product.id, 1)}
+                        className={`w-6 h-6 cursor-pointer ${product.quantity >= (product.stock ?? product.stok ?? 99) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        onClick={() =>
+                          product.quantity < (product.stock ?? product.stok ?? 99) && handleQuantityChange(product.id, 1)
+                        }
                       />
                     </div>
                     <div className="w-[200px] h-full px-4 py-7 border-r border-[#e5e7eb] flex items-center justify-center">
