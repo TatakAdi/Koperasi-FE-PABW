@@ -1,10 +1,10 @@
 'use client';
-import Navbar from '@/components/Navbar';
-import SidePanel from '@/components/SidePanel';
-import CheckoutCard from '@/components/keranjang/CheckoutCard';
-import { deleteCartItem, getCartItems, updateCartItem } from '@/lib/api/cart';
-import { getUserLogged } from '@/lib/api/login';
-import { logout } from '@/lib/api/logout';
+import Navbar from '@/app/components/Navbar';
+import SidePanel from '@/app/components/SidePanel';
+import CheckoutCard from '@/app/components/keranjang/CheckoutCard';
+import { deleteCartItem, getCartItems, updateCartItem } from '@/app/lib/api/cart';
+import { getUserLogged } from '@/app/lib/api/login';
+import { logout } from '@/app/lib/api/logout';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
