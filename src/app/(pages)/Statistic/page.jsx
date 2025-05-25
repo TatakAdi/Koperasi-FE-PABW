@@ -41,15 +41,15 @@ export default function StatAdminPage() {
                 <div className="flex items-center gap-4">
                   <div className="flex-1 h-14 border-r border-neutral-200 flex items-center gap-2">
                     <img src="/Box.svg" alt="box" className="size-6" />
-                    <div className="text-SIDEBAR-MODULE text-base font-medium font-[Geist] leading-normal">Nama Barang</div>
+                    <div className="text-[#737373] text-base font-medium font-[Geist] leading-normal">Nama Barang</div>
                   </div>
                   <div className="flex-1 h-14 border-r border-neutral-200 flex items-center gap-2">
                     <img src="/Cart2.svg" alt="cart2" className="size-6" />
-                    <div className="text-SIDEBAR-MODULE text-base font-medium font-[Geist] leading-normal">Jumlah Terjual</div>
+                    <div className="text-[#737373] text-base font-medium font-[Geist] leading-normal">Jumlah Terjual</div>
                   </div>
                   <div className="flex-1 h-14 flex items-center gap-2">
                     <img src="/Tag.svg" alt="tag" className="size-6" />
-                    <div className="text-SIDEBAR-MODULE text-base font-medium font-[Geist] leading-normal">Total Harga</div>
+                    <div className="text-[#737373] text-base font-medium font-[Geist] leading-normal">Total Harga</div>
                   </div>
                 </div>
               </div>
@@ -72,13 +72,13 @@ export default function StatAdminPage() {
                     className={`flex items-center gap-4 border-b ${idx === arr.length - 1 ? '' : 'border-neutral-200'} last:border-b-0`}
                   >
                     <div className="flex-1 py-2 h-14 border-r border-neutral-200 flex items-center gap-2">
-                      <div className="text-17-SOFT-BLACK text-base font-medium font-[Geist] leading-normal">{item.name}</div>
+                      <div className="text-black text-base font-medium font-[Geist] leading-normal">{item.name}</div>
                     </div>
                     <div className="flex-1 py-2 h-14 border-r border-neutral-200 flex items-center gap-2">
-                      <div className="text-17-SOFT-BLACK text-base font-medium font-[Geist] leading-normal">{item.sold}</div>
+                      <div className="text-black text-base font-medium font-[Geist] leading-normal">{item.sold}</div>
                     </div>
                     <div className="flex-1 py-2 h-14 flex items-center gap-2">
-                      <div className="text-17-SOFT-BLACK text-base font-medium font-[Geist] leading-normal">{item.price}</div>
+                      <div className="text-black text-base font-medium font-[Geist] leading-normal">{item.price}</div>
                     </div>
                   </div>
                 ))}

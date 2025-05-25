@@ -1,46 +1,62 @@
 import React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function SidebarAdmin() {
   const router = useRouter();
+  const pathname = usePathname();
+
+  // Helper for active state
+  const menu = [
+    {
+      label: "Selling Statistics",
+      icon: (
+        <>
+          <img src="/statistic.svg" alt="statistic" className="size-6" />
+          <img src="/carbon.svg" alt="carbon" className="size-6" />
+        </>
+      ),
+      href: "/Statistic",
+      match: "/Statistic",
+    },
+    {
+      label: "Product Management",
+      icon: <img src="/carbon.svg" alt="carbon" className="size-6" />,
+      href: "/Product",
+      match: "/Product",
+    },
+    {
+      label: "Actors",
+      icon: <img src="/actor.svg" alt="actor" className="size-6" />,
+      href: "/Actors",
+      match: "/Actors",
+    },
+  ];
 
   return (
     <div className="w-72 min-h-[936px] px-3 pt-3 pb-4 bg-gray-100 rounded-xl flex flex-col justify-start items-start gap-2.5 overflow-hidden">
       <div className="w-full flex flex-col gap-4">
-        {/* Selling Statistics */}
-        <button
-          type="button"
-          onClick={() => router.push("/Statistic")}
-          className="w-full px-2 py-1.5 rounded-lg flex items-center gap-2.5 hover:bg-gray-300 transition"
-        >
-          <img src="/statistic.svg" alt="statistic" className="size-6" />
-          <img src="/carbon.svg" alt="carbon" className="size-6" />
-          <span className="text-stone-500 text-base font-medium font-[Geist] leading-normal">
-            Selling Statistics
-          </span>
-        </button>
-        {/* Product Management */}
-        <button
-          type="button"
-          onClick={() => router.push("/Product")}
-          className="w-full px-2 py-1.5 rounded-lg flex items-center gap-2.5 hover:bg-gray-200 transition"
-        >
-          <img src="/carbon.svg" alt="carbon" className="size-6" />
-          <span className="text-stone-500 text-base font-medium font-[Geist] leading-normal">
-            Product Management
-          </span>
-        </button>
-        {/* Actors */}
-        <button
-          type="button"
-          onClick={() => router.push("/Actors")}
-          className="w-full px-2 py-1.5 rounded-lg flex items-center gap-2.5 hover:bg-gray-200 transition"
-        >
-          <img src="/actor.svg" alt="actor" className="size-6" />
-          <span className="text-stone-500 text-base font-medium font-[Geist] leading-normal">
-            Actors
-          </span>
-        </button>
+        {menu.map((item) => {
+          const isActive = pathname === item.match;
+          return (
+            <button
+              key={item.label}
+              type="button"
+              onClick={() => router.push(item.href)}
+              className={`w-full px-2 py-1.5 rounded-lg flex items-center gap-2.5 transition
+                ${isActive ? "bg-[#E3E7ED]" : "hover:bg-gray-200"}
+              `}
+            >
+              {item.icon}
+              <span
+                className={`text-base font-medium font-[Geist] leading-normal
+                  ${isActive ? "text-[#008A2E]" : "text-stone-500"}
+                `}
+              >
+                {item.label}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
