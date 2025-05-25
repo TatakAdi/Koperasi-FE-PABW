@@ -7,7 +7,7 @@ import Kategori from "@/app/components/Kategori";
 
 export default function ProductPage() {
   return (
-    <div className="w-[1440px] h-[1024px] relative bg-white overflow-hidden">
+    <div className="w-full h-[1024px] relative bg-white overflow-hidden">
       {/* Navbar */}
       <Navbar />
       {/* Sidebar */}
@@ -27,25 +27,25 @@ export default function ProductPage() {
               <div className="w-[1040px] max-w-[1084px] border-b border-neutral-200 flex flex-col gap-2.5 overflow-hidden mx-auto">
                 <div className="flex items-center">
                   <div className="w-28 h-14 max-w-36 border-r border-neutral-200 flex justify-center items-center gap-2">
-                    <div className="text-SIDEBAR-MODULE text-base font-medium font-[Geist] leading-normal">Gambar</div>
+                    <div className="text-[#737373] text-base font-medium font-[Geist] leading-normal">Gambar</div>
                   </div>
                   <div className="flex-1 h-14 border-r border-neutral-200 flex justify-center items-center gap-2">
-                    <div className="text-SIDEBAR-MODULE text-base font-medium font-[Geist] leading-normal">Nama Barang</div>
+                    <div className="text-[#737373] text-base font-medium font-[Geist] leading-normal">Nama Barang</div>
                   </div>
                   <div className="flex-1 h-14 border-r border-neutral-200 flex justify-center items-center gap-2">
-                    <div className="text-SIDEBAR-MODULE text-base font-medium font-[Geist] leading-normal">Kategori</div>
+                    <div className="text-[#737373] text-base font-medium font-[Geist] leading-normal">Kategori</div>
                   </div>
                   <div className="flex-1 h-14 max-w-32 border-r border-neutral-200 flex justify-center items-center gap-2">
-                    <div className="text-SIDEBAR-MODULE text-base font-medium font-[Geist] leading-normal">Harga</div>
+                    <div className="text-[#737373] text-base font-medium font-[Geist] leading-normal">Harga</div>
                   </div>
                   <div className="w-24 h-14 max-w-28 border-r border-neutral-200 flex justify-center items-center gap-2">
-                    <div className="text-SIDEBAR-MODULE text-base font-medium font-[Geist] leading-normal">Stok</div>
+                    <div className="text-[#737373] text-base font-medium font-[Geist] leading-normal">Stok</div>
                   </div>
                   <div className="flex-1 h-14 max-w-44 border-r border-neutral-200 flex justify-center items-center gap-2">
-                    <div className="text-SIDEBAR-MODULE text-base font-medium font-[Geist] leading-normal">Penjual</div>
+                    <div className="text-[#737373] text-base font-medium font-[Geist] leading-normal">Penjual</div>
                   </div>
                   <div className="flex-1 h-14 max-w-28 border-r border-neutral-200 flex justify-center items-center gap-2">
-                    <div className="text-SIDEBAR-MODULE text-base font-medium font-[Geist] leading-normal">Aksi</div>
+                    <div className="text-[#737373] text-base font-medium font-[Geist] leading-normal">Aksi</div>
                   </div>
                 </div>
               </div>
@@ -77,25 +77,73 @@ export default function ProductPage() {
                     stok: 12,
                     penjual: "Mas Fu’ad Grobogan",
                   },
+                  {
+                    gambar: "https://placehold.co/64x64",
+                    nama: "Holland Bakery cabang “Grobogan”",
+                    kategori: "ringan",
+                    harga: "Rp. 20.000",
+                    stok: 12,
+                    penjual: "Mas Fu’ad Grobogan",
+                  },
+                  {
+                    gambar: "https://placehold.co/64x64",
+                    nama: "Holland Bakery cabang “Grobogan”",
+                    kategori: "ringan",
+                    harga: "Rp. 20.000",
+                    stok: 12,
+                    penjual: "Mas Fu’ad Grobogan",
+                  },
+                  {
+                    gambar: "https://placehold.co/64x64",
+                    nama: "Holland Bakery cabang “Grobogan”",
+                    kategori: "ringan",
+                    harga: "Rp. 20.000",
+                    stok: 12,
+                    penjual: "Mas Fu’ad Grobogan",
+                  },
+                  {
+                    gambar: "https://placehold.co/64x64",
+                    nama: "Holland Bakery cabang “Grobogan”",
+                    kategori: "ringan",
+                    harga: "Rp. 20.000",
+                    stok: 12,
+                    penjual: "Mas Fu’ad Grobogan",
+                  },
+                  {
+                    gambar: "https://placehold.co/64x64",
+                    nama: "Holland Bakery cabang “Grobogan”",
+                    kategori: "ringan",
+                    harga: "Rp. 20.000",
+                    stok: 12,
+                    penjual: "Mas Fu’ad Grobogan",
+                  },
+                  {
+                    gambar: "https://placehold.co/64x64",
+                    nama: "Holland Bakery cabang “Grobogan”",
+                    kategori: "ringan",
+                    harga: "Rp. 20.000",
+                    stok: 12,
+                    penjual: "Mas Fu’ad Grobogan",
+                  },
                 ].map((item, idx) => (
                   <div key={idx} className="border-b border-neutral-200 flex items-center">
                     <div className="w-28 self-stretch max-w-36 p-2 border-r border-neutral-200 flex justify-center items-center">
                       <img className="size-16 rounded-lg" src={item.gambar} alt={item.nama} />
                     </div>
                     <div className="flex-1 self-stretch p-2 border-r border-neutral-200 flex justify-center items-center">
-                      <div className="flex-1 text-17-SOFT-BLACK text-base font-medium font-[Geist] leading-normal">{item.nama}</div>
+                      <div className="flex-1 text-black text-base font-medium font-[Geist] leading-normal">{item.nama}</div>
                     </div>
                     <div className="flex-1 self-stretch p-2 border-r border-neutral-200 flex justify-center items-center">
                       <Kategori value={item.kategori} />
                     </div>
                     <div className="flex-1 self-stretch max-w-32 p-2 border-r border-neutral-200 flex justify-center items-center">
-                      <div className="flex-1 text-center text-17-SOFT-BLACK text-base font-medium font-[Geist] leading-normal">{item.harga}</div>
+                      <div className="flex-1 text-center text-black text-base font-medium font-[Geist] leading-normal">{item.harga}</div>
                     </div>
                     <div className="w-24 self-stretch max-w-28 p-2 border-r border-neutral-200 flex justify-center items-center">
-                      <div className="flex-1 text-center text-17-SOFT-BLACK text-base font-medium font-[Geist] leading-normal">{item.stok}</div>
+                      <div className="flex-1 text-center text-black text-base font-medium font-[Geist] leading-normal">{item.stok}</div>
                     </div>
                     <div className="flex-1 self-stretch max-w-44 p-2 border-r border-neutral-200 flex justify-center items-center">
-                      <div className="flex-1 text-center text-17-SOFT-BLACK text-base font-medium font-[Geist] leading-normal">{item.penjual}</div>
+                      <div className="flex-1 text-center text-black text-base font-medium font-[Geist] leading-normal">{item.penjual}</div>
                     </div>
                     <div className="flex-1 self-stretch max-w-28 p-2 border-r border-neutral-200 flex justify-center items-center">
                       <div className="flex gap-4">
