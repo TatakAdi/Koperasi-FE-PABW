@@ -11,9 +11,12 @@ export default function Navbar({
   onKeywordCahnge,
   toggleKeywordSearch,
   toggleNotificationPanel,
+  fullName,
+  email,
   authUser,
   roles,
   logout,
+  saldo,
 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const router = useRouter();
@@ -29,7 +32,7 @@ export default function Navbar({
         onClick={() => router.push("/")}
       >
         <Image
-          src="/logo.svg"
+          src="/ITKLogo2.svg"
           alt="Logo"
           fill
           className="object-contain cursor-pointer"
@@ -72,8 +75,11 @@ export default function Navbar({
             {isMenuOpen && (
               <div className="absolute top-14 right-0 z-50">
                 <ProfilePicMenu
+                  fullName={fullName}
+                  email={email}
                   authed={authUser}
                   roles={roles}
+                  saldo={saldo}
                   logout={logout}
                 />
               </div>

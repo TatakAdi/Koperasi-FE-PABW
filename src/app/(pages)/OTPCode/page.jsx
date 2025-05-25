@@ -2,10 +2,14 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { reqOTPCode } from "@/lib/api/reqOTPCode";
+import { verifyOtp } from "@/lib/api/verifyOtp";
 
 export default function EmailVerif() {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
+  const [timer, setTimer] = useState(10);
+  const [showResend, setShowResend] = useState(false);
   const [error, setError] = useState("");
   const inputsRef = useRef([]);
   const router = useRouter();
@@ -17,16 +21,31 @@ export default function EmailVerif() {
     setError("");
 
     // Simulasi API call
-    setTimeout(() => {
-      if (finalCode === "123456") {
-        console.log("Kode benar:", finalCode);
+    setTimeout(async () => {
+      const result = await verifyOtp({ email, otp: finalCode });
+
+      if (result.success) {
         router.push("/SetNewPW");
       } else {
-        setError("Invalid code. Please try again");
+        setError("Invalid code. please try again");
       }
+
       setLoading(false);
     }, 1500);
   };
+
+  // Delay mengirimkan code baru
+  useEffect(() => {
+    let countdown;
+    if (timer > 0) {
+      countdown = setTimeout(() => {
+        setTimer(timer - 1);
+      }, 1000);
+    } else {
+      setShowResend(true);
+    }
+    return () => clearTimeout(countdown);
+  }, [timer]);
 
   useEffect(() => {
     if (code.every((val) => val !== "")) {
@@ -51,7 +70,12 @@ export default function EmailVerif() {
     <div className="w-full min-h-screen flex justify-center items-center p-4 bg-white">
       <div className="flex flex-col items-start w-full max-w-[420px]">
         <div className="w-[44px] h-[44px] relative mb-4">
-          <Image src="/logo.svg" alt="Logo" fill className="object-contain" />
+          <Image
+            src="/ITKLogo2.svg"
+            alt="Logo"
+            fill
+            className="object-contain"
+          />
         </div>
 
         <h2 className="text-black text-[24px] font-semibold font-geist mb-1">
@@ -102,9 +126,18 @@ export default function EmailVerif() {
         <p className="text-[#8F8F8F] text-[14px] mt-2">
           Can’t find your code? Check your spam folder. <br />
           Haven’t received the code?{" "}
-          <span className="text-black font-medium cursor-pointer">
-            Get a new code
-          </span>
+          {showResend ? (
+            <span
+              className="text-black font-medium cursor-pointer hover:underline"
+              onClick={() => reqOTPCode({ email })}
+            >
+              Get a new code
+            </span>
+          ) : (
+            <span className="text-black font-medium">
+              Resend code in 00:{timer.toString().padStart(2, "0")}
+            </span>
+          )}
         </p>
       </div>
     </div>

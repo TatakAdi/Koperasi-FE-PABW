@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { Hamburger, Popcorn, Coffee, List } from "lucide-react";
 
 export default function SidePanel({
   category,
@@ -13,40 +14,61 @@ export default function SidePanel({
 }) {
   const [filterEnabled, setFilterEnabled] = useState(false);
   const categoryBox =
-    "w-full py-2 px-2.5 rounded-md cursor-pointer hover:bg-[#E9ECF1] hover:text-[#199F48]";
+    "flex gap-1.5 w-full py-2 px-2.5 rounded-md cursor-pointer hover:bg-[#E9ECF1] hover:text-[#199F48]";
   const unactiveCategoryBox = "bg-inherit text-[#666]";
   const activeCategoryBox = "bg-[#E9ECF1] text-[#199F48]";
 
   return (
     <aside className="w-[296px] min-h-screen bg-[#F2F4F7] sticky top-0 h-full">
+      <div id="OrderOrderISay" className="m-2.5">
+        <div
+          id="Order"
+          className={`${categoryBox} ${
+            category === "Makanan Berat"
+              ? activeCategoryBox
+              : unactiveCategoryBox
+          }`}
+        >
+          <List size={20} />
+          <span>My Order</span>
+        </div>
+      </div>
+      <hr className="mx-5 text-[#D9DFE8] h-[10px] " />
       <div id="category" className="m-2.5 grid gap-5 flex-shrink-0">
-        <span
+        <div
           id="food"
-          onClick={() => onCategoryChange("food")}
+          onClick={() => onCategoryChange("Makanan Berat")}
           className={`${categoryBox} ${
-            category === "food" ? activeCategoryBox : unactiveCategoryBox
+            category === "Makanan Berat"
+              ? activeCategoryBox
+              : unactiveCategoryBox
           }`}
         >
-          Makanan Berat
-        </span>
-        <span
+          <Hamburger size={20} />
+          <span>Makanan Berat</span>
+        </div>
+        <div
           id="snack"
-          onClick={() => onCategoryChange("snack")}
+          onClick={() => onCategoryChange("Makanan Ringan")}
           className={`${categoryBox} ${
-            category === "snack" ? activeCategoryBox : unactiveCategoryBox
+            category === "Makanan Ringan"
+              ? activeCategoryBox
+              : unactiveCategoryBox
           }`}
         >
-          Makanan Ringan
-        </span>
-        <span
+          <Popcorn size={20} />
+          <span>Makanan Ringan</span>
+        </div>
+        <div
           id="drink"
-          onClick={() => onCategoryChange("drink")}
+          onClick={() => onCategoryChange("Minuman")}
           className={`${categoryBox} ${
-            category === "drink" ? activeCategoryBox : unactiveCategoryBox
+            category === "Minuman" ? activeCategoryBox : unactiveCategoryBox
           }`}
         >
-          Minuman
-        </span>
+          <Coffee size={20} />
+          <span>Minuman</span>
+        </div>
       </div>
       <hr className="mx-5 text-[#D9DFE8] h-[10px] " />
       <div id="filter">

@@ -27,6 +27,8 @@ export default function Home() {
   const [isFocus, setIsFocus] = useState(false);
   const [selectedProduct, setSelectedProduk] = useState(null);
   const [jumlah, onJumlahChange] = useState(1);
+  const [isSuccess, setIsSuccess] = useState(false); // Untuk notifikasi barang berhasil ke keranjang atau tidak
+  const [successMessage, setSuccessMessage] = useState("");
   const router = useRouter();
 
   async function onLogoutHandler() {
@@ -42,6 +44,14 @@ export default function Home() {
 
   const onMinOrder = () => {
     return onJumlahChange((prevState) => Math.max(prevState - 1, 1));
+  };
+
+  const onCategoryChange = (selectedCategory) => {
+    if (category === selectedCategory) {
+      setCategory(null);
+    } else {
+      setCategory(selectedCategory);
+    }
   };
 
   useEffect(() => {
@@ -68,6 +78,7 @@ export default function Home() {
         console.error("Tidak dapat mengambil produk dari server");
         return;
       }
+      console.log(data);
       setProduk(data);
       setIsLoading(false);
     };
@@ -98,39 +109,61 @@ export default function Home() {
     });
 
     if (!authUser.id) {
-      alert("Maaf,anda belum login");
+      setSuccessMessage("Maaf,anda belum login");
       console.error("Pengguna belum melakukan login");
-      setIsAddCartLoad(false);
-      return;
     }
 
     if (error) {
       console.error("Gagal menambahkan produk ke dalam keranjang");
-      setIsAddCartLoad(false);
-      return;
+      setSuccessMessage("Maaf,produk gagal ditambahkan ke dalam keranjang");
     }
     setIsAddCartLoad(false);
-    setIsFocus(false);
+    setIsSuccess(true);
+    setSuccessMessage("Barang berhasil ditambahkan ke keranjang");
+
+    setTimeout(() => {
+      setIsSuccess(false);
+      setSuccessMessage("");
+      setIsFocus(false);
+    }, 2500);
   };
 
   const filteredContent = () => {
+    console.log({ category, minPrice, maxPrice, keyword, sellSort });
     const categoryMap = {
-      food: 1,
-      snack: 2,
-      drink: 3,
+      "Makanan Berat": 1,
+      "Makanan Ringan": 2,
+      Minuman: 3,
     };
 
-    return produk
-      .filter((item) => item.category_id === categoryMap[category])
-      .filter((item) => {
-        const min = minPrice || 0;
-        const max = maxPrice || Infinity;
-        return item.price >= min && item.price <= max;
-      })
-      .filter((item) => item.name.toLowerCase().includes(keyword.toLowerCase()))
-      .sort((a, b) =>
+    let result = [...produk];
+
+    if (category && categoryMap[category]) {
+      result = result.filter(
+        (item) => item.category_id === categoryMap[category]
+      );
+    }
+
+    const min =
+      isNaN(Number(minPrice)) || minPrice == "" ? 0 : Number(minPrice);
+    const max =
+      isNaN(Number(maxPrice)) || maxPrice == "" ? Infinity : Number(maxPrice);
+    result = result.filter((item) => item.price >= min && item.price <= max);
+
+    if (keyword && keyword.trim() !== "") {
+      result = result.filter((item) =>
+        item.name.toLowerCase().includes(keyword.toLowerCase())
+      );
+    }
+
+    const validSort = sellSort === "Terbanyak" || sellSort === "Tersedikit";
+    if (validSort) {
+      result = result.sort((a, b) =>
         sellSort === "Terbanyak" ? b.stock - a.stock : a.stock - b.stock
       );
+    }
+
+    return result;
   };
 
   return (
@@ -140,6 +173,9 @@ export default function Home() {
         onKeywordCahnge={setKeyword}
         authUser={authUser}
         roles={authUser !== null && authUser.tipe}
+        fullName={authUser !== null && authUser.fullname}
+        email={authUser !== null && authUser.email}
+        saldo={authUser !== null && authUser.saldo}
         logout={onLogoutHandler}
       />
       <main
@@ -149,7 +185,7 @@ export default function Home() {
       >
         <SidePanel
           category={category}
-          onCategoryChange={setCategory}
+          onCategoryChange={onCategoryChange}
           salesSort={sellSort}
           setSalesSort={setSellSort}
           maxPrice={maxPrice}
@@ -158,37 +194,39 @@ export default function Home() {
           onMinPriceChange={setMinPrice}
         />
         <div className="flex-grow overflow-y-auto h-full">
-          <p className="h-5 my-4">Minuman {">"} Minuman(19)</p>
+          <p className="h-5 my-4">
+            {!category ? (
+              <>Semua Produk ({filteredContent().length})</>
+            ) : (
+              <>
+                Semua Produk &gt; {category}({filteredContent().length})
+              </>
+            )}
+          </p>
           {!isLoading ? (
-            <div className="flex-grow grid grid-cols-4 gap-4  ">
-              {category !== null
-                ? filteredContent().map((produk) => (
-                    <ProductBox
-                      key={produk.id}
-                      id={produk.id}
-                      name={produk.name}
-                      price={produk.price}
-                      stock={produk.stock}
-                      onClickFocus={(focus) => {
-                        setSelectedProduk(produk.id);
-                        setIsFocus(focus);
-                      }}
-                    />
-                  ))
-                : produk.map((produk) => (
-                    <ProductBox
-                      key={produk.id}
-                      id={produk.id}
-                      name={produk.name}
-                      price={produk.price}
-                      stock={produk.stock}
-                      onClickFocus={(focus) => {
-                        setSelectedProduk(produk.id);
-                        setIsFocus(focus);
-                      }}
-                    />
-                  ))}
-            </div>
+            filteredContent().length !== 0 ? (
+              <div className="flex-grow grid grid-cols-4 gap-4  ">
+                {filteredContent().map((produk) => (
+                  <ProductBox
+                    key={produk.id}
+                    id={produk.id}
+                    name={produk.name}
+                    price={produk.price}
+                    stock={produk.stock}
+                    onClickFocus={(focus) => {
+                      setSelectedProduk(produk.id);
+                      setIsFocus(focus);
+                    }}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="flex justify-center items-center w-full h-full">
+                <p className="text-xl text-gray-500">
+                  Maaf, barang tidak dapat ditemukan
+                </p>
+              </div>
+            )
           ) : (
             <div className="flex flex-col justify-center items-center w-full h-full">
               <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-black"></div>
@@ -211,6 +249,8 @@ export default function Home() {
           onFocusChange={setIsFocus}
           productDataLoad={isProductLoad}
           addCartItemLoad={isAddCartLoad}
+          isSucced={isSuccess}
+          succedMessage={successMessage}
         />
       )}
     </div>

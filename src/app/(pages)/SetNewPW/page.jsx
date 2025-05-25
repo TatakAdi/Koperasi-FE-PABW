@@ -1,31 +1,60 @@
 "use client";
 import { useState } from "react";
+import { changePassword } from "@/lib/api/changePassword";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
-import PasswordInput from "@/components/PasswordInput";
+import PasswordInput from "@/components/inputForm/PasswordInput";
 import useInput from "@/hooks/useInput";
 
 export default function SetNewPassword() {
   const [newPassword, setNewPassword] = useInput();
   const [repeatPassword, setRepeatPassword] = useInput();
-  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const email = sessionStorage.getItem("email");
+  const [errorClient, setError] = useState("");
+  const router = useRouter();
 
-  const handleSetPassword = () => {
+  const handleSetPassword = async () => {
     if (newPassword !== repeatPassword) {
       setError("The passwords you entered do not match");
-    } else if (newPassword.length < 8) {
+      return;
+    } else if (newPassword.length < 6) {
       setError("Password must be at least 8 characters long");
-    } else {
-      setError("");
-      // TODO: Kirim password ke backend di sini
-      console.log("Password set successfully!");
+      return;
     }
+    setError("");
+    setIsLoading(true);
+    // TODO: Kirim password ke backend di sini
+    const { error, data, status, message } = await changePassword({
+      email,
+      password: newPassword,
+    });
+
+    if (error) {
+      setError(message || "Something went wrong");
+      return;
+    }
+    console.log("Password set successfully!");
+    setIsLoading(false);
+    sessionStorage.removeItem("email");
+    router.push("/Login");
+  };
+
+  const onSubmitHandler = (event) => {
+    event.preventDefault();
+    handleSetPassword({ email, password: newPassword });
   };
 
   return (
     <div className="w-full min-h-screen flex justify-center items-center p-4 bg-white">
       <div className="flex flex-col items-start w-full max-w-[420px]">
         <div className="w-[44px] aspect-square relative mb-4">
-          <Image src="/logo.svg" alt="Logo" fill className="object-contain" />
+          <Image
+            src="/ITKLogo2.svg"
+            alt="Logo"
+            fill
+            className="object-contain"
+          />
         </div>
 
         <h2 className="text-black text-[24px] font-semibold font-[Geist] leading-none mb-2">
@@ -36,14 +65,14 @@ export default function SetNewPassword() {
           Your new password must be different from your previous ones.
         </p>
 
-        <div className="w-full flex flex-col gap-4">
+        <form className="w-full flex flex-col gap-4" onSubmit={onSubmitHandler}>
           <div>
             <label className="text-black font-geist mb-1 block">
               New Password
             </label>
             <PasswordInput
-              value={newPassword}
-              onChange={setNewPassword}
+              password={newPassword}
+              onPasswordChange={setNewPassword}
               placeholder="Enter new password"
             />
             <p className="text-sm text-gray-500 mt-1">
@@ -56,24 +85,32 @@ export default function SetNewPassword() {
               New Password (Repeat)
             </label>
             <PasswordInput
-              value={repeatPassword}
-              onChange={setRepeatPassword}
+              password={repeatPassword}
+              onPasswordChange={setRepeatPassword}
               placeholder="Repeat new password"
             />
           </div>
 
           <button
-            type="button"
-            onClick={handleSetPassword}
-            className="bg-black text-white w-full h-[53px] rounded-xl py-4 hover:bg-gray-800 transition-colors"
+            type="submit"
+            disabled={isLoading}
+            className={`flex justify-center items-center bg-black text-white w-full h-[53px] rounded-xl py-4 hover:bg-gray-800 transition-colors ${
+              !isLoading ? "cursor-pointer" : "cursor-not-allowed"
+            }`}
           >
-            Set Password
+            {!isLoading ? (
+              "Set Password"
+            ) : (
+              <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-white"></div>
+            )}
           </button>
 
-          {error && (
-            <p className="text-red-600 text-sm mt-2 text-center">{error}</p>
+          {errorClient && (
+            <p className="text-red-600 text-sm mt-2 text-center">
+              {errorClient}
+            </p>
           )}
-        </div>
+        </form>
       </div>
     </div>
   );
