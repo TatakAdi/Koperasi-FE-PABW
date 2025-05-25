@@ -193,7 +193,7 @@ export default function ActorsPage() {
                                     {privilageDropdown && (
                                         <div
                                             ref={privilageRef}
-                                            className="absolute left-0 right-0 mt-2 z-20 self-stretch bg-white rounded-md shadow-[-8px_0px_24px_16px_rgba(0,0,0,0.04)] shadow-[0px_8px_16px_-0.5px_rgba(0,0,0,0.02)] shadow-[0px_0px_0px_1px_rgba(224,224,224,1.00)] shadow-[0px_12px_24px_-1.5px_rgba(0,0,0,0.04)] shadow-[0px_16px_32px_-3px_rgba(0,0,0,0.04)] flex flex-col justify-start items-start"
+                                            className="font-['Inter'] absolute left-0 right-0 mt-2 z-20 self-stretch bg-white rounded-md shadow-[-8px_0px_24px_16px_rgba(0,0,0,0.04)] shadow-[0px_8px_16px_-0.5px_rgba(0,0,0,0.02)] shadow-[0px_0px_0px_1px_rgba(224,224,224,1.00)] shadow-[0px_12px_24px_-1.5px_rgba(0,0,0,0.04)] shadow-[0px_16px_32px_-3px_rgba(0,0,0,0.04)] flex flex-col justify-start items-start"
                                         >
                                             {["Admin", "Pegawai", "Anggota", "Penitip"].map((item, idx) => (
                                                 <div
