@@ -183,7 +183,7 @@ export default function KeranjangPage() {
                       <div className="flex items-center gap-4">
                         <img
                           className="w-16 h-16 rounded-lg"
-                          src={product.image}
+                          src={product.image || "Piscok.svg"}
                           alt={product.name}
                         />
                         <div className="flex flex-col gap-1">

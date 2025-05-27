@@ -2,16 +2,18 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getUserLogged } from "@/app/lib/api/login";
-import { logout } from "@/app/lib/api/logout";
-import useInput from "@/app/hooks/useInput";
-import Navbar from "@/app/components/Navbar";
-import SidePanel from "@/app/components/SidePanel";
-import CartItem from "@/app/components/keranjang/CartItem";
+import { getUserLogged } from "app/lib/api/login";
+import { logout } from "app/lib/api/logout";
+import { getCartItems } from "app/lib/api/cart";
+import useInput from "app/hooks/useInput";
+import Navbar from "app/components/Navbar";
+import SidePanel from "app/components/SidePanel";
+import MyOrderNotPayItems from "app/components/MyOrderNotPayItems";
 
 export default function MyOrders() {
   const [authUser, setAuthUser] = useState(null);
   const [category, setCategory] = useState(null);
+  const [cartItems, setCartItems] = useState([]);
   const [status, setStatus] = useState("Belum Dibayar"); // "Belum Dibayar", "Sedang Diproses", "Sedang Dikirim", "Selesai"
   const [minPrice, setMinPrice] = useInput();
   const [maxPrice, setMaxPrice] = useInput();
@@ -32,8 +34,18 @@ export default function MyOrders() {
         return;
       }
 
-      console.log("Data pengguna :", data);
       setAuthUser(data);
+
+      const cartRes = await getCartItems(data.id);
+      console.log("CartRes: ", cartRes);
+      if (!cartRes.error && cartRes.data && cartRes.data.items) {
+        setCartItems(
+          cartRes.data.items.map((item) => ({
+            ...item,
+            quantity: item.jumlah,
+          }))
+        );
+      }
     };
     getUser();
   }, []);
@@ -49,6 +61,12 @@ export default function MyOrders() {
     } else {
       setCategory(selectedCategory);
     }
+  };
+
+  const notPayedCartItem = () => {
+    return cartItems.filter(
+      (item) => item.status_barang === "menunggu pegawai"
+    );
   };
 
   return (
@@ -79,7 +97,9 @@ export default function MyOrders() {
           onMinPriceChange={setMinPrice}
         />
         <div className="flex-grow h-full">
-          <div className={`flex w-full text-[#969696] gap-8 cursor-pointer`}>
+          <div
+            className={`flex w-full text-[#969696] gap-8 cursor-pointer mb-5`}
+          >
             <span
               className={`${
                 status === "Belum Dibayar" &&
@@ -120,14 +140,83 @@ export default function MyOrders() {
 
           {status === "Belum Dibayar" && (
             <>
-              <div className="grid grid-cols-4 items-center">
-                <div className="text-lg pl-4">Nama Barang</div>
-                <div className="text-lg text-left">Harga</div>
-                <div className="text-lg text-center">Jumlah</div>
-                <div className="text-lg text-center">Aksi</div>
+              <div className="grid grid-cols-4 items-center text-center text-[#737373] border-[#E5E5E5] border-b-1">
+                <div className="text-lg py-6 border-r-1 border-[#E5E5E5]">
+                  Nama Barang
+                </div>
+                <div className="text-lg py-6 border-r-1 border-[#E5E5E5]">
+                  Harga
+                </div>
+                <div className="text-lg py-6 border-r-1 border-[#E5E5E5]">
+                  Jumlah
+                </div>
+                <div className="text-lg py-6 border-r-1 border-[#E5E5E5]">
+                  Aksi
+                </div>
+              </div>
+
+              <div className="divide-y">
+                {cartItems.map((item) => (
+                  <MyOrderNotPayItems key={item.id} {...item} />
+                ))}
+              </div>
+              {/*Tempat MyOrdersCartItem ditaruh nanti */}
+            </>
+          )}
+          {status === "Sedang Diproses" && (
+            <>
+              <div className="grid grid-cols-3 items-center text-center text-[#737373] border-[#E5E5E5] border-b-1">
+                <div className="text-lg py-6 border-r-1 border-[#E5E5E5]">
+                  Nama Barang
+                </div>
+                <div className="text-lg py-6 border-r-1 border-[#E5E5E5]">
+                  Harga
+                </div>
+                <div className="text-lg py-6 border-r-1 border-[#E5E5E5]">
+                  Jumlah
+                </div>
               </div>
 
               <div className="divide-y"></div>
+            </>
+          )}
+          {status === "Sedang Dikirim" && (
+            <>
+              <div className="grid grid-cols-4 items-center text-center text-[#737373] border-[#E5E5E5] border-b-1">
+                <div className="text-lg py-6 border-r-1 border-[#E5E5E5]">
+                  Nama Barang
+                </div>
+                <div className="text-lg py-6 border-r-1 border-[#E5E5E5]">
+                  Harga
+                </div>
+                <div className="text-lg py-6 border-r-1 border-[#E5E5E5]">
+                  Jumlah
+                </div>
+                <div className="text-lg py-6 border-r-1 border-[#E5E5E5]">
+                  status
+                </div>
+              </div>
+            </>
+          )}
+          {status === "Selesai" && (
+            <>
+              <div className="grid grid-cols-5 items-center text-center text-[#737373] border-[#E5E5E5] border-b-1">
+                <div className="text-lg py-6 border-r-1 border-[#E5E5E5]">
+                  Nama Barang
+                </div>
+                <div className="text-lg py-6 border-r-1 border-[#E5E5E5]">
+                  Harga
+                </div>
+                <div className="text-lg py-6 border-r-1 border-[#E5E5E5]">
+                  Jumlah
+                </div>
+                <div className="text-lg py-6 border-r-1 border-[#E5E5E5]">
+                  Status
+                </div>
+                <div className="text-lg py-6 border-r-1 border-[#E5E5E5]">
+                  Aksi
+                </div>
+              </div>
             </>
           )}
         </div>
