@@ -48,7 +48,7 @@ export default function DeliveryTimeStep({ onContinue, onCancel }) {
         <div className="flex justify-between gap-3 w-full mt-4">
           <button
             onClick={onCancel}
-            className="flex h-10 px-2 flex-1 justify-center items-center gap-1 rounded-lg bg-white shadow-[0px_4px_4px_-0.5px_rgba(0,0,0,0.04),0px_0px_0px_1px_#E0E0E0,0px_2px_4px_0px_rgba(0,0,0,0.04)] text-red-500 text-sm font-medium hover:bg-red-50 transition"
+            className="flex h-10 px-2 flex-1 justify-center items-center gap-1 rounded-lg bg-white shadow-[0px_4px_4px_-0.5px_rgba(0,0,0,0.04),0px_0px_0px_1px_#E0E0E0,0px_2px_4px_0px_rgba(0,0,0,0.04)] text-black text-sm font-medium hover:bg-gray-100 transition"
           >
             Kembali
           </button>

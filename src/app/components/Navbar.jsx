@@ -1,10 +1,10 @@
 "use client";
-import SearchBar from "./SearchBar";
+import { Bell, ShoppingCart } from "lucide-react";
 import Image from "next/image";
-import ProfilePicMenu from "./ProfilePicMenu";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ShoppingCart, Bell } from "lucide-react";
+import { useState } from "react";
+import ProfilePicMenu from "./ProfilePicMenu";
+import SearchBar from "./SearchBar";
 
 export default function Navbar({
   keyword,

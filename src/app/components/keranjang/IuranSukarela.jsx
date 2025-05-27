@@ -1,5 +1,4 @@
 'use client';
-import React from 'react';
 
 export default function IuranSukarela({
   saldo = 1000000,
@@ -10,7 +9,7 @@ export default function IuranSukarela({
 }) {
   return (
     <div
-      className="fixed inset-0 bg-black/10 flex justify-center items-center z-50 px-4"
+      className="fixed inset-0 bg-white/10 flex justify-center items-center z-50 px-4"
       style={{ backdropFilter: 'blur(2px)', WebkitBackdropFilter: 'blur(2px)' }}
     >
       <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md space-y-4">
