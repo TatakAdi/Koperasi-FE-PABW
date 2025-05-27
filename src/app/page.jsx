@@ -213,6 +213,7 @@ export default function Home() {
                     id={produk.id}
                     name={produk.name}
                     price={produk.price}
+                    deskripsi={produk.description}
                     stock={produk.stock}
                     onClickFocus={(focus) => {
                       setSelectedProduk(produk.id);

@@ -1,10 +1,10 @@
 "use client";
 import EmailInput from "../../components/inputForm/EmailInput";
-import useInput from "@/hooks/useInput";
+import useInput from "app/hooks/useInput";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { reqOTPCode } from "@/lib/api/reqOTPCode";
+import { reqOTPCode } from "app/lib/api/reqOTPCode";
 
 export default function ForgotPass() {
   const [email, onEmailChange] = useInput();

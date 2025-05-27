@@ -1,10 +1,10 @@
 "use client";
 import { useState } from "react";
-import { changePassword } from "@/lib/api/changePassword";
+import { changePassword } from "app/lib/api/changePassword";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import PasswordInput from "@/components/inputForm/PasswordInput";
-import useInput from "@/hooks/useInput";
+import PasswordInput from "app/components/inputForm/PasswordInput";
+import useInput from "app/hooks/useInput";
 
 export default function SetNewPassword() {
   const [newPassword, setNewPassword] = useInput();

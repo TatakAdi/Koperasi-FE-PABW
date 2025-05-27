@@ -1,8 +1,22 @@
 import { useState } from "react";
 import { PlusIcon } from "lucide-react";
 
-export default function ProductBox({ id, name, price, stock, onClickFocus }) {
+export default function ProductBox({
+  id,
+  name,
+  price,
+  stock,
+  onClickFocus,
+  deskripsi,
+}) {
   const [isHover, setIsHover] = useState(false);
+
+  const pangkasDeskripsi = (text, maxLength) => {
+    if (typeof text !== "string") return "";
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + "...";
+  };
+
   return (
     <div className="w-[259px] h-fit rounded-lg border-1 border-[#d1d1d1] bg-white">
       <img
@@ -14,7 +28,8 @@ export default function ProductBox({ id, name, price, stock, onClickFocus }) {
         <div className="grid grid-cols-1 gap-2">
           <h5>{name}</h5>
           <p className="font-normal text-sm text-[#737373]">
-            Diperoleh dan diolah dari kedelai pilihan
+            {pangkasDeskripsi(deskripsi, 28) ||
+              "Diperoleh dari kedelai pilihan"}
           </p>
           {/*Deskripsi */}
           <p className="font-normal text-sm text-[#737373]">Stok: {stock}</p>

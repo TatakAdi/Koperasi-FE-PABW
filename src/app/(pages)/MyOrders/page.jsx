@@ -2,12 +2,12 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getUserLogged } from "@/lib/api/login";
-import { logout } from "@/lib/api/logout";
-import useInput from "@/hooks/useInput";
-import Navbar from "@/components/Navbar";
-import SidePanel from "@/components/SidePanel";
-import CartItem from "@/components/keranjang/CartItem";
+import { getUserLogged } from "@/app/lib/api/login";
+import { logout } from "@/app/lib/api/logout";
+import useInput from "@/app/hooks/useInput";
+import Navbar from "@/app/components/Navbar";
+import SidePanel from "@/app/components/SidePanel";
+import CartItem from "@/app/components/keranjang/CartItem";
 
 export default function MyOrders() {
   const [authUser, setAuthUser] = useState(null);
@@ -79,7 +79,7 @@ export default function MyOrders() {
           onMinPriceChange={setMinPrice}
         />
         <div className="flex-grow h-full">
-          <div className={`flex w-full text-[#969696] gap-3.5 cursor-pointer`}>
+          <div className={`flex w-full text-[#969696] gap-8 cursor-pointer`}>
             <span
               className={`${
                 status === "Belum Dibayar" &&

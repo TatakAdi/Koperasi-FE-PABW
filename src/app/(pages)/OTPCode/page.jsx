@@ -2,8 +2,8 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { reqOTPCode } from "@/lib/api/reqOTPCode";
-import { verifyOtp } from "@/lib/api/verifyOtp";
+import { reqOTPCode } from "app/lib/api/reqOTPCode";
+import { verifyOtp } from "app/lib/api/verifyOtp";
 
 export default function EmailVerif() {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
