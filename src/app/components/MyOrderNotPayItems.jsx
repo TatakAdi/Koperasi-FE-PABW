@@ -1,4 +1,10 @@
-export default function CartItemsOrder() {
+export default function MyOrderNotPayItems({
+  id,
+  image,
+  name,
+  price,
+  quantity,
+}) {
   return (
     <div
       key={product.id}
