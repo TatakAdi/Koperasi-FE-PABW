@@ -76,6 +76,7 @@ export default function Home() {
 
       if (error) {
         console.error("Tidak dapat mengambil produk dari server");
+        setIsLoading(false);
         return;
       }
       console.log(data);

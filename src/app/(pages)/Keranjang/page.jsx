@@ -1,30 +1,63 @@
-'use client';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Sidebar from '@/components/keranjang/Sidebar';
-// import SidePanel from '@/components/SidePanel';
-import CartItem from '@/components/keranjang/CartItem';
-import Header from '@/components/Navbar';
-import CheckoutCard from '@/components/keranjang/CheckoutCard';
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Sidebar from "@/components/keranjang/Sidebar";
+import CartItem from "@/components/keranjang/CartItem";
+import Header from "@/components/Navbar";
+import CheckoutCard from "@/components/keranjang/CheckoutCard";
 
 export default function KeranjangPage() {
   const [showCheckout, setShowCheckout] = useState(false);
   const router = useRouter();
-  const [kategori, setKategori] = useState('Makanan Berat');
+  const [kategori, setKategori] = useState("Makanan Berat");
   const [selectedItems, setSelectedItems] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState([
-    { id: 1, name: 'Nasi Ayam Geprek', category: 'Makanan Berat', price: 25000, quantity: 1, image: '/AyamGeprek.svg' },
-    { id: 2, name: 'Piscok Lumer asli Probolinggo Chef Nabil', category: 'Makanan Ringan', price: 17999999999, quantity: 1, image: '/PisCok.svg' },
-    { id: 3, name: 'Es Teh', category: 'Minuman', price: 5000, quantity: 1, image: '/EsTeh.svg' },
-    { id: 4, name: 'Keripik Singkong', category: 'Makanan Ringan', price: 10000, quantity: 1, image: '/KeripikSingkong.svg' },
-    { id: 5, name: 'Mie Goreng Jawa', category: 'Makanan Berat', price: 30000, quantity: 1, image: '/MieJawa.svg' },
+    {
+      id: 1,
+      name: "Nasi Ayam Geprek",
+      category: "Makanan Berat",
+      price: 25000,
+      quantity: 1,
+      image: "/AyamGeprek.svg",
+    },
+    {
+      id: 2,
+      name: "Piscok Lumer asli Probolinggo Chef Nabil",
+      category: "Makanan Ringan",
+      price: 17999999999,
+      quantity: 1,
+      image: "/PisCok.svg",
+    },
+    {
+      id: 3,
+      name: "Es Teh",
+      category: "Minuman",
+      price: 5000,
+      quantity: 1,
+      image: "/EsTeh.svg",
+    },
+    {
+      id: 4,
+      name: "Keripik Singkong",
+      category: "Makanan Ringan",
+      price: 10000,
+      quantity: 1,
+      image: "/KeripikSingkong.svg",
+    },
+    {
+      id: 5,
+      name: "Mie Goreng Jawa",
+      category: "Makanan Berat",
+      price: 30000,
+      quantity: 1,
+      image: "/MieJawa.svg",
+    },
   ]);
 
-  const filteredProducts = products.filter(
-    (item) =>
-      // item.category === kategori && // Ini buat kategorikan sesuai sidebar
-      item.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredProducts = products.filter((item) =>
+    // item.category === kategori && // Ini buat kategorikan sesuai sidebar
+    item.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const selectedFiltered = products.filter((item) =>
@@ -40,9 +73,7 @@ export default function KeranjangPage() {
 
   const handleSelect = (id) => {
     setSelectedItems((prev) =>
-      prev.includes(id)
-        ? prev.filter((itemId) => itemId !== id)
-        : [...prev, id]
+      prev.includes(id) ? prev.filter((itemId) => itemId !== id) : [...prev, id]
     );
   };
 
@@ -58,13 +89,9 @@ export default function KeranjangPage() {
 
   const handleSelectAll = () => {
     const idsInView = filteredProducts.map((p) => p.id);
-    const isAllSelected = idsInView.every((id) =>
-      selectedItems.includes(id)
-    );
+    const isAllSelected = idsInView.every((id) => selectedItems.includes(id));
     if (isAllSelected) {
-      setSelectedItems((prev) =>
-        prev.filter((id) => !idsInView.includes(id))
-      );
+      setSelectedItems((prev) => prev.filter((id) => !idsInView.includes(id)));
     } else {
       setSelectedItems((prev) => [...new Set([...prev, ...idsInView])]);
     }
@@ -76,9 +103,7 @@ export default function KeranjangPage() {
 
   const handleDelete = (id) => {
     setProducts((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, quantity: 1 } : item
-      )
+      prev.map((item) => (item.id === id ? { ...item, quantity: 1 } : item))
     );
     setSelectedItems((prev) => prev.filter((itemId) => itemId !== id));
   };
@@ -145,7 +170,7 @@ export default function KeranjangPage() {
                       Total ({selectedFiltered.length} Produk):
                     </p>
                     <p className="font-bold text-lg">
-                      Rp. {total.toLocaleString('id-ID')}
+                      Rp. {total.toLocaleString("id-ID")}
                     </p>
                   </div>
                   <button

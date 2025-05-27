@@ -36,7 +36,7 @@ export default function ProfilePicMenu({
           <span className=""> Account Setting</span>{" "}
         </div>
 
-        <div className={`${styleBox}`}>
+        <div className={`${styleBox}`} onClick={() => router.push("/MyOrders")}>
           <List size={20} />
           <span> My Orders</span>
         </div>
