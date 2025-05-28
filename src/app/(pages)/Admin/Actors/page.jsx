@@ -1,90 +1,68 @@
 'use client';
 
-import AddActor from "@/app/components/AddActor"; // Pastikan komponen ini ada
+import FormActor from "@/app/components/FormActor";
 import Navbar from "@/app/components/Navbar";
 import Privilage from "@/app/components/Privilage";
 import SidebarAdmin from "@/app/components/SidebarAdmin";
+import useInput from "@/app/hooks/useInput";
+import { getUserLogged } from "@/app/lib/api/login";
+import { logout } from "@/app/lib/api/logout";
+import { getUser } from "@/app/lib/api/user";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-
-const actors = [
-    {
-        id: 1,
-        nama: "Mas Fu’ad Grobogan Jateng",
-        email: "fuadtamvan@gmail.com",
-        status: "Belum Bayar",
-        saldoSukarela: "Rp. 192.700",
-        saldoWajib: "Rp. 192.700",
-        privilage: "admin",
-    },
-    {
-        id: 2,
-        nama: "Mas Fu’ad Grobogan Jateng",
-        email: "fuadtamvan@gmail.com",
-        status: "Sudah Bayar",
-        saldoSukarela: "Rp. 192.700",
-        saldoWajib: "Rp. 192.700",
-        privilage: "penitip",
-    },
-    {
-        id: 8,
-        nama: "Mas Fu’ad Grobogan Jateng",
-        email: "fuadtamvan@gmail.com",
-        status: "Belum Bayar",
-        saldoSukarela: "Rp. 192.700",
-        saldoWajib: "Rp. 192.700",
-        privilage: "pegawai",
-    },
-    {
-        id: 9,
-        nama: "Mas Fu’ad Grobogan Jateng",
-        email: "fuadtamvan@gmail.com",
-        status: "Belum Bayar",
-        saldoSukarela: "Rp. 192.700",
-        saldoWajib: "Rp. 192.700",
-        privilage: "pegawai",
-    },
-    {
-        id: 10,
-        nama: "Mas Fu’ad Grobogan Jateng",
-        email: "fuadtamvan@gmail.com",
-        status: "Belum Bayar",
-        saldoSukarela: "Rp. 192.700",
-        saldoWajib: "Rp. 192.700",
-        privilage: "pegawai",
-    },
-];
 
 export default function ActorsPage() {
     const [showDropdown, setShowDropdown] = useState(false);
     const [showAddActor, setShowAddActor] = useState(false);
-    // const [privilageDropdown, setPrivilageDropdown] = useState(false); // Ini sepertinya untuk form AddActor, bisa dipindah ke sana jika hanya digunakan di sana
-    // const [selectedPrivilage, setSelectedPrivilage] = useState("Admin"); // Sama seperti di atas
+    const [showEditActor, setShowEditActor] = useState(null);
+    const [actors, setActors] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
     const dropdownRef = useRef(null);
-    // const privilageRef = useRef(null); // Sama seperti di atas
 
     // --- State dan Handler untuk Navbar ---
-    const [keyword, setKeyword] = useState('');
-    const [authUser, setAuthUser] = useState(null); // Inisialisasi sesuai kebutuhan
+    const [keyword, setKeyword] = useInput();
+    const [authUser, setAuthUser] = useState(null);
 
-    useEffect(() => {
-        // Contoh: Mengisi authUser dengan data dummy atau dari API saat komponen dimuat
-        // Sesuaikan ini dengan logika autentikasi dan pengambilan data pengguna Anda
-        setAuthUser({
-            tipe: "admin",
-            fullname: "Nama Admin Contoh",
-            email: "admin@example.com",
-            saldo: 500000,
-            // tambahkan properti lain yang dibutuhkan Navbar
-        });
-    }, []);
+    // --- Pagination States ---
+    const [currentPage, setCurrentPage] = useState(1);
+    const [actorsPerPage] = useState(8); // Maximum 8 actors per page
 
     async function onLogoutHandler() {
-        console.log("Logout berhasil");
+        await logout();
         setAuthUser(null);
-        // Tambahkan logika redirect atau pembersihan state lainnya jika perlu
     }
-    // --------------------------------------
+
+    useEffect(() => {
+        const fetchActor = async () => {
+            setIsLoading(true);
+            const { error, data } = await getUser();
+
+            if (error) {
+                console.error("Tidak dapat mengambil user dari server");
+                return;
+            }
+            console.log(data);
+            setActors(data);
+            setIsLoading(false);
+            setCurrentPage(1); // Reset to first page when actors data changes
+        };
+        fetchActor();
+    }, []);
+
+    useEffect(() => {
+        const getUser = async () => {
+            const { error, data } = await getUserLogged();
+
+            if (error) {
+                console.log("Token Invalid & Data user gagal terambil");
+                return;
+            }
+
+            console.log("Data pengguna :", data);
+            setAuthUser(data);
+        };
+        getUser();
+    }, []);
 
     // Close dropdown "Actions" if click outside
     useEffect(() => {
@@ -92,11 +70,6 @@ export default function ActorsPage() {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
                 setShowDropdown(false);
             }
-            // Jika privilageRef masih digunakan di halaman ini (misalnya untuk filter), biarkan.
-            // Jika hanya untuk form AddActor, logika ini bisa dipindah ke komponen AddActor.
-            // if (privilageRef.current && !privilageRef.current.contains(event.target)) {
-            //     setPrivilageDropdown(false);
-            // }
         }
         document.addEventListener("mousedown", handleClickOutside);
         return () => {
@@ -104,42 +77,86 @@ export default function ActorsPage() {
         };
     }, []);
 
+    // Logic for displaying current actors
+    const indexOfLastActor = currentPage * actorsPerPage;
+    const indexOfFirstActor = indexOfLastActor - actorsPerPage;
+    const currentActors = actors.slice(indexOfFirstActor, indexOfLastActor);
+
+    // Logic for displaying page numbers
+    const totalPages = Math.ceil(actors.length / actorsPerPage);
+
+    const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+    const nextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
+
+    const prevPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
+    // Determine which page numbers to display in the pagination control
+    const getPaginationGroup = () => {
+        let start = Math.max(1, currentPage - 2);
+        let end = Math.min(totalPages, currentPage + 2);
+        const pages = [];
+
+        // Add '...' if there are pages before the start
+        if (start > 1) {
+            pages.push(1);
+            if (start > 2) {
+                pages.push('...');
+            }
+        }
+
+        for (let i = start; i <= end; i++) {
+            pages.push(i);
+        }
+
+        // Add '...' if there are pages after the end
+        if (end < totalPages) {
+            if (end < totalPages - 1) {
+                pages.push('...');
+            }
+            pages.push(totalPages);
+        }
+
+        return pages;
+    };
+
+
     if (showAddActor) {
         return (
-            <AddActor
-                onClose={() => setShowAddActor(false)}
-                // Anda mungkin perlu meneruskan state terkait privilage ke AddActor
-                // selectedPrivilage={selectedPrivilage}
-                // setSelectedPrivilage={setSelectedPrivilage}
-                // privilageDropdown={privilageDropdown}
-                // setPrivilageDropdown={setPrivilageDropdown}
-                // privilageRef={privilageRef}
+            <FormActor
+                onClose={() => {setShowAddActor(false);
+                    setShowEditActor(null);
+                }}
+                initialData={showEditActor}
             />
         );
     }
 
-    // Tampilan default (table actors)
     return (
         <div className="w-full min-h-screen flex flex-col bg-white">
             <Navbar
                 keyword={keyword}
-                onKeywordChange={setKeyword} // Perbaiki typo dari onKeywordCahnge
+                onKeywordChange={setKeyword}
                 authUser={authUser}
-                roles={authUser ? authUser.tipe : null} // Akses properti dengan aman
+                roles={authUser ? authUser.tipe : null}
                 fullName={authUser ? authUser.fullname : null}
                 email={authUser ? authUser.email : null}
                 saldo={authUser ? authUser.saldo : null}
                 logout={onLogoutHandler}
             />
-            <div className="flex flex-1"> {/* flex-1 agar mengambil sisa tinggi layar */}
+            <div className="flex flex-1">
                 <SidebarAdmin />
-                {/* Main Content */}
-                {/* Hilangkan top-[88px], biarkan flexbox menangani posisi relatif terhadap Navbar */}
-                {/* Gunakan flex-1 untuk mengambil sisa lebar, overflow-auto untuk scroll jika konten melebihi */}
                 <main className="flex-1 p-5 overflow-auto">
-                    <div className="w-full"> {/* Tidak perlu h-[840px] atau top-[16px] lagi */}
-                        {/* Header Info & Actions Button */}
-                        <div className="w-full mb-6 flex justify-between items-end"> {/* Ganti inline-flex dan top/left */}
+                    <div className="w-full">
+                        <div className="w-full mb-6 flex justify-between items-end">
                             <div className="flex justify-start items-start gap-9">
                                 {/* Iuran Wajib */}
                                 <div className="inline-flex flex-col justify-start items-start gap-2">
@@ -183,7 +200,7 @@ export default function ActorsPage() {
                                 </button>
                                 {showDropdown && (
                                     <div
-                                        className="absolute p-2 right-0 mt-2 bg-white rounded-md shadow-lg inline-flex flex-col justify-start items-start gap-1 z-30" // Menyederhanakan shadow, menghapus 'n'
+                                        className="absolute p-2 right-0 mt-2 bg-white rounded-md shadow-lg inline-flex flex-col justify-start items-start gap-1 z-30"
                                         style={{ minWidth: "180px" }}
                                     >
                                         <div className="w-full px-3 py-2 text-left text-black text-sm font-normal font-['Geist'] leading-tight cursor-pointer hover:bg-gray-100 rounded" onClick={() => { setShowDropdown(false); setShowAddActor(true); }}>
@@ -201,7 +218,6 @@ export default function ActorsPage() {
                         </div>
 
                         {/* Table Container */}
-                        {/* Hilangkan top-[96px], gunakan margin jika perlu (mb-6 di atas sudah memberi jarak) */}
                         <div className="w-full flex flex-col">
                             {/* Table Header */}
                             <div className="w-full border-b border-[#E5E5E5] flex flex-col justify-start items-start gap-2.5">
@@ -217,44 +233,77 @@ export default function ActorsPage() {
                                 </div>
                             </div>
                             {/* Table Rows */}
-                            {actors.map((actor) => (
+                            {currentActors.map((actor) => (
                                 <div key={actor.id} className="self-stretch h-16 border-b border-[#E5E5E5] inline-flex justify-start items-center">
                                     <div className="w-14 self-stretch max-w-16 p-2 border-r border-[#E5E5E5] flex justify-center items-center"><div className="flex-1 text-center text-black text-base font-medium font-['Geist'] leading-normal">{actor.id}</div></div>
-                                    <div className="flex-1 self-stretch p-2 border-r border-[#E5E5E5] flex justify-center items-center"><div className="flex-1 text-center text-black text-base font-medium font-['Geist'] leading-normal">{actor.nama}</div></div>
+                                    <div className="flex-1 self-stretch p-2 border-r border-[#E5E5E5] flex justify-center items-center"><div className="flex-1 text-center text-black text-base font-medium font-['Geist'] leading-normal">{actor.fullname}</div></div>
                                     <div className="flex-1 self-stretch p-2 border-r border-[#E5E5E5] flex justify-center items-center"><div className="flex-1 text-center text-black text-base font-medium font-['Geist'] leading-normal">{actor.email}</div></div>
                                     <div className="flex-1 self-stretch max-w-32 p-2 border-r border-[#E5E5E5] flex justify-center items-center">
                                         <div className={`text-base font-medium font-['Geist'] leading-normal ${actor.status === "Sudah Bayar" ? "text-black" : "text-red-600"}`}>
                                             {actor.status}
                                         </div>
                                     </div>
-                                    <div className="flex-1 self-stretch max-w-32 p-2 border-r border-[#E5E5E5] flex justify-center items-center"><div className="flex-1 text-center text-black text-base font-medium font-['Geist'] leading-normal">{actor.saldoSukarela}</div></div>
+                                    <div className="flex-1 self-stretch max-w-32 p-2 border-r border-[#E5E5E5] flex justify-center items-center"><div className="flex-1 text-center text-black text-base font-medium font-['Geist'] leading-normal">{actor.saldo}</div></div>
                                     <div className="flex-1 self-stretch max-w-28 p-2 border-r border-[#E5E5E5] flex justify-center items-center"><div className="flex-1 text-center text-black text-base font-medium font-['Geist'] leading-normal">{actor.saldoWajib}</div></div>
-                                    <div className="flex-1 self-stretch max-w-28 p-2 border-r border-[#E5E5E5] flex justify-center items-center"><Privilage value={actor.privilage} /></div>
+                                    <div className="flex-1 self-stretch max-w-28 p-2 border-r border-[#E5E5E5] flex justify-center items-center"><Privilage value={actor.tipe} /></div>
                                     <div className="w-24 self-stretch p-2 border-r border-[#E5E5E5] flex justify-center items-center gap-2">
                                         <Image src="/Trash.svg" alt="Hapus" width={20} height={20} className="w-5 h-5 cursor-pointer" />
-                                        <Image src="/Pensil.svg" alt="Edit" width={20} height={20} className="w-5 h-5 cursor-pointer" />
+                                        <Image src="/Pensil.svg" alt="Edit" width={20} height={20} className="w-5 h-5 cursor-pointer"
+                                        onClick={() => {
+                                                setShowEditActor(actor); // Set the actor data to be edited
+                                                setShowAddActor(true); // Show the form
+                                            }}
+                                        />
                                     </div>
                                 </div>
                             ))}
                         </div>
                         {/* Pagination */}
-                        <div className="w-full mt-6 flex justify-center items-center gap-2"> {/* mt-6 untuk jarak dari tabel */}
-                            <div className="flex justify-center items-center gap-2">
-                                <button className="size-6 flex items-center justify-center rounded hover:bg-gray-200 transition" aria-label="Previous Page">
-                                    <svg width="16" height="16" fill="none" viewBox="0 0 16 16"><path d="M10 12L6 8L10 4" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                                </button>
-                                <div className="text-black text-base font-medium font-['Geist'] leading-normal">1</div>
-                                <div className="text-gray-500 text-base font-medium font-['Geist'] leading-normal">...</div>
-                                <div className="text-gray-500 text-base font-medium font-['Geist'] leading-normal">6</div>
-                                <button className="size-6 flex items-center justify-center rounded hover:bg-gray-200 transition" aria-label="Next Page">
-                                    <svg width="16" height="16" fill="none" viewBox="0 0 16 16"><path d="M6 4L10 8L6 12" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                                </button>
+                        {totalPages > 1 && ( // Only show pagination if there's more than 1 page
+                            <div className="w-full mt-6 flex justify-center items-center gap-2">
+                                <div className="flex justify-center items-center gap-2">
+                                    <button
+                                        onClick={prevPage}
+                                        disabled={currentPage === 1}
+                                        className="size-6 flex items-center justify-center rounded hover:bg-gray-200 transition"
+                                        aria-label="Previous Page"
+                                    >
+                                        <svg width="16" height="16" fill="none" viewBox="0 0 16 16"><path d="M10 12L6 8L10 4" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                    </button>
+
+                                    {getPaginationGroup().map((item, index) => (
+                                        <div key={index}>
+                                            {item === '...' ? (
+                                                <div className="text-gray-500 text-base font-medium font-['Geist'] leading-normal">...</div>
+                                            ) : (
+                                                <button
+                                                    onClick={() => paginate(item)}
+                                                    className={`size-6 flex items-center justify-center rounded transition ${
+                                                        currentPage === item
+                                                            ? "bg-gray-300 text-black"
+                                                            : "hover:bg-gray-200 text-gray-500"
+                                                    }`}
+                                                >
+                                                    <div className="text-base font-medium font-['Geist'] leading-normal">{item}</div>
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))}
+
+                                    <button
+                                        onClick={nextPage}
+                                        disabled={currentPage === totalPages}
+                                        className="size-6 flex items-center justify-center rounded hover:bg-gray-200 transition"
+                                        aria-label="Next Page"
+                                    >
+                                        <svg width="16" height="16" fill="none" viewBox="0 0 16 16"><path d="M6 4L10 8L6 12" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
                 </main>
             </div>
-            {/* Success Notification (jika perlu) */}
         </div>
     );
 }

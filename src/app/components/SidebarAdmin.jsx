@@ -13,20 +13,17 @@ export default function SidebarAdmin() {
           <img src="/statistic.svg" alt="statistic" className="size-6" />
         </>
       ),
-      href: "/Statistic",
-      match: "/Statistic",
+      href: "/Admin/Statistic",
     },
     {
       label: "Product Management",
       icon: <img src="/carbon.svg" alt="carbon" className="size-6" />,
-      href: "/Product",
-      match: "/Product",
+      href: "/Admin/Product",
     },
     {
       label: "Actors",
       icon: <img src="/actor.svg" alt="actor" className="size-6" />,
-      href: "/Actors",
-      match: "/Actors",
+      href: "/Admin/Actors",
     },
   ];
 
@@ -34,7 +31,7 @@ export default function SidebarAdmin() {
     <div className="w-72 min-h-[936px] px-3 pt-3 pb-4 bg-gray-100 rounded-xl flex flex-col justify-start items-start gap-2.5">
       <div className="w-full flex flex-col gap-4">
         {menu.map((item) => {
-          const isActive = pathname === item.match;
+          const isActive = pathname === item.href;
           return (
             <button
               key={item.label}

@@ -1,16 +1,15 @@
 "use client";
-import Navbar from "./components/Navbar";
-import { getUserLogged } from "./lib/api/login";
-import { logout } from "./lib/api/logout";
-import { getProduct } from "./lib/api/product";
-import { getProductId } from "./lib/api/product";
-import { addCartItem } from "./lib/api/cart";
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import SidePanel from "./components/SidePanel";
-import useInput from "./hooks/useInput";
+import { useEffect, useState } from "react";
+import Navbar from "./components/Navbar";
 import ProductBox from "./components/ProductBox";
 import ProductFocusBox from "./components/ProductFocusBox";
+import SidePanel from "./components/SidePanel";
+import useInput from "./hooks/useInput";
+import { addCartItem } from "./lib/api/cart";
+import { getUserLogged } from "./lib/api/login";
+import { logout } from "./lib/api/logout";
+import { getProduct, getProductId } from "./lib/api/product";
 
 export default function Home() {
   const [authUser, setAuthUser] = useState(null);
@@ -170,7 +169,7 @@ export default function Home() {
     <div className="min-h-screen h-screen w-full font-[family-name:var(--font-geist-sans)]  overflow-y-hidden">
       <Navbar
         keyword={keyword}
-        onKeywordCahnge={setKeyword}
+        onKeywordChange={setKeyword}
         authUser={authUser}
         roles={authUser !== null && authUser.tipe}
         fullName={authUser !== null && authUser.fullname}

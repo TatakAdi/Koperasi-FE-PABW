@@ -3,12 +3,49 @@
 import Kategori from "@/app/components/Kategori";
 import Navbar from "@/app/components/Navbar";
 import SidebarAdmin from "@/app/components/SidebarAdmin";
+import useInput from "@/app/hooks/useInput";
+import { getUserLogged } from "@/app/lib/api/login";
+import { logout } from "@/app/lib/api/logout";
+import { useEffect, useState } from "react";
 
 export default function ProductPage() {
+    const [keyword, setKeyword] = useInput();
+    const [authUser, setAuthUser] = useState(null);
+    
+
+    useEffect(() => {
+        const getUser = async () => {
+          const { error, data } = await getUserLogged();
+    
+          if (error) {
+            console.log("Token Invalid & Data user gagal terambil");
+            return;
+          }
+    
+          console.log("Data pengguna :", data);
+          setAuthUser(data);
+        };
+        getUser();
+      }, []);
+
+    async function onLogoutHandler() {
+      await logout();
+      setAuthUser(null);
+    }
+  
   return (
     <div className="w-full h-[1024px] relative bg-white overflow-hidden">
       {/* Navbar */}
-      <Navbar />
+      <Navbar
+          keyword={keyword}
+          onKeywordChange={setKeyword} // Perbaiki typo dari onKeywordCahnge
+          authUser={authUser}
+          roles={authUser ? authUser.tipe : null} // Akses properti dengan aman
+          fullName={authUser ? authUser.fullname : null}
+          email={authUser ? authUser.email : null}
+          saldo={authUser ? authUser.saldo : null}
+          logout={onLogoutHandler}
+      />
       <div className="w-full h-full flex flex-row">
       {/* Sidebar */}
         <SidebarAdmin />

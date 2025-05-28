@@ -1,4 +1,3 @@
-import React from "react";
 
 // Mapping role ke style sesuai design (warna HEX sesuai permintaan)
 const ROLE_STYLES = {
@@ -14,8 +13,8 @@ const ROLE_STYLES = {
       "px-1.5 py-0.5 bg-[#FFF9E5] rounded-lg flex justify-center items-center gap-1 outline outline-1 outline-[#E5E5E5]",
     textClass: "text-[#A35200]",
   },
-  anggota: {
-    label: "Anggota",
+  pengguna: {
+    label: "Pengguna",
     className:
       "px-1.5 py-0.5 bg-[#EBFAEB] rounded-lg flex justify-center items-center gap-1 outline outline-1 outline-[#E5E5E5]",
     textClass: "text-[#297A3A]",
