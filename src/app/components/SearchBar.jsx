@@ -1,10 +1,22 @@
 import { SearchIcon } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 export default function SearchBar({
   keyword,
   onKeywordChange,
   toggleKeywordSearch,
 }) {
+  const pathname = usePathname();
+
+  const getPlaceholder = () => {
+    if (pathname === "/Admin/Actors") {
+      return "Cari Nama, Email, atau Tipe";
+    } else if (pathname === "/Admin/Product") {
+      return "Cari Produk, Kategori, atau Penjual";
+    }
+    return "Cari Produk";
+  };
+
   return (
     <div className="relative">
       <input
@@ -12,7 +24,7 @@ export default function SearchBar({
         name=""
         id=""
         className="bg-[#F2F4F7] rounded-4xl w-[800px] font-normal text-base px-5 py-3"
-        placeholder="Cari Produk"
+        placeholder={getPlaceholder()}
         value={keyword}
         onChange={onKeywordChange}
       />

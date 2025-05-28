@@ -90,11 +90,11 @@ export default function FormActor({ onClose, initialData = null }) { // Tambahka
         if (onClose) {
                 onClose();
             }
-        if (!initialData) {
-            setActorName('');
-            setActorEmail('');
-            setSelectedPrivilage('Admin');
-        }
+        // if (!initialData) {
+        //     setActorName('');
+        //     setActorEmail('');
+        //     setSelectedPrivilage('Admin');
+        // }
     };
 
     // Tentukan judul form berdasarkan mode

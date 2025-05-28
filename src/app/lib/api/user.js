@@ -37,21 +37,41 @@ export async function updateUser(data) {
   return { error: false, data: responseJson.data, status: response.status };
 }
 
-export async function addUser(data) {
+export async function addUser({fullname, email, tipe, password = "PABW2025"}) {
   const response = await fetch(`/api/proxy/addUser`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify({fullname, email, tipe, password}),
   });
 
   const responseJson = await response.json();
 
-  if (response.status !== 200) {
-    console.error(responseJson.message);
-    return { error: true, data: null, status: response.status };
-  }
+  if (!response.ok) {
+      throw new Error(responseJson.message || 'Gagal menambahkan pengguna');
+    }
+  return { data: responseJson.data, error: null };
+}
 
-  return { error: false, data: responseJson.data, status: response.status };
+export async function deleteUser(id) {
+    const response = await fetch(
+    `/api/proxy/deleteUser?id_user=${id}`,
+    {
+        method: "DELETE",
+        headers: {
+        "Content-Type": "application/json",
+        },
+    }
+    );
+
+    const responseJson = await response.json();
+
+    if (response.status !== 200) {
+    console.error("Error caught: ", responseJson.message);
+    return { error: true, data: null, status: response.status };
+    }
+
+    console.log("User berhasil dihapus");
+    return { error: false, data: responseJson.data, status: response.status };
 }

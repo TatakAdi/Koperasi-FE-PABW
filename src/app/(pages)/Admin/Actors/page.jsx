@@ -7,20 +7,21 @@ import SidebarAdmin from "@/app/components/SidebarAdmin";
 import useInput from "@/app/hooks/useInput";
 import { getUserLogged } from "@/app/lib/api/login";
 import { logout } from "@/app/lib/api/logout";
-import { getUser } from "@/app/lib/api/user";
+import { deleteUser, getUser } from "@/app/lib/api/user";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react"; // Tambahkan useMemo
 
 export default function ActorsPage() {
     const [showDropdown, setShowDropdown] = useState(false);
     const [showAddActor, setShowAddActor] = useState(false);
     const [showEditActor, setShowEditActor] = useState(null);
     const [actors, setActors] = useState([]);
+    const [allActors, setAllActors] = useState([]); // State untuk menyimpan semua data aktor
     const [isLoading, setIsLoading] = useState(false);
     const dropdownRef = useRef(null);
 
     // --- State dan Handler untuk Navbar ---
-    const [keyword, setKeyword] = useInput();
+    const [keyword, setKeyword] = useInput(''); // Inisialisasi useInput dengan string kosong
     const [authUser, setAuthUser] = useState(null);
 
     // --- Pagination States ---
@@ -32,21 +33,22 @@ export default function ActorsPage() {
         setAuthUser(null);
     }
 
-    useEffect(() => {
-        const fetchActor = async () => {
-            setIsLoading(true);
-            const { error, data } = await getUser();
+    // Fungsi untuk mengambil semua data aktor dari API
+    const fetchAllActors = async () => {
+        setIsLoading(true);
+        const { error, data } = await getUser();
 
-            if (error) {
-                console.error("Tidak dapat mengambil user dari server");
-                return;
-            }
-            console.log(data);
-            setActors(data);
-            setIsLoading(false);
-            setCurrentPage(1); // Reset to first page when actors data changes
-        };
-        fetchActor();
+        if (error) {
+            console.error("Tidak dapat mengambil user dari server:", error);
+            setAllActors([]); // Set allActors to empty array on error
+        } else {
+            setAllActors(data); // Simpan semua data aktor
+        }
+        setIsLoading(false);
+    };
+
+    useEffect(() => {
+        fetchAllActors(); // Panggil saat komponen pertama kali di-mount
     }, []);
 
     useEffect(() => {
@@ -63,7 +65,7 @@ export default function ActorsPage() {
         };
         getUser();
     }, []);
-
+    
     // Close dropdown "Actions" if click outside
     useEffect(() => {
         function handleClickOutside(event) {
@@ -77,13 +79,32 @@ export default function ActorsPage() {
         };
     }, []);
 
+    // --- Filter aktor berdasarkan keyword ---
+    const filteredActors = useMemo(() => {
+        if (!keyword) {
+            return allActors; // Jika keyword kosong, tampilkan semua aktor
+        }
+        const lowercasedKeyword = keyword.toLowerCase();
+        return allActors.filter(actor =>
+            actor.fullname.toLowerCase().includes(lowercasedKeyword) ||
+            actor.email.toLowerCase().includes(lowercasedKeyword) ||
+            actor.tipe.toLowerCase().includes(lowercasedKeyword)
+        );
+    }, [allActors, keyword]);
+
+    // Update `actors` state setiap kali `filteredActors` berubah
+    useEffect(() => {
+        setActors(filteredActors);
+        setCurrentPage(1); // Reset halaman ke 1 setiap kali filter berubah
+    }, [filteredActors]);
+
     // Logic for displaying current actors
     const indexOfLastActor = currentPage * actorsPerPage;
     const indexOfFirstActor = indexOfLastActor - actorsPerPage;
     const currentActors = actors.slice(indexOfFirstActor, indexOfLastActor);
 
     // Logic for displaying page numbers
-    const totalPages = Math.ceil(actors.length / actorsPerPage);
+    const totalPages = Math.ceil(actors.length / actorsPerPage); // Berdasarkan data yang difilter
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -105,7 +126,6 @@ export default function ActorsPage() {
         let end = Math.min(totalPages, currentPage + 2);
         const pages = [];
 
-        // Add '...' if there are pages before the start
         if (start > 1) {
             pages.push(1);
             if (start > 2) {
@@ -117,7 +137,6 @@ export default function ActorsPage() {
             pages.push(i);
         }
 
-        // Add '...' if there are pages after the end
         if (end < totalPages) {
             if (end < totalPages - 1) {
                 pages.push('...');
@@ -128,12 +147,29 @@ export default function ActorsPage() {
         return pages;
     };
 
+    // --- Fungsi untuk menghapus aktor ---
+    const handleDeleteActor = async (actorId) => {
+        if (window.confirm("Apakah Anda yakin ingin menghapus aktor ini?")) {
+            const { error } = await deleteUser(actorId);
+
+            if (error) {
+                alert("Gagal menghapus aktor. Silakan coba lagi.");
+                console.error("Error deleting actor:", error);
+            } else {
+                alert("Aktor berhasil dihapus!");
+                fetchAllActors(); // Muat ulang semua data setelah penghapusan
+            }
+        }
+    };
+
 
     if (showAddActor) {
         return (
             <FormActor
-                onClose={() => {setShowAddActor(false);
+                onClose={() => {
+                    setShowAddActor(false);
                     setShowEditActor(null);
+                    fetchAllActors(); // Muat ulang data setelah form ditutup
                 }}
                 initialData={showEditActor}
             />
@@ -247,11 +283,23 @@ export default function ActorsPage() {
                                     <div className="flex-1 self-stretch max-w-28 p-2 border-r border-[#E5E5E5] flex justify-center items-center"><div className="flex-1 text-center text-black text-base font-medium font-['Geist'] leading-normal">{actor.saldoWajib}</div></div>
                                     <div className="flex-1 self-stretch max-w-28 p-2 border-r border-[#E5E5E5] flex justify-center items-center"><Privilage value={actor.tipe} /></div>
                                     <div className="w-24 self-stretch p-2 border-r border-[#E5E5E5] flex justify-center items-center gap-2">
-                                        <Image src="/Trash.svg" alt="Hapus" width={20} height={20} className="w-5 h-5 cursor-pointer" />
-                                        <Image src="/Pensil.svg" alt="Edit" width={20} height={20} className="w-5 h-5 cursor-pointer"
-                                        onClick={() => {
-                                                setShowEditActor(actor); // Set the actor data to be edited
-                                                setShowAddActor(true); // Show the form
+                                        <Image
+                                            src="/Trash.svg"
+                                            alt="Hapus"
+                                            width={20}
+                                            height={20}
+                                            className="w-5 h-5 cursor-pointer" 
+                                            onClick={() => handleDeleteActor(actor.id)}
+                                        />
+                                        <Image
+                                            src="/Pensil.svg"
+                                            alt="Edit"
+                                            width={20}
+                                            height={20}
+                                            className="w-5 h-5 cursor-pointer"
+                                            onClick={() => {
+                                                setShowEditActor(actor);
+                                                setShowAddActor(true);
                                             }}
                                         />
                                     </div>
@@ -259,7 +307,7 @@ export default function ActorsPage() {
                             ))}
                         </div>
                         {/* Pagination */}
-                        {totalPages > 1 && ( // Only show pagination if there's more than 1 page
+                        {totalPages > 1 && (
                             <div className="w-full mt-6 flex justify-center items-center gap-2">
                                 <div className="flex justify-center items-center gap-2">
                                     <button
