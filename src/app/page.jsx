@@ -130,7 +130,6 @@ export default function Home() {
   };
 
   const filteredContent = () => {
-    console.log({ category, minPrice, maxPrice, keyword, sellSort });
     const categoryMap = {
       "Makanan Berat": 1,
       "Makanan Ringan": 2,

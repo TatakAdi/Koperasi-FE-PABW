@@ -6,19 +6,25 @@ import { getUserLogged } from "app/lib/api/login";
 import { logout } from "app/lib/api/logout";
 import { getCartItems } from "app/lib/api/cart";
 import useInput from "app/hooks/useInput";
+import CheckoutCard from "app/components/keranjang/CheckoutCard";
 import Navbar from "app/components/Navbar";
 import SidePanel from "app/components/SidePanel";
-import MyOrderNotPayItems from "app/components/MyOrderNotPayItems";
+import MyOrderNotPayItems from "app/components/myOrders/MyOrderNotPayItems";
+import { Noto_Sans_Tamil_Supplement } from "next/font/google";
 
 export default function MyOrders() {
   const [authUser, setAuthUser] = useState(null);
   const [category, setCategory] = useState(null);
+  const [cart, setCart] = useState();
   const [cartItems, setCartItems] = useState([]);
   const [status, setStatus] = useState("Belum Dibayar"); // "Belum Dibayar", "Sedang Diproses", "Sedang Dikirim", "Selesai"
   const [minPrice, setMinPrice] = useInput();
   const [maxPrice, setMaxPrice] = useInput();
   const [keyword, setKeyword] = useInput();
   const [sellSort, setSellSort] = useState("");
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [isFocus, setIsFocus] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false); // Untuk notifikasi barang berhasil ke keranjang atau tidak
@@ -38,13 +44,16 @@ export default function MyOrders() {
 
       const cartRes = await getCartItems(data.id);
       console.log("CartRes: ", cartRes);
+      setCart(cartRes);
       if (!cartRes.error && cartRes.data && cartRes.data.items) {
-        setCartItems(
-          cartRes.data.items.map((item) => ({
-            ...item,
-            quantity: item.jumlah,
-          }))
-        );
+        const items = cartRes.data.items.map((item) => ({
+          ...item,
+          quantity: item.jumlah,
+        }));
+
+        console.log("cart = ", cart);
+        setCartItems(items);
+        setProducts(items);
       }
     };
     getUser();
@@ -64,9 +73,22 @@ export default function MyOrders() {
   };
 
   const notPayedCartItem = () => {
-    return cartItems.filter(
-      (item) => item.status_barang === "menunggu pegawai"
-    );
+    if (cart && cart.status_barang === "menunggu pegawai") {
+      const filteredContent = cart.items || [];
+      console.log("filtered: ", filteredContent);
+      return filteredContent;
+    }
+    console.log("filtered: [] (cart tidak sedang menunggu pegawai)");
+    return [];
+  };
+
+  const onPayHandle = (itemId) => {
+    const selectedItem = cartItems.find((item) => item.id === itemId);
+    if (selectedItem) {
+      setSelectedItems([itemId]);
+      setTotal(selectedItem.price * selectedItem.quantity);
+      setIsFocus(true);
+    }
   };
 
   return (
@@ -157,7 +179,11 @@ export default function MyOrders() {
 
               <div className="divide-y">
                 {cartItems.map((item) => (
-                  <MyOrderNotPayItems key={item.id} {...item} />
+                  <MyOrderNotPayItems
+                    key={item.id}
+                    {...item}
+                    onPayHandle={onPayHandle}
+                  />
                 ))}
               </div>
               {/*Tempat MyOrdersCartItem ditaruh nanti */}
@@ -220,6 +246,15 @@ export default function MyOrders() {
             </>
           )}
         </div>
+
+        {isFocus && (
+          <CheckoutCard
+            total={total}
+            products={products}
+            selectedItems={selectedItems}
+            onCancel={() => setIsFocus(false)}
+          />
+        )}
       </main>
     </div>
   );
