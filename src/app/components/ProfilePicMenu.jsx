@@ -1,5 +1,13 @@
-import { KeyRound, List, LogIn, LogOut, Package, User } from "lucide-react";
-import { useRouter } from "next/navigation";
+import {
+  KeyRound,
+  List,
+  LogIn,
+  LogOut,
+  Package,
+  User,
+  Store,
+} from "lucide-react";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function ProfilePicMenu({
   fullName,
@@ -10,6 +18,19 @@ export default function ProfilePicMenu({
   saldo,
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+
+  const adminButtonEventHandler = () => {
+    if (roles === "admin") {
+      if (pathname.startsWith("/Admin")) {
+        router.push("/");
+      } else {
+        router.push("/Admin/Statistic");
+      }
+    } else {
+      router.push("/MyProducts");
+    }
+  };
 
   const styleBox =
     "flex flex-row text-sm font-medium text-[#535353] p-2 cursor-pointer hover:bg-[#EDEDED] rounded-lg gap-2 m-2";
@@ -39,17 +60,19 @@ export default function ProfilePicMenu({
           <List size={20} />
           <span> My Orders</span>
         </div>
-        <div className={`${styleBox}`}>
-          {roles === "admin"? (
-            <>
-              <button
-                onClick={() => router.push("/Admin/Statistic")}
-                className="flex flex-row items-center gap-2"
-              >
+        <div className={`${styleBox}`} onClick={adminButtonEventHandler}>
+          {roles === "admin" ? (
+            !pathname.startsWith("/Admin") ? (
+              <>
                 <KeyRound size={20} />
                 <span>Admin Panel</span>
-              </button>
-            </>
+              </>
+            ) : (
+              <>
+                <Store size={20} />
+                <span>Main Page</span>
+              </>
+            )
           ) : (
             <>
               <Package size={20} />

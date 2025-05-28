@@ -1,10 +1,12 @@
 import { SearchIcon } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 export default function SearchBar({
   keyword,
   onKeywordChange,
   toggleKeywordSearch,
 }) {
+  const pathname = usePathname();
   return (
     <div className="relative">
       <input
@@ -12,7 +14,9 @@ export default function SearchBar({
         name=""
         id=""
         className="bg-[#F2F4F7] rounded-4xl w-[800px] font-normal text-base px-5 py-3"
-        placeholder="Cari Produk"
+        placeholder={
+          pathname.startsWith("/Admin") ? "Cari aktor" : "Cari produk"
+        }
         value={keyword}
         onChange={onKeywordChange}
       />

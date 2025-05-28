@@ -95,7 +95,7 @@ export default function MyOrders() {
     <div className="min-h-screen h-screen w-full font-[family-name:var(--font-geist-sans)]  overflow-y-hidden">
       <Navbar
         keyword={keyword}
-        onKeywordCahnge={setKeyword}
+        onKeywordChange={setKeyword}
         authUser={authUser}
         roles={authUser !== null && authUser.tipe}
         fullName={authUser !== null && authUser.fullname}

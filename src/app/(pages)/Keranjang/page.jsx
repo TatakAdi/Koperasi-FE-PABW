@@ -2,7 +2,7 @@
 import Navbar from "@/app/components/Navbar";
 import SidePanel from "@/app/components/SidePanel";
 import CheckoutCard from "@/app/components/keranjang/CheckoutCard";
-import useInput from "@/app/hooks/useInput";
+import useInput from "app/hooks/useInput";
 import {
   deleteCartItem,
   getCartItems,
