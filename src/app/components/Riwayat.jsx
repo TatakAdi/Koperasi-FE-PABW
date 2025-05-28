@@ -1,10 +1,9 @@
-import React from "react";
 
 export default function Riwayat() {
   return (
     <div className="flex flex-row gap-4">
       {/* Card: Total Transaksi */}
-      <div className="w-80 p-4 bg-white rounded-xl outline outline-1 outline-offset-[-1px] outline-stroke-4 flex flex-col gap-2.5 overflow-hidden">
+      <div className="w-80 p-4 bg-white rounded-xl outline outline-1 outline-offset-[-1px] outline-stroke-4 flex flex-col gap-2.5 overflow-hidden outline-[#D0D0D0]">
         <div className="flex flex-col gap-6 w-full">
           <div className="flex justify-between items-center w-full">
             <div className="flex items-center gap-2.5">
@@ -33,7 +32,7 @@ export default function Riwayat() {
         </div>
       </div>
       {/* Card: Total Pengiriman (Monthly) */}
-      <div className="w-80 p-4 bg-white rounded-xl outline outline-1 outline-offset-[-1px] outline-stroke-4 flex flex-col justify-end items-start gap-2.5 overflow-hidden">
+      <div className="w-80 p-4 bg-white rounded-xl outline outline-1 outline-offset-[-1px] outline-stroke-4 flex flex-col justify-end items-start gap-2.5 overflow-hidden outline-[#D0D0D0]">
         <div className="flex flex-col justify-end gap-6 w-full">
           <div className="flex justify-between items-center w-full">
             <div className="flex items-center gap-2.5">
@@ -62,7 +61,7 @@ export default function Riwayat() {
         </div>
       </div>
       {/* Card: Total Pengiriman (Daily) */}
-      <div className="w-80 p-4 bg-white rounded-xl outline outline-1 outline-offset-[-1px] outline-stroke-4 flex flex-col gap-2.5 overflow-hidden">
+      <div className="w-80 p-4 bg-white rounded-xl outline outline-1 outline-offset-[-1px] outline-stroke-4 flex flex-col gap-2.5 overflow-hidden outline-[#D0D0D0]">
         <div className="flex flex-col gap-6 items-start w-full">
           <div className="flex justify-start items-center gap-28 w-full">
             <div className="flex-1 flex justify-between items-center">

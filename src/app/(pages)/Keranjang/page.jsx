@@ -126,6 +126,9 @@ export default function KeranjangPage() {
         onKeywordCahnge={setSearchTerm}
         authUser={authUser}
         roles={authUser !== null && authUser.tipe}
+        fullName={authUser !== null && authUser.fullname}
+        email={authUser !== null && authUser.email}
+        saldo={authUser !== null && authUser.saldo}
         logout={onLogoutHandler}
       />
         <div className="flex">

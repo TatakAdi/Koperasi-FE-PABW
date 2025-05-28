@@ -1,21 +1,19 @@
 'use client';
 
-import React from "react";
+import Kategori from "@/app/components/Kategori";
 import Navbar from "@/app/components/Navbar";
 import SidebarAdmin from "@/app/components/SidebarAdmin";
-import Kategori from "@/app/components/Kategori";
 
 export default function ProductPage() {
   return (
     <div className="w-full h-[1024px] relative bg-white overflow-hidden">
       {/* Navbar */}
       <Navbar />
+      <div className="w-full h-full flex flex-row">
       {/* Sidebar */}
-      <div className="w-72 min-h-[936px] px-3 pt-3 pb-4 left-[20px] top-[88px] absolute bg-gray-100 rounded-xl flex flex-col gap-2.5 overflow-hidden z-10">
         <SidebarAdmin />
-      </div>
       {/* Main Content */}
-      <div className="w-[1124px] h-[936px] px-5 py-4 left-[316px] top-[88px] absolute bg-white rounded-xl flex flex-col gap-12 overflow-hidden">
+      <div className="w-full h-full px-5 py-4 mr-[32px] top-[88px] bg-white rounded-xl flex flex-col gap-12 overflow-hidden">
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">
             <div className="text-black text-2xl font-medium font-[Geist]">Data Barang</div>
@@ -24,33 +22,33 @@ export default function ProductPage() {
           <div className="flex flex-col gap-6">
             <div className="flex flex-col">
               {/* Table Header */}
-              <div className="w-[1040px] max-w-[1084px] border-b border-neutral-200 flex flex-col gap-2.5 overflow-hidden mx-auto">
+              <div className="w-full border-b border-neutral-200 flex flex-col gap-2.5">
                 <div className="flex items-center">
-                  <div className="w-28 h-14 max-w-36 border-r border-neutral-200 flex justify-center items-center gap-2">
+                  <div className="w-full h-14 border-r max-w-[10%] border-neutral-200 flex justify-center items-center gap-2">
                     <div className="text-[#737373] text-base font-medium font-[Geist] leading-normal">Gambar</div>
                   </div>
-                  <div className="flex-1 h-14 border-r border-neutral-200 flex justify-center items-center gap-2">
+                  <div className="w-full h-14 border-r border-neutral-200 flex justify-center items-center gap-2">
                     <div className="text-[#737373] text-base font-medium font-[Geist] leading-normal">Nama Barang</div>
                   </div>
-                  <div className="flex-1 h-14 border-r border-neutral-200 flex justify-center items-center gap-2">
+                  <div className="w-full h-14 border-r max-w-[15%] border-neutral-200 flex justify-center items-center gap-2">
                     <div className="text-[#737373] text-base font-medium font-[Geist] leading-normal">Kategori</div>
                   </div>
-                  <div className="flex-1 h-14 max-w-32 border-r border-neutral-200 flex justify-center items-center gap-2">
+                  <div className="w-full h-14 border-r max-w-[10%] border-neutral-200 flex justify-center items-center gap-2">
                     <div className="text-[#737373] text-base font-medium font-[Geist] leading-normal">Harga</div>
                   </div>
-                  <div className="w-24 h-14 max-w-28 border-r border-neutral-200 flex justify-center items-center gap-2">
+                  <div className="w-full h-14 border-r max-w-[10%] border-neutral-200 flex justify-center items-center gap-2">
                     <div className="text-[#737373] text-base font-medium font-[Geist] leading-normal">Stok</div>
                   </div>
-                  <div className="flex-1 h-14 max-w-44 border-r border-neutral-200 flex justify-center items-center gap-2">
+                  <div className="w-full h-14 border-r max-w-[15%] border-neutral-200 flex justify-center items-center gap-2">
                     <div className="text-[#737373] text-base font-medium font-[Geist] leading-normal">Penjual</div>
                   </div>
-                  <div className="flex-1 h-14 max-w-28 border-r border-neutral-200 flex justify-center items-center gap-2">
+                  <div className="w-full h-14 border-r max-w-[10%] border-neutral-200 flex justify-center items-center gap-2">
                     <div className="text-[#737373] text-base font-medium font-[Geist] leading-normal">Aksi</div>
                   </div>
                 </div>
               </div>
               {/* Table Rows */}
-              <div className="w-[1040px] max-w-[1084px] flex flex-col mx-auto">
+              <div className="w-full flex flex-col">
                 {/* Contoh data, silakan ganti dengan data dinamis */}
                 {[
                   {
@@ -127,25 +125,25 @@ export default function ProductPage() {
                   },
                 ].map((item, idx) => (
                   <div key={idx} className="border-b border-neutral-200 flex items-center">
-                    <div className="w-28 self-stretch max-w-36 p-2 border-r border-neutral-200 flex justify-center items-center">
+                    <div className="w-full self-stretch max-w-[10%] p-2 border-r border-neutral-200 flex justify-center items-center">
                       <img className="size-16 rounded-lg" src={item.gambar} alt={item.nama} />
                     </div>
-                    <div className="flex-1 self-stretch p-2 border-r border-neutral-200 flex justify-center items-center">
+                    <div className="w-full self-stretch p-2 border-r border-neutral-200 flex justify-center items-center">
                       <div className="flex-1 text-black text-base font-medium font-[Geist] leading-normal">{item.nama}</div>
                     </div>
-                    <div className="flex-1 self-stretch p-2 border-r border-neutral-200 flex justify-center items-center">
+                    <div className="w-full max-w-[15%] self-stretch p-2 border-r border-neutral-200 flex justify-center items-center">
                       <Kategori value={item.kategori} />
                     </div>
-                    <div className="flex-1 self-stretch max-w-32 p-2 border-r border-neutral-200 flex justify-center items-center">
+                    <div className="w-full max-w-[10%] self-stretch p-2 border-r border-neutral-200 flex justify-center items-center">
                       <div className="flex-1 text-center text-black text-base font-medium font-[Geist] leading-normal">{item.harga}</div>
                     </div>
-                    <div className="w-24 self-stretch max-w-28 p-2 border-r border-neutral-200 flex justify-center items-center">
+                    <div className="w-full max-w-[10%] self-stretch p-2 border-r border-neutral-200 flex justify-center items-center">
                       <div className="flex-1 text-center text-black text-base font-medium font-[Geist] leading-normal">{item.stok}</div>
                     </div>
-                    <div className="flex-1 self-stretch max-w-44 p-2 border-r border-neutral-200 flex justify-center items-center">
+                    <div className="w-full max-w-[15%] self-stretch p-2 border-r border-neutral-200 flex justify-center items-center">
                       <div className="flex-1 text-center text-black text-base font-medium font-[Geist] leading-normal">{item.penjual}</div>
                     </div>
-                    <div className="flex-1 self-stretch max-w-28 p-2 border-r border-neutral-200 flex justify-center items-center">
+                    <div className="w-full max-w-[10%] self-stretch p-2 border-r border-neutral-200 flex justify-center items-center">
                       <div className="flex gap-4">
                         {/* Icon Trash (kiri) */}
                         <button className="size-6 flex items-center justify-center" aria-label="Delete">
@@ -191,13 +189,14 @@ export default function ProductPage() {
         </div>
       </div>
       {/* Success Notification */}
-      <div className="h-12 p-4 left-[527px] top-[1058px] absolute bg-fill-success rounded-xl shadow-[0px_4px_8px_0px_rgba(0,0,0,0.02)] shadow-[0px_8px_16px_-0.5px_rgba(0,0,0,0.02)] shadow-[0px_0px_0px_1px_rgba(41,122,58,0.32)] shadow-[0px_12px_24px_-1.5px_rgba(0,0,0,0.04)] shadow-[0px_16px_32px_-3px_rgba(0,0,0,0.04)] outline outline-1 outline-offset-[-1px] flex items-center gap-12 overflow-hidden">
+      {/* <div className="h-12 p-4 left-[527px] top-[1058px]  bg-fill-success rounded-xl shadow-[0px_4px_8px_0px_rgba(0,0,0,0.02)] shadow-[0px_8px_16px_-0.5px_rgba(0,0,0,0.02)] shadow-[0px_0px_0px_1px_rgba(41,122,58,0.32)] shadow-[0px_12px_24px_-1.5px_rgba(0,0,0,0.04)] shadow-[0px_16px_32px_-3px_rgba(0,0,0,0.04)] outline outline-1 outline-offset-[-1px] flex items-center gap-12 overflow-hidden">
         <div className="flex items-center gap-3">
           <div className="size-6 relative overflow-hidden">
-            <div className="size-5 left-[2px] top-[1.99px] absolute outline outline-2 outline-offset-[-1px] outline-foreground-success" />
+            <div className="size-5 left-[2px] top-[1.99px]  outline-2 outline-offset-[-1px] outline-foreground-success" />
           </div>
           <div className="text-foreground-success text-base font-medium font-['Inter'] leading-normal">Barang berhasil ditambahkan ke keranjang</div>
         </div>
+      </div> */}
       </div>
     </div>
   );
