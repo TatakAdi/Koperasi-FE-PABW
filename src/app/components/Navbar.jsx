@@ -8,7 +8,7 @@ import SearchBar from "./SearchBar";
 
 export default function Navbar({
   keyword,
-  onKeywordCahnge,
+  onKeywordChange,
   toggleKeywordSearch,
   toggleNotificationPanel,
   fullName,
@@ -40,7 +40,7 @@ export default function Navbar({
       </div>
       <SearchBar
         keyword={keyword}
-        onKeywordChange={onKeywordCahnge}
+        onKeywordChange={onKeywordChange}
         toggleKeywordSearch={toggleKeywordSearch}
       />
       <div className="flex justify-around items-center gap-6 ">

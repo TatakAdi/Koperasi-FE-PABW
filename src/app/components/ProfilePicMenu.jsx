@@ -1,6 +1,5 @@
-import React from "react";
+import { KeyRound, List, LogIn, LogOut, Package, User } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { User, LogIn, LogOut, List, KeyRound, Package } from "lucide-react";
 
 export default function ProfilePicMenu({
   fullName,
@@ -41,10 +40,15 @@ export default function ProfilePicMenu({
           <span> My Orders</span>
         </div>
         <div className={`${styleBox}`}>
-          {roles === "admin" ? (
+          {roles === "admin"? (
             <>
-              <KeyRound size={20} />
-              <span>Admin Panel</span>
+              <button
+                onClick={() => router.push("/Admin/Statistic")}
+                className="flex flex-row items-center gap-2"
+              >
+                <KeyRound size={20} />
+                <span>Admin Panel</span>
+              </button>
             </>
           ) : (
             <>

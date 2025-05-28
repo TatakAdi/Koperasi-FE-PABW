@@ -1,10 +1,15 @@
 "use client";
-import Navbar from "app/components/Navbar";
-import SidePanel from "app/components/SidePanel";
-import CheckoutCard from "app/components/keranjang/CheckoutCard";
-import { deleteCartItem, getCartItems, updateCartItem } from "app/lib/api/cart";
-import { getUserLogged } from "app/lib/api/login";
-import { logout } from "app/lib/api/logout";
+import Navbar from "@/app/components/Navbar";
+import SidePanel from "@/app/components/SidePanel";
+import CheckoutCard from "@/app/components/keranjang/CheckoutCard";
+import useInput from "@/app/hooks/useInput";
+import {
+  deleteCartItem,
+  getCartItems,
+  updateCartItem,
+} from "@/app/lib/api/cart";
+import { getUserLogged } from "@/app/lib/api/login";
+import { logout } from "@/app/lib/api/logout";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -12,7 +17,7 @@ export default function KeranjangPage() {
   const [authUser, setAuthUser] = useState(null);
   const [showCheckout, setShowCheckout] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [keyword, setKeyword] = useInput();
   const [products, setProducts] = useState([]);
   const router = useRouter();
   const updateTimeout = useRef({});
@@ -116,10 +121,13 @@ export default function KeranjangPage() {
   return (
     <div className="min-h-screen">
       <Navbar
-        keyword={searchTerm}
-        onKeywordCahnge={setSearchTerm}
+        keyword={keyword}
+        onKeywordChange={setKeyword}
         authUser={authUser}
         roles={authUser !== null && authUser.tipe}
+        fullName={authUser !== null && authUser.fullname}
+        email={authUser !== null && authUser.email}
+        saldo={authUser !== null && authUser.saldo}
         logout={onLogoutHandler}
       />
       <div className="flex">
