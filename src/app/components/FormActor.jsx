@@ -18,7 +18,11 @@ export default function FormActor({ onClose, initialData = null }) { // Tambahka
     // State untuk dropdown privilege
     const [privilageDropdownOpen, setPrivilageDropdownOpen] = useState(false);
     // Inisialisasi privilege dengan initialData jika ada, jika tidak, gunakan "Admin"
-    const [selectedPrivilage, setSelectedPrivilage] = useState(initialData ? initialData.tipe : "Admin");
+    const [selectedPrivilage, setSelectedPrivilage] = useState(
+            initialData 
+                ? initialData.tipe.charAt(0).toUpperCase() + initialData.tipe.slice(1).toLowerCase() 
+                : "Admin"
+        );
     const privilageRef = useRef(null);
 
     // --- State dan Handler untuk Navbar ---
@@ -61,40 +65,31 @@ export default function FormActor({ onClose, initialData = null }) { // Tambahka
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+        const privilegeToSend = selectedPrivilage.toLowerCase();
 
         if (initialData) {
             // Mode Edit: Kirim data yang diperbarui
-            await updateUser({
+            updateUser({
                 id: initialData.id, // Pastikan initialData memiliki id
                 fullname: actorName,
                 email: actorEmail,
-                tipe: selectedPrivilage,
+                tipe: privilegeToSend,
             });
             // Lakukan panggilan API untuk UPDATE aktor
             // Contoh: updateActor(initialData.id, { fullname: actorName, email: actorEmail, tipe: selectedPrivilage });
         } else {
             // Mode Tambah: Kirim data aktor baru
-            await addUser({
+            addUser({
                 fullname: actorName,
                 email: actorEmail,
-                tipe: selectedPrivilage,
+                tipe: privilegeToSend,
             });
             // Lakukan panggilan API untuk CREATE aktor
             // Contoh: createActor({ fullname: actorName, email: actorEmail, tipe: selectedPrivilage });
         }
-
-        if (response && !response.error) { // Check if the API call was successful
-            if (onClose) {
-                onClose(); // Only close the form if the API call was successful
+        if (onClose) {
+                onClose();
             }
-            // ... (rest of the code for resetting form in add mode)
-        } else {
-            console.error("API call failed:", response);
-            alert("Failed to save actor. Please try again.");
-        }
-        // Tidak perlu mereset form jika `initialData` ada, karena `useState` akan diinisialisasi ulang
-        // saat komponen di-mount ulang atau prop `initialData` berubah.
-        // Namun, jika Anda ingin form kosong setelah submit di mode tambah, baris ini tetap relevan:
         if (!initialData) {
             setActorName('');
             setActorEmail('');

@@ -1,5 +1,3 @@
-"use server";
-
 export default async function handler(req, res) {
     try {
         const { id, ...updateData } = req.body;
@@ -13,7 +11,7 @@ export default async function handler(req, res) {
         }
 
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_APP_URL}/api/user/${id}`,
+            `${process.env.NEXT_PUBLIC_APP_URL}/api/admin/user/${id}`,
             {
                 method: "PUT",
                 headers: {
