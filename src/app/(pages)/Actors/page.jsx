@@ -7,7 +7,8 @@ import SidebarAdmin from "@/app/components/SidebarAdmin";
 import useInput from "@/app/hooks/useInput";
 import { getUserLogged } from "@/app/lib/api/login";
 import { logout } from "@/app/lib/api/logout";
-import { deleteUser, getUser } from "@/app/lib/api/user"; // Ensure softDelete is imported if you want to use it for "Trash.svg"
+import { getPayment } from "@/app/lib/api/payment"; // Impor getPayment
+import { deleteUser, getUser } from "@/app/lib/api/user";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -31,16 +32,46 @@ export default function ActorsPage() {
         setAuthUser(null);
     }
 
+    // Fungsi untuk mengambil semua data aktor dan data pembayaran dari API
     const fetchAllActors = async () => {
         setIsLoading(true);
-        const { error, data } = await getUser();
+        let usersData = [];
+        let paymentsData = [];
 
-        if (error) {
-            console.error("Tidak dapat mengambil user dari server:", error);
-            setAllActors([]);
+        // Ambil data pengguna
+        const { error: userError, data: users } = await getUser();
+        if (userError) {
+            console.error("Tidak dapat mengambil user dari server:", userError);
         } else {
-            setAllActors(data);
+            usersData = users;
         }
+
+        // Ambil data pembayaran
+        const { error: paymentError, data: payments } = await getPayment();
+        if (paymentError) {
+            console.error("Tidak dapat mengambil pembayaran dari server:", paymentError);
+        } else {
+            paymentsData = payments;
+        }
+
+        // Buat peta (map) user_id ke payment_status dari data pembayaran
+        const paymentStatusMap = new Map();
+        if (Array.isArray(paymentsData)) { // Pastikan paymentsData adalah array
+            paymentsData.forEach(payment => {
+                if (payment.user_id && payment.payment_status) {
+                    paymentStatusMap.set(payment.user_id, payment.payment_status);
+                }
+            });
+        }
+
+        // Gabungkan data status pembayaran ke dalam data aktor
+        const mergedActors = usersData.map(actor => ({
+            ...actor,
+            // Tambahkan payment_status dari peta, default ke 'belum bayar' jika tidak ditemukan
+            payment_status: paymentStatusMap.get(actor.id) || 'belum bayar'
+        }));
+
+        setAllActors(mergedActors);
         setIsLoading(false);
     };
 
@@ -49,12 +80,11 @@ export default function ActorsPage() {
     }, []);
 
     useEffect(() => {
-        const fetchUserLogged = async () => { // Renamed to avoid conflict with imported getUser
+        const fetchUserLogged = async () => {
             const { error, data } = await getUserLogged();
 
             if (error) {
                 console.log("Token Invalid & Data user gagal terambil");
-                // You might want to add router.push("/") here if the user is not logged in
                 return;
             }
             setAuthUser(data);
@@ -83,7 +113,8 @@ export default function ActorsPage() {
             actor.fullname.toLowerCase().includes(lowercasedKeyword) ||
             actor.email.toLowerCase().includes(lowercasedKeyword) ||
             actor.tipe.toLowerCase().includes(lowercasedKeyword) ||
-            (actor.status_keanggotaan && actor.status_keanggotaan.toLowerCase().includes(lowercasedKeyword)) // Include status_keanggotaan in filter
+            (actor.status_keanggotaan && actor.status_keanggotaan.toLowerCase().includes(lowercasedKeyword)) ||
+            (actor.payment_status && actor.payment_status.toLowerCase().includes(lowercasedKeyword))
         );
     }, [allActors, keyword]);
 
@@ -138,12 +169,9 @@ export default function ActorsPage() {
         return pages;
     };
 
-    // --- Fungsi untuk menghapus aktor (atau soft delete) ---
     const handleDeleteActor = async (actorId) => {
-        // Consider using softDelete(actorId) here if that's the intended behavior
-        // instead of hard deleteUser(actorId)
         if (window.confirm("Apakah Anda yakin ingin menghapus aktor ini? (Ini akan menghapus permanen)")) {
-            const { error } = await deleteUser(actorId); // Using deleteUser as per original code
+            const { error } = await deleteUser(actorId);
 
             if (error) {
                 alert("Gagal menghapus aktor. Silakan coba lagi.");
@@ -253,8 +281,8 @@ export default function ActorsPage() {
                                     <div className="w-14 h-14 max-w-16 border-r border-[#E5E5E5] flex justify-center items-center gap-2 px-2 text-center"><div className="text-[#737373] text-base font-medium font-['Geist'] leading-normal capitalize">ID</div></div>
                                     <div className="flex-1 h-14 border-r border-[#E5E5E5] flex justify-center items-center gap-2 px-2 text-center"><div className="text-[#737373] text-base font-medium font-['Geist'] leading-normal capitalize">Nama anggota</div></div>
                                     <div className="flex-1 h-14 min-w-48 border-r border-[#E5E5E5] flex justify-center items-center gap-2 px-2 text-center"><div className="text-[#737373] text-base font-medium font-['Geist'] leading-normal capitalize">Email</div></div>
-                                    <div className="flex-1 h-14 max-w-32 border-r border-[#E5E5E5] flex justify-center items-center gap-2 px-2 text-center"><div className="text-[#737373] text-base font-medium font-['Geist'] leading-normal capitalize">Status</div></div>
-                                    {/* Kolom Baru: Status Anggota */}
+                                    {/* Mengubah kolom "Status" untuk menampilkan status pembayaran */}
+                                    <div className="flex-1 h-14 max-w-32 border-r border-[#E5E5E5] flex justify-center items-center gap-2 px-2 text-center"><div className="text-[#737373] text-base font-medium font-['Geist'] leading-normal capitalize">Status Pembayaran</div></div>
                                     <div className="flex-1 h-14 max-w-32 border-r border-[#E5E5E5] flex justify-center items-center gap-2 px-2 text-center"><div className="text-[#737373] text-base font-medium font-['Geist'] leading-normal capitalize">Status Anggota</div></div>
                                     <div className="flex-1 h-14 max-w-32 border-r border-[#E5E5E5] flex justify-center items-center gap-2 px-2 text-center"><div className="text-[#737373] text-base font-medium font-['Geist'] leading-normal capitalize">Saldo sukarela</div></div>
                                     <div className="flex-1 h-14 max-w-28 border-r border-[#E5E5E5] flex justify-center items-center gap-2 px-2 text-center"><div className="text-[#737373] text-base font-medium font-['Geist'] leading-normal capitalize">Saldo wajib</div></div>
@@ -268,17 +296,21 @@ export default function ActorsPage() {
                                     <div className="w-14 self-stretch max-w-16 p-2 border-r border-[#E5E5E5] flex justify-center items-center"><div className="flex-1 text-center text-black text-base font-medium font-['Geist'] leading-normal">{actor.id}</div></div>
                                     <div className="flex-1 self-stretch p-2 border-r border-[#E5E5E5] flex justify-center items-center"><div className="flex-1 text-center text-black text-base font-medium font-['Geist'] leading-normal">{actor.fullname}</div></div>
                                     <div className="flex-1 self-stretch p-2 border-r border-[#E5E5E5] flex justify-center items-center"><div className="flex-1 text-center text-black text-base font-medium font-['Geist'] leading-normal">{actor.email}</div></div>
+                                    {/* Render Status Pembayaran */}
                                     <div className="flex-1 self-stretch max-w-32 p-2 border-r border-[#E5E5E5] flex justify-center items-center">
-                                        <div className={`text-base font-medium font-['Geist'] leading-normal ${actor.status === "Sudah Bayar" ? "text-black" : "text-red-600"}`}>
-                                            {actor.status}
+                                        <div className={`flex-1 text-center text-base font-medium font-['Geist'] leading-normal ${
+                                            actor.payment_status === "settlement" ? "text-black" : "text-red-600"
+                                        }`}>
+                                            {/* Menampilkan "Sudah Bayar" atau "Belum Bayar" */}
+                                            {actor.payment_status === "settlement" ? "Sudah Bayar" : "Belum Bayar"}
                                         </div>
                                     </div>
-                                    {/* Data Kolom Baru: Status Anggota */}
+                                    {/* Render Status Anggota */}
                                     <div className="flex-1 self-stretch max-w-32 p-2 border-r border-[#E5E5E5] flex justify-center items-center">
-                                        <div className={`text-base text-center flex-1 font-medium font-['Geist'] leading-normal ${
+                                        <div className={`flex-1 text-center text-base font-medium font-['Geist'] leading-normal ${
                                             actor.status_keanggotaan === "aktif" ? "text-black" :
                                             actor.status_keanggotaan === "tidak aktif" ? "text-red-600" :
-                                            "text-black" // Default for 'bukan anggota' or other values
+                                            "text-black" // Default for 'bukan anggota'
                                         }`}>
                                             {actor.status_keanggotaan ? actor.status_keanggotaan.charAt(0).toUpperCase() + actor.status_keanggotaan.slice(1) : ''}
                                         </div>
