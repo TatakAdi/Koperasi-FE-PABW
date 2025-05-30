@@ -52,7 +52,7 @@ export default function KeranjangPage() {
     0
   );
 
-  const hasSelectedItems = selectedItems.length > 0;
+  const hasProduct = products.length > 0;
 
   const handleSelect = (id) => {
     setSelectedItems((prev) =>
@@ -212,7 +212,7 @@ export default function KeranjangPage() {
                   </div>
                 ))}
               </div>
-              {hasSelectedItems && (
+              {hasProduct && (
                 <div className="w-[1084px] h-12 flex items-center">
                   <div className="w-[360px] min-w-80 h-12 border-r border-[#e5e7eb] flex items-center gap-[106px]">
                     <img
@@ -226,7 +226,7 @@ export default function KeranjangPage() {
                       onClick={handleSelectAll}
                     />
                     <div className="text-base font-medium text-[#222] font-['Geist']">
-                      Pilih Semua ({products.length})
+                      Pilih Semua ({selectedItems.length})
                     </div>
                   </div>
                   <div className="w-[262px] h-12 px-4 border-r border-[#e5e7eb] flex items-center justify-center">

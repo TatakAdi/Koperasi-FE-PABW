@@ -13,17 +13,17 @@ export default function SidebarAdmin() {
           <img src="/statistic.svg" alt="statistic" className="size-6" />
         </>
       ),
-      href: "/Admin/Statistic",
+      href: "/Statistic",
     },
     {
       label: "Product Management",
       icon: <img src="/carbon.svg" alt="carbon" className="size-6" />,
-      href: "/Admin/Product",
+      href: "/Product",
     },
     {
       label: "Actors",
       icon: <img src="/actor.svg" alt="actor" className="size-6" />,
-      href: "/Admin/Actors",
+      href: "/Actors",
     },
   ];
 

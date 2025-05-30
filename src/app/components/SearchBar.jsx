@@ -9,9 +9,9 @@ export default function SearchBar({
   const pathname = usePathname();
 
   const getPlaceholder = () => {
-    if (pathname === "/Admin/Actors") {
-      return "Cari Nama, Email, atau Tipe";
-    } else if (pathname === "/Admin/Product") {
+    if (pathname === "/Actors") {
+      return "Cari Nama, Email, atau Privilage";
+    } else if (pathname === "/Product") {
       return "Cari Produk, Kategori, atau Penjual";
     }
     return "Cari Produk";

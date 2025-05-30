@@ -43,7 +43,7 @@ export default function ProfilePicMenu({
           {roles === "admin"? (
             <>
               <button
-                onClick={() => router.push("/Admin/Statistic")}
+                onClick={() => router.push("/Actors")}
                 className="flex flex-row items-center gap-2"
               >
                 <KeyRound size={20} />

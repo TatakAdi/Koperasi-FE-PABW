@@ -5,6 +5,7 @@ import SidebarAdmin from "@/app/components/SidebarAdmin";
 import useInput from "@/app/hooks/useInput";
 import { getUserLogged } from "@/app/lib/api/login";
 import { logout } from "@/app/lib/api/logout";
+import { postPaymentMember } from "@/app/lib/api/payment";
 import { addUser, updateUser } from "@/app/lib/api/user";
 import { useEffect, useRef, useState } from 'react';
 
@@ -68,33 +69,48 @@ export default function FormActor({ onClose, initialData = null }) { // Tambahka
         const privilegeToSend = selectedPrivilage.toLowerCase();
 
         if (initialData) {
-            // Mode Edit: Kirim data yang diperbarui
+            // ... (existing update logic)
             updateUser({
-                id: initialData.id, // Pastikan initialData memiliki id
+                id: initialData.id,
                 fullname: actorName,
                 email: actorEmail,
                 tipe: privilegeToSend,
             });
-            // Lakukan panggilan API untuk UPDATE aktor
-            // Contoh: updateActor(initialData.id, { fullname: actorName, email: actorEmail, tipe: selectedPrivilage });
         } else {
             // Mode Tambah: Kirim data aktor baru
-            addUser({
+            const { error, data: newUserId } = await addUser({ // Destructure to get newUserId
                 fullname: actorName,
                 email: actorEmail,
                 tipe: privilegeToSend,
             });
-            // Lakukan panggilan API untuk CREATE aktor
-            // Contoh: createActor({ fullname: actorName, email: actorEmail, tipe: selectedPrivilage });
+
+            if (error) {
+                console.error("Failed to add user:", error);
+                alert("Gagal menambahkan aktor. Silakan coba lagi.");
+                return;
+            }
+
+            if (newUserId) { // Check if newUserId is available
+                // Now you have the user_id, you can call postPaymentMember
+                const paymentResult = await postPaymentMember({
+                    user_id: newUserId,
+                    payment_method: 'link', // Or dynamically set based on your form
+                    amount: 0 // Set initial amount, perhaps a mandatory first payment or 0
+                });
+
+                if (paymentResult.error) {
+                    console.error("Failed to post payment for new member:", paymentResult.error);
+                    alert("Aktor berhasil ditambahkan, tetapi gagal mencatat pembayaran awal.");
+                } else {
+                    alert("Aktor dan pembayaran awal berhasil ditambahkan!");
+                }
+            } else {
+                alert("Aktor berhasil ditambahkan, tetapi ID pengguna tidak ditemukan untuk pembayaran.");
+            }
         }
         if (onClose) {
-                onClose();
-            }
-        // if (!initialData) {
-        //     setActorName('');
-        //     setActorEmail('');
-        //     setSelectedPrivilage('Admin');
-        // }
+            onClose();
+        }
     };
 
     // Tentukan judul form berdasarkan mode

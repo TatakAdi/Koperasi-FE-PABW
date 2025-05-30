@@ -52,6 +52,7 @@ export default function ActorsPage() {
     }, []);
 
     useEffect(() => {
+        
         const getUser = async () => {
             const { error, data } = await getUserLogged();
 
@@ -62,7 +63,10 @@ export default function ActorsPage() {
 
             console.log("Data pengguna :", data);
             setAuthUser(data);
+
+            
         };
+        
         getUser();
     }, []);
     
@@ -197,7 +201,7 @@ export default function ActorsPage() {
                                 {/* Iuran Wajib */}
                                 <div className="inline-flex flex-col justify-start items-start gap-2">
                                     <div className="text-stone-500 text-base font-normal font-['Geist'] leading-normal">Iuran Wajib:</div>
-                                    <div className="min-w-40 px-3 py-2 bg-white rounded-lg outline outline-offset-[-1px] outline-1 outline-[#D0D0D0] inline-flex justify-start items-center gap-2">
+                                    <div className="min-w-40 px-3 py-2 bg-white rounded-lg outline-offset-[-1px] outline-1 outline-[#D0D0D0] inline-flex justify-start items-center gap-2">
                                         <div className="text-stone-500 text-base font-normal font-['Geist'] leading-tight">Rp</div>
                                         <div className="text-neutral-900 text-base font-medium font-['Geist'] leading-normal">172.659.267</div>
                                     </div>
@@ -205,7 +209,7 @@ export default function ActorsPage() {
                                 {/* Tenggat Bayar */}
                                 <div className="inline-flex flex-col justify-start items-start gap-2">
                                     <div className="text-stone-500 text-base font-normal font-['Geist'] leading-normal">Tenggat Bayar:</div>
-                                    <div className="px-3 py-2 bg-white rounded-lg outline outline-offset-[-1px] outline-1 outline-[#D0D0D0] inline-flex justify-start items-center gap-2">
+                                    <div className="px-3 py-2 bg-white rounded-lg outline-offset-[-1px] outline-1 outline-[#D0D0D0] inline-flex justify-start items-center gap-2">
                                         <div className="size-5 relative">
                                             <Image src="/Calendar.svg" alt="Calendar" width={20} height={20} />
                                         </div>
@@ -222,7 +226,7 @@ export default function ActorsPage() {
                                 <button
                                     type="button"
                                     onClick={() => setShowDropdown((v) => !v)}
-                                    className="px-3 py-2 bg-black rounded-lg outline outline-1 outline-offset-[-1px] flex justify-start items-center gap-1 overflow-hidden"
+                                    className="px-3 py-2 bg-black rounded-lg outline-1 outline-offset-[-1px] flex justify-start items-center gap-1 overflow-hidden"
                                 >
                                     <span className="w-6 h-6 flex items-center justify-center">
                                         <Image src="/listrik.svg" alt="Listrik" width={24} height={24} className="w-6 h-6" style={{ filter: "brightness(0) invert(1)" }} priority />
