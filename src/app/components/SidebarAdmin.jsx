@@ -16,6 +16,11 @@ export default function SidebarAdmin() {
       href: "/Statistic",
     },
     {
+      label: "Sellings Data",
+      icon: <img src="/carbon.svg" alt="sellings-data" className="size-6" />,
+      href: "/Sellings",
+    },
+    {
       label: "Product Management",
       icon: <img src="/carbon.svg" alt="carbon" className="size-6" />,
       href: "/Product",
