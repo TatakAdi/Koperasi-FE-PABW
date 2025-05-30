@@ -1,3 +1,4 @@
+// app/components/FormActor.jsx
 'use client';
 
 import Navbar from "@/app/components/Navbar";
@@ -9,53 +10,61 @@ import { postPaymentMember } from "@/app/lib/api/payment";
 import { addUser, updateUser } from "@/app/lib/api/user";
 import { useEffect, useRef, useState } from 'react';
 
-// Komponen AddActor, diubah namanya menjadi FormActor agar lebih generik
-export default function FormActor({ onClose, initialData = null }) { // Tambahkan prop initialData
-    // State untuk input form
-    // Inisialisasi state dengan initialData jika ada, jika tidak, gunakan string kosong
+export default function FormActor({ onClose, initialData = null }) {
     const [actorName, setActorName] = useState(initialData ? initialData.fullname : '');
     const [actorEmail, setActorEmail] = useState(initialData ? initialData.email : '');
 
-    // State untuk dropdown privilege
     const [privilageDropdownOpen, setPrivilageDropdownOpen] = useState(false);
-    // Inisialisasi privilege dengan initialData jika ada, jika tidak, gunakan "Admin"
-    const [selectedPrivilage, setSelectedPrivilage] = useState(
-            initialData 
-                ? initialData.tipe.charAt(0).toUpperCase() + initialData.tipe.slice(1).toLowerCase() 
-                : "Admin"
-        );
-    const privilageRef = useRef(null);
+    const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
 
-    // --- State dan Handler untuk Navbar ---
+    const [selectedPrivilage, setSelectedPrivilage] = useState(
+        initialData
+            ? initialData.tipe.charAt(0).toUpperCase() + initialData.tipe.slice(1).toLowerCase()
+            : "Admin"
+    );
+
+    const [selectedStatus, setSelectedStatus] = useState(() => {
+        if (initialData) {
+            return initialData.status_keanggotaan.charAt(0).toUpperCase() + initialData.status_keanggotaan.slice(1).toLowerCase();
+        }
+        // Untuk pengguna baru, status default akan ditentukan di handleSubmit,
+        // jadi di sini kita bisa menggunakan nilai placeholder atau nilai yang tidak akan digunakan.
+        // Namun, jika dropdown status tidak ditampilkan, nilai ini tidak terlalu relevan di sini.
+        // Kita akan menggunakan "Bukan Anggota" sebagai default visual.
+        return "Bukan Anggota";
+    });
+
+    const privilageRef = useRef(null);
+    const statusRef = useRef(null);
+
     const [keyword, setKeyword] = useInput();
     const [authUser, setAuthUser] = useState(null);
 
     useEffect(() => {
-        const getUser = async () => {
+        const fetchAuthUser = async () => {
             const { error, data } = await getUserLogged();
 
             if (error) {
                 console.log("Token Invalid & Data user gagal terambil");
                 return;
             }
-
-            console.log("Data pengguna :", data);
             setAuthUser(data);
         };
-        getUser();
+        fetchAuthUser();
     }, []);
 
     async function onLogoutHandler() {
         await logout();
         setAuthUser(null);
     }
-    // ----------------------------------------------------
 
-    // Menutup dropdown privilege jika klik di luar
     useEffect(() => {
         function handleClickOutside(event) {
             if (privilageRef.current && !privilageRef.current.contains(event.target)) {
                 setPrivilageDropdownOpen(false);
+            }
+            if (statusRef.current && !statusRef.current.contains(event.target)) {
+                setStatusDropdownOpen(false);
             }
         }
         document.addEventListener("mousedown", handleClickOutside);
@@ -67,53 +76,81 @@ export default function FormActor({ onClose, initialData = null }) { // Tambahka
     const handleSubmit = async (event) => {
         event.preventDefault();
         const privilegeToSend = selectedPrivilage.toLowerCase();
+        const statusToSend = selectedStatus.toLowerCase();
 
         if (initialData) {
-            // ... (existing update logic)
-            updateUser({
+            // Logika untuk mengedit aktor
+            const { error: updateError } = await updateUser({
                 id: initialData.id,
                 fullname: actorName,
                 email: actorEmail,
                 tipe: privilegeToSend,
+                status_keanggotaan: statusToSend,
             });
+
+            if (updateError) {
+                console.error("Failed to update user:", updateError);
+                alert(`Gagal memperbarui aktor: ${updateError}`);
+            } else {
+                alert("Aktor berhasil diperbarui!");
+            }
         } else {
-            // Mode Tambah: Kirim data aktor baru
-            const { error, data: newUserId } = await addUser({ // Destructure to get newUserId
+            // Logika untuk menambah aktor baru
+            let defaultStatusForNewUser;
+
+            // Tentukan status_keanggotaan default berdasarkan privilege yang dipilih
+            if (privilegeToSend === 'admin' || privilegeToSend === 'pegawai') {
+                defaultStatusForNewUser = 'bukan anggota';
+            } else if (privilegeToSend === 'pengguna' || privilegeToSend === 'penitip') {
+                defaultStatusForNewUser = 'tidak aktif';
+            } else {
+                // Fallback jika ada privilege yang tidak terduga
+                defaultStatusForNewUser = 'bukan anggota';
+            }
+
+            const { error: addUserError, data: newUserId } = await addUser({
                 fullname: actorName,
                 email: actorEmail,
                 tipe: privilegeToSend,
+                status_keanggotaan: defaultStatusForNewUser, // Menggunakan status yang ditentukan
             });
 
-            if (error) {
-                console.error("Failed to add user:", error);
-                alert("Gagal menambahkan aktor. Silakan coba lagi.");
+            if (addUserError) {
+                console.error("Failed to add user:", addUserError);
+                alert(`Gagal menambahkan aktor: ${addUserError}. Silakan coba lagi.`);
                 return;
             }
 
-            if (newUserId) { // Check if newUserId is available
-                // Now you have the user_id, you can call postPaymentMember
+            if (newUserId) {
                 const paymentResult = await postPaymentMember({
                     user_id: newUserId,
-                    payment_method: 'link', // Or dynamically set based on your form
-                    amount: 0 // Set initial amount, perhaps a mandatory first payment or 0
+                    payment_method: 'link',
+                    amount: 17000
                 });
 
                 if (paymentResult.error) {
                     console.error("Failed to post payment for new member:", paymentResult.error);
-                    alert("Aktor berhasil ditambahkan, tetapi gagal mencatat pembayaran awal.");
+                    let specificError = 'Unknown error';
+                    if (typeof paymentResult.error === 'object' && paymentResult.error !== null) {
+                        specificError = JSON.stringify(paymentResult.error.errors || paymentResult.error.message || paymentResult.error);
+                    } else if (typeof paymentResult.error === 'string') {
+                        specificError = paymentResult.error;
+                    }
+                    alert(`Aktor berhasil ditambahkan, tetapi gagal mencatat pembayaran awal. Detail: ${specificError}`);
                 } else {
                     alert("Aktor dan pembayaran awal berhasil ditambahkan!");
                 }
             } else {
+                console.error("User added, but newUserId was null/undefined after addUser call.");
                 alert("Aktor berhasil ditambahkan, tetapi ID pengguna tidak ditemukan untuk pembayaran.");
             }
         }
+
         if (onClose) {
             onClose();
         }
     };
 
-    // Tentukan judul form berdasarkan mode
     const formTitle = initialData ? "Edit Actor" : "Add Actor";
     const formDescription = initialData ? "Perbarui informasi aktor ini" : "Tambah aktor baru ke list";
     const submitButtonText = initialData ? "Submit" : "Submit";
@@ -161,8 +198,8 @@ export default function FormActor({ onClose, initialData = null }) { // Tambahka
                                 <button
                                     type="submit"
                                     className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
-                                    form="actor-form" // Kaitkan tombol submit dengan ID form
-                                    onClick={handleSubmit} // Panggil handleSubmit saat tombol diklik
+                                    form="actor-form"
+                                    onClick={handleSubmit}
                                 >
                                     {submitButtonText}
                                 </button>
@@ -203,52 +240,106 @@ export default function FormActor({ onClose, initialData = null }) { // Tambahka
                                     </div>
                                 </div>
                             </div>
-                            {/* Privilege Dropdown */}
-                            <div className="w-full flex flex-col gap-2">
-                                <label className="text-neutral-700 text-base font-medium font-['Geist'] leading-normal">Privilege</label>
-                                <div className="relative self-stretch" ref={privilageRef}>
-                                    <button
-                                        type="button"
-                                        className="w-full h-12 pl-4 pr-3 py-3 bg-gray-100 rounded-xl flex justify-between items-center text-left border border-gray-300 focus:border-black focus:ring-1 focus:ring-black"
-                                        onClick={() => setPrivilageDropdownOpen((prev) => !prev)}
-                                        aria-haspopup="listbox"
-                                        aria-expanded={privilageDropdownOpen}
-                                    >
-                                        <span className="text-neutral-900 text-base font-medium font-['Geist']">{selectedPrivilage}</span>
-                                        <svg width="20" height="20" fill="none" className={`transition-transform duration-200 ${privilageDropdownOpen ? 'rotate-180' : ''}`}>
-                                            <path d="M7 8L10 11L13 8" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                        </svg>
-                                    </button>
-                                    {privilageDropdownOpen && (
-                                        <div
-                                            role="listbox"
-                                            className="absolute left-0 right-0 mt-1 z-20 bg-white rounded-md shadow-lg border border-gray-200 flex flex-col overflow-hidden"
+
+                            <div className="flex flex-col md:flex-row gap-6 ">
+
+                                {/* Privilege Dropdown */}
+                                <div className="w-full flex flex-col gap-2">
+                                    <label className="text-neutral-700 text-base font-medium font-['Geist'] leading-normal">Privilege</label>
+                                    <div className="relative self-stretch" ref={privilageRef}>
+                                        <button
+                                            type="button"
+                                            className="w-full h-12 pl-4 pr-3 py-3 bg-gray-100 rounded-xl flex justify-between items-center text-left border border-gray-300 focus:border-black focus:ring-1 focus:ring-black"
+                                            onClick={() => setPrivilageDropdownOpen((prev) => !prev)}
+                                            aria-haspopup="listbox"
+                                            aria-expanded={privilageDropdownOpen}
                                         >
-                                            {["Admin", "Pegawai", "Pengguna", "Penitip"].map((item) => (
-                                                <div
-                                                    key={item}
-                                                    role="option"
-                                                    aria-selected={selectedPrivilage === item}
-                                                    className={`px-4 py-3 text-black text-base font-normal font-['Geist'] cursor-pointer hover:bg-gray-100
-                                                    ${selectedPrivilage === item ? 'bg-gray-100 font-semibold' : ''}`}
-                                                    onClick={() => {
-                                                        setSelectedPrivilage(item);
-                                                        setPrivilageDropdownOpen(false);
-                                                    }}
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === 'Enter' || e.key === ' ') {
+                                            <span className="text-neutral-900 text-base font-medium font-['Geist']">{selectedPrivilage}</span>
+                                            <svg width="20" height="20" fill="none" className={`transition-transform duration-200 ${privilageDropdownOpen ? 'rotate-180' : ''}`}>
+                                                <path d="M7 8L10 11L13 8" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                            </svg>
+                                        </button>
+                                        {privilageDropdownOpen && (
+                                            <div
+                                                role="listbox"
+                                                className="absolute left-0 right-0 mt-1 z-20 bg-white rounded-md shadow-lg border border-gray-200 flex flex-col overflow-hidden"
+                                            >
+                                                {["Admin", "Pegawai", "Pengguna", "Penitip"].map((item) => (
+                                                    <div
+                                                        key={item}
+                                                        role="option"
+                                                        aria-selected={selectedPrivilage === item}
+                                                        className={`px-4 py-3 text-black text-base font-normal font-['Geist'] cursor-pointer hover:bg-gray-100
+                                                        ${selectedPrivilage === item ? 'bg-gray-100 font-semibold' : ''}`}
+                                                        onClick={() => {
                                                             setSelectedPrivilage(item);
                                                             setPrivilageDropdownOpen(false);
-                                                        }
-                                                    }}
-                                                    tabIndex={0}
-                                                >
-                                                    {item}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
+                                                        }}
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === 'Enter' || e.key === ' ') {
+                                                                setSelectedPrivilage(item);
+                                                                setPrivilageDropdownOpen(false);
+                                                            }
+                                                        }}
+                                                        tabIndex={0}
+                                                    >
+                                                        {item}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
+
+                                {/* Status Dropdown - Hanya tampil jika initialData ada DAN status_keanggotaan BUKAN "bukan anggota" */}
+                                {(initialData && initialData.status_keanggotaan !== "bukan anggota") && (
+                                    <div className="w-full flex flex-col gap-2">
+                                        <label className="text-neutral-700 text-base font-medium font-['Geist'] leading-normal">Status Keanggotaan</label>
+                                        <div className="relative self-stretch" ref={statusRef}>
+                                            <button
+                                                type="button"
+                                                className="w-full h-12 pl-4 pr-3 py-3 bg-gray-100 rounded-xl flex justify-between items-center text-left border border-gray-300 focus:border-black focus:ring-1 focus:ring-black"
+                                                onClick={() => setStatusDropdownOpen((prev) => !prev)}
+                                                aria-haspopup="listbox"
+                                                aria-expanded={statusDropdownOpen}
+                                            >
+                                                <span className="text-neutral-900 text-base font-medium font-['Geist']">{selectedStatus}</span>
+                                                <svg width="20" height="20" fill="none" className={`transition-transform duration-200 ${statusDropdownOpen ? 'rotate-180' : ''}`}>
+                                                    <path d="M7 8L10 11L13 8" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                                </svg>
+                                            </button>
+                                            {statusDropdownOpen && (
+                                                <div
+                                                    role="listbox"
+                                                    className="absolute left-0 right-0 mt-1 z-20 bg-white rounded-md shadow-lg border border-gray-200 flex flex-col overflow-hidden"
+                                                >
+                                                    {["Aktif", "Tidak Aktif"].map((item) => (
+                                                        <div
+                                                            key={item}
+                                                            role="option"
+                                                            aria-selected={selectedStatus === item}
+                                                            className={`px-4 py-3 text-black text-base font-normal font-['Geist'] cursor-pointer hover:bg-gray-100
+                                                            ${selectedStatus === item ? 'bg-gray-100 font-semibold' : ''}`}
+                                                            onClick={() => {
+                                                                setSelectedStatus(item);
+                                                                setStatusDropdownOpen(false);
+                                                            }}
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                                    setSelectedStatus(item);
+                                                                    setStatusDropdownOpen(false);
+                                                                }
+                                                            }}
+                                                            tabIndex={0}
+                                                        >
+                                                            {item}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </form>
                     </div>

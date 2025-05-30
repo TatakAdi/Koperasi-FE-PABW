@@ -7,70 +7,61 @@ import SidebarAdmin from "@/app/components/SidebarAdmin";
 import useInput from "@/app/hooks/useInput";
 import { getUserLogged } from "@/app/lib/api/login";
 import { logout } from "@/app/lib/api/logout";
-import { deleteUser, getUser } from "@/app/lib/api/user";
+import { deleteUser, getUser } from "@/app/lib/api/user"; // Ensure softDelete is imported if you want to use it for "Trash.svg"
 import Image from "next/image";
-import { useEffect, useMemo, useRef, useState } from "react"; // Tambahkan useMemo
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export default function ActorsPage() {
     const [showDropdown, setShowDropdown] = useState(false);
     const [showAddActor, setShowAddActor] = useState(false);
     const [showEditActor, setShowEditActor] = useState(null);
     const [actors, setActors] = useState([]);
-    const [allActors, setAllActors] = useState([]); // State untuk menyimpan semua data aktor
+    const [allActors, setAllActors] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const dropdownRef = useRef(null);
 
-    // --- State dan Handler untuk Navbar ---
-    const [keyword, setKeyword] = useInput(''); // Inisialisasi useInput dengan string kosong
+    const [keyword, setKeyword] = useInput('');
     const [authUser, setAuthUser] = useState(null);
 
-    // --- Pagination States ---
     const [currentPage, setCurrentPage] = useState(1);
-    const [actorsPerPage] = useState(8); // Maximum 8 actors per page
+    const [actorsPerPage] = useState(8);
 
     async function onLogoutHandler() {
         await logout();
         setAuthUser(null);
     }
 
-    // Fungsi untuk mengambil semua data aktor dari API
     const fetchAllActors = async () => {
         setIsLoading(true);
         const { error, data } = await getUser();
 
         if (error) {
             console.error("Tidak dapat mengambil user dari server:", error);
-            setAllActors([]); // Set allActors to empty array on error
+            setAllActors([]);
         } else {
-            setAllActors(data); // Simpan semua data aktor
+            setAllActors(data);
         }
         setIsLoading(false);
     };
 
     useEffect(() => {
-        fetchAllActors(); // Panggil saat komponen pertama kali di-mount
+        fetchAllActors();
     }, []);
 
     useEffect(() => {
-        
-        const getUser = async () => {
+        const fetchUserLogged = async () => { // Renamed to avoid conflict with imported getUser
             const { error, data } = await getUserLogged();
 
             if (error) {
                 console.log("Token Invalid & Data user gagal terambil");
+                // You might want to add router.push("/") here if the user is not logged in
                 return;
             }
-
-            console.log("Data pengguna :", data);
             setAuthUser(data);
-
-            
         };
-        
-        getUser();
+        fetchUserLogged();
     }, []);
-    
-    // Close dropdown "Actions" if click outside
+
     useEffect(() => {
         function handleClickOutside(event) {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -83,32 +74,29 @@ export default function ActorsPage() {
         };
     }, []);
 
-    // --- Filter aktor berdasarkan keyword ---
     const filteredActors = useMemo(() => {
         if (!keyword) {
-            return allActors; // Jika keyword kosong, tampilkan semua aktor
+            return allActors;
         }
         const lowercasedKeyword = keyword.toLowerCase();
         return allActors.filter(actor =>
             actor.fullname.toLowerCase().includes(lowercasedKeyword) ||
             actor.email.toLowerCase().includes(lowercasedKeyword) ||
-            actor.tipe.toLowerCase().includes(lowercasedKeyword)
+            actor.tipe.toLowerCase().includes(lowercasedKeyword) ||
+            (actor.status_keanggotaan && actor.status_keanggotaan.toLowerCase().includes(lowercasedKeyword)) // Include status_keanggotaan in filter
         );
     }, [allActors, keyword]);
 
-    // Update `actors` state setiap kali `filteredActors` berubah
     useEffect(() => {
         setActors(filteredActors);
-        setCurrentPage(1); // Reset halaman ke 1 setiap kali filter berubah
+        setCurrentPage(1);
     }, [filteredActors]);
 
-    // Logic for displaying current actors
     const indexOfLastActor = currentPage * actorsPerPage;
     const indexOfFirstActor = indexOfLastActor - actorsPerPage;
     const currentActors = actors.slice(indexOfFirstActor, indexOfLastActor);
 
-    // Logic for displaying page numbers
-    const totalPages = Math.ceil(actors.length / actorsPerPage); // Berdasarkan data yang difilter
+    const totalPages = Math.ceil(actors.length / actorsPerPage);
 
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -124,7 +112,6 @@ export default function ActorsPage() {
         }
     };
 
-    // Determine which page numbers to display in the pagination control
     const getPaginationGroup = () => {
         let start = Math.max(1, currentPage - 2);
         let end = Math.min(totalPages, currentPage + 2);
@@ -151,21 +138,22 @@ export default function ActorsPage() {
         return pages;
     };
 
-    // --- Fungsi untuk menghapus aktor ---
+    // --- Fungsi untuk menghapus aktor (atau soft delete) ---
     const handleDeleteActor = async (actorId) => {
-        if (window.confirm("Apakah Anda yakin ingin menghapus aktor ini?")) {
-            const { error } = await deleteUser(actorId);
+        // Consider using softDelete(actorId) here if that's the intended behavior
+        // instead of hard deleteUser(actorId)
+        if (window.confirm("Apakah Anda yakin ingin menghapus aktor ini? (Ini akan menghapus permanen)")) {
+            const { error } = await deleteUser(actorId); // Using deleteUser as per original code
 
             if (error) {
                 alert("Gagal menghapus aktor. Silakan coba lagi.");
                 console.error("Error deleting actor:", error);
             } else {
                 alert("Aktor berhasil dihapus!");
-                fetchAllActors(); // Muat ulang semua data setelah penghapusan
+                fetchAllActors();
             }
         }
     };
-
 
     if (showAddActor) {
         return (
@@ -173,7 +161,7 @@ export default function ActorsPage() {
                 onClose={() => {
                     setShowAddActor(false);
                     setShowEditActor(null);
-                    fetchAllActors(); // Muat ulang data setelah form ditutup
+                    fetchAllActors();
                 }}
                 initialData={showEditActor}
             />
@@ -266,6 +254,8 @@ export default function ActorsPage() {
                                     <div className="flex-1 h-14 border-r border-[#E5E5E5] flex justify-center items-center gap-2 px-2 text-center"><div className="text-[#737373] text-base font-medium font-['Geist'] leading-normal capitalize">Nama anggota</div></div>
                                     <div className="flex-1 h-14 min-w-48 border-r border-[#E5E5E5] flex justify-center items-center gap-2 px-2 text-center"><div className="text-[#737373] text-base font-medium font-['Geist'] leading-normal capitalize">Email</div></div>
                                     <div className="flex-1 h-14 max-w-32 border-r border-[#E5E5E5] flex justify-center items-center gap-2 px-2 text-center"><div className="text-[#737373] text-base font-medium font-['Geist'] leading-normal capitalize">Status</div></div>
+                                    {/* Kolom Baru: Status Anggota */}
+                                    <div className="flex-1 h-14 max-w-32 border-r border-[#E5E5E5] flex justify-center items-center gap-2 px-2 text-center"><div className="text-[#737373] text-base font-medium font-['Geist'] leading-normal capitalize">Status Anggota</div></div>
                                     <div className="flex-1 h-14 max-w-32 border-r border-[#E5E5E5] flex justify-center items-center gap-2 px-2 text-center"><div className="text-[#737373] text-base font-medium font-['Geist'] leading-normal capitalize">Saldo sukarela</div></div>
                                     <div className="flex-1 h-14 max-w-28 border-r border-[#E5E5E5] flex justify-center items-center gap-2 px-2 text-center"><div className="text-[#737373] text-base font-medium font-['Geist'] leading-normal capitalize">Saldo wajib</div></div>
                                     <div className="flex-1 h-14 max-w-28 border-r border-[#E5E5E5] flex justify-center items-center gap-2 px-2 text-center"><div className="text-[#737373] text-base font-medium font-['Geist'] leading-normal capitalize">Privilege</div></div>
@@ -283,6 +273,16 @@ export default function ActorsPage() {
                                             {actor.status}
                                         </div>
                                     </div>
+                                    {/* Data Kolom Baru: Status Anggota */}
+                                    <div className="flex-1 self-stretch max-w-32 p-2 border-r border-[#E5E5E5] flex justify-center items-center">
+                                        <div className={`text-base text-center flex-1 font-medium font-['Geist'] leading-normal ${
+                                            actor.status_keanggotaan === "aktif" ? "text-black" :
+                                            actor.status_keanggotaan === "tidak aktif" ? "text-red-600" :
+                                            "text-black" // Default for 'bukan anggota' or other values
+                                        }`}>
+                                            {actor.status_keanggotaan ? actor.status_keanggotaan.charAt(0).toUpperCase() + actor.status_keanggotaan.slice(1) : ''}
+                                        </div>
+                                    </div>
                                     <div className="flex-1 self-stretch max-w-32 p-2 border-r border-[#E5E5E5] flex justify-center items-center"><div className="flex-1 text-center text-black text-base font-medium font-['Geist'] leading-normal">{actor.saldo}</div></div>
                                     <div className="flex-1 self-stretch max-w-28 p-2 border-r border-[#E5E5E5] flex justify-center items-center"><div className="flex-1 text-center text-black text-base font-medium font-['Geist'] leading-normal">{actor.saldoWajib}</div></div>
                                     <div className="flex-1 self-stretch max-w-28 p-2 border-r border-[#E5E5E5] flex justify-center items-center"><Privilage value={actor.tipe} /></div>
@@ -292,7 +292,7 @@ export default function ActorsPage() {
                                             alt="Hapus"
                                             width={20}
                                             height={20}
-                                            className="w-5 h-5 cursor-pointer" 
+                                            className="w-5 h-5 cursor-pointer"
                                             onClick={() => handleDeleteActor(actor.id)}
                                         />
                                         <Image
