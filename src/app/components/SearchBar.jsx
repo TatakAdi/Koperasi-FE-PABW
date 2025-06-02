@@ -7,6 +7,7 @@ export default function SearchBar({
   toggleKeywordSearch,
 }) {
   const pathname = usePathname();
+
   return (
     <div className="relative">
       <input
