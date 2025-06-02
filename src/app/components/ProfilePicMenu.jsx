@@ -1,11 +1,4 @@
-import {
-  KeyRound,
-  List,
-  LogIn,
-  LogOut,
-  Package,
-  User
-} from "lucide-react";
+import { KeyRound, List, LogIn, LogOut, Package, User } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
 export default function ProfilePicMenu({
@@ -20,19 +13,23 @@ export default function ProfilePicMenu({
   const pathname = usePathname();
 
   const handleAdminOrProductPageRedirect = () => {
-    if (roles === "admin" || roles === "pegawai") { // Admin dan Pegawai bisa akses admin panel
-      if (pathname.startsWith("/Actors")) { // Cek jika sudah di halaman admin (misal /admin/statistic, /admin/actors)
+    if (roles === "admin" || roles === "pegawai") {
+      // Admin dan Pegawai bisa akses admin panel
+      if (pathname.startsWith("/Actors")) {
+        // Cek jika sudah di halaman admin (misal /admin/statistic, /admin/actors)
         router.push("/"); // Kembali ke halaman utama jika sudah di panel admin
       } else {
         router.push("/Actors"); // Masuk ke panel admin jika belum
       }
-    } else if (roles === "penitip" || roles === "pengguna") { // Selain admin/pegawai, ke halaman produk saya
+    } else if (roles === "penitip" || roles === "pengguna") {
+      // Selain admin/pegawai, ke halaman produk saya
       router.push("/myproducts");
     }
     // Jika ada peran lain yang tidak memiliki halaman admin/produk spesifik, tidak perlu tindakan
   };
 
-  const styleBox = "flex flex-row text-sm font-medium text-[#535353] p-2 cursor-pointer hover:bg-[#EDEDED] rounded-lg gap-2 m-2";
+  const styleBox =
+    "flex flex-row text-sm font-medium text-[#535353] p-2 cursor-pointer hover:bg-[#EDEDED] rounded-lg gap-2 m-2";
 
   return (
     <div className="w-[420px] flex flex-col bg-[#F2F4F7] rounded-lg">
@@ -50,26 +47,38 @@ export default function ProfilePicMenu({
           authed !== null ? "border-y " : "border-b "
         } border-[#E6E6E6]`}
       >
-        <div className={`${styleBox}`} onClick={() => router.push("/account-setting")}> {/* Tambahkan rute spesifik */}
+        <div
+          className={`${styleBox}`}
+          onClick={() => router.push("/account-setting")}
+        >
+          {" "}
+          {/* Tambahkan rute spesifik */}
           <User size={20} />
           <span>Account Setting</span>{" "}
         </div>
 
-        <div className={`${styleBox}`} onClick={() => router.push("/my-orders")}> {/* Rute spesifik */}
+        <div className={`${styleBox}`} onClick={() => router.push("/MyOrders")}>
+          {" "}
+          {/* Rute spesifik */}
           <List size={20} />
           <span>My Orders</span>
         </div>
 
         {authed && ( // Hanya tampilkan tombol ini jika sudah login
-          <div className={`${styleBox}`} onClick={handleAdminOrProductPageRedirect}>
+          <div
+            className={`${styleBox}`}
+            onClick={handleAdminOrProductPageRedirect}
+          >
             {roles === "admin" || roles === "pegawai" ? (
               <>
                 <KeyRound size={20} />
                 <span>Admin Panel</span>
               </>
-            ) : ( // Untuk roles selain admin/pegawai (contoh: penitip, pengguna)
+            ) : (
+              // Untuk roles selain admin/pegawai (contoh: penitip, pengguna)
               <>
-                <Package size={20} /> {/* Menggunakan Package untuk My Product */}
+                <Package size={20} />{" "}
+                {/* Menggunakan Package untuk My Product */}
                 <span>My Products</span>
               </>
             )}
@@ -85,7 +94,10 @@ export default function ProfilePicMenu({
                 Iuran Sukarela
               </p>
               <p className="font-medium text-base text-black">
-                Rp. {saldo !== null && saldo !== undefined ? saldo.toLocaleString("id-ID") : "0"}
+                Rp.{" "}
+                {saldo !== null && saldo !== undefined
+                  ? saldo.toLocaleString("id-ID")
+                  : "0"}
               </p>
               <p className="text-[#666666] font-medium text-xs">
                 Last Payment: 02/12/23 {/* Ini mungkin data statis */}
@@ -93,7 +105,10 @@ export default function ProfilePicMenu({
             </div>
             <div>
               <p className="text-[#535353] font-base text-base">Iuran Wajib</p>
-              <p className="font-medium text-base text-black">Rp. 17.000</p> {/* Ini juga mungkin data statis */}
+              <p className="font-medium text-base text-black">
+                Rp. 17.000
+              </p>{" "}
+              {/* Ini juga mungkin data statis */}
               <p className="text-[#666666] font-medium text-xs">
                 Last Payment: 02/12/23
               </p>
@@ -102,7 +117,7 @@ export default function ProfilePicMenu({
         </div>
       )}
       <div
-        onClick={!authed ? () => router.push("/login") : logout}
+        onClick={!authed ? () => router.push("/Login") : logout}
         className={` ${styleBox} `}
       >
         {!authed ? (
