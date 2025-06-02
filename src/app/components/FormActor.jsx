@@ -8,7 +8,6 @@ import { logout } from "@/app/lib/api/logout";
 import { postPaymentMember } from "@/app/lib/api/payment";
 import { addUser, updateUser } from "@/app/lib/api/user";
 import { useEffect, useRef, useState } from "react";
-// import Image from "next/image"; // Komponen Image tidak digunakan secara langsung di file ini
 
 export default function FormActor({ onClose, initialData = null }) {
   const [actorName, setActorName] = useState(
@@ -22,14 +21,14 @@ export default function FormActor({ onClose, initialData = null }) {
   const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
 
   const [selectedPrivilage, setSelectedPrivilage] = useState(
-    initialData && initialData.tipe // Pastikan initialData.tipe ada
+    initialData && initialData.tipe
       ? initialData.tipe.charAt(0).toUpperCase() +
         initialData.tipe.slice(1).toLowerCase()
       : "Admin" 
   );
 
   const [selectedStatus, setSelectedStatus] = useState(() => {
-    if (initialData && initialData.status_keanggotaan) { 
+    if (initialData && initialData.status_keanggotaan) {
       return (
         initialData.status_keanggotaan.charAt(0).toUpperCase() +
         initialData.status_keanggotaan.slice(1).toLowerCase()
@@ -41,8 +40,8 @@ export default function FormActor({ onClose, initialData = null }) {
   const privilageRef = useRef(null);
   const statusRef = useRef(null);
 
-  const [keyword, setKeyword] = useInput(""); 
-  const [authUser, setAuthUser] = useState(null); 
+  const [keyword, setKeyword] = useInput("");
+  const [authUser, setAuthUser] = useState(null);
 
   useEffect(() => {
     const fetchAuthUser = async () => {
@@ -55,7 +54,7 @@ export default function FormActor({ onClose, initialData = null }) {
     fetchAuthUser();
   }, []);
 
-  async function onLogoutHandler() { 
+  async function onLogoutHandler() {
     await logout();
     setAuthUser(null);
   }
@@ -78,12 +77,35 @@ export default function FormActor({ onClose, initialData = null }) {
     };
   }, []);
 
+  // useEffect untuk sinkronisasi selectedStatus saat selectedPrivilage berubah di mode EDIT
+  useEffect(() => {
+    if (initialData) { // Hanya berjalan di mode Edit
+      if (selectedPrivilage === "Admin" || selectedPrivilage === "Pegawai") {
+        if (selectedStatus !== "Bukan Anggota") {
+           setSelectedStatus("Bukan Anggota");
+        }
+      } else if (selectedPrivilage === "Pengguna" || selectedPrivilage === "Penitip") {
+        if (selectedStatus === "Bukan Anggota") {
+          // Jika status sebelumnya "Bukan Anggota" (misal dari Admin/Pegawai), set default ke "Tidak Aktif"
+          // Jika sudah "Aktif" atau "Tidak Aktif" dari initialData, tidak diubah.
+          setSelectedStatus("Tidak Aktif");
+        }
+      }
+    }
+  }, [selectedPrivilage, initialData]); // Perhatikan dependency array
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     const privilegeToSend = selectedPrivilage.toLowerCase();
-    
-    if (initialData) { 
-      const statusToSendOnEdit = selectedStatus.toLowerCase();
+
+    if (initialData) { // Mode Edit
+      let statusToSendOnEdit;
+      if (privilegeToSend === "admin" || privilegeToSend === "pegawai") {
+        statusToSendOnEdit = "bukan anggota"; // Otomatis untuk Admin/Pegawai
+      } else { // Untuk Pengguna atau Penitip
+        statusToSendOnEdit = selectedStatus.toLowerCase();
+      }
+
       const { error: updateError } = await updateUser({
         id: initialData.id,
         fullname: actorName,
@@ -98,24 +120,27 @@ export default function FormActor({ onClose, initialData = null }) {
       } else {
         alert("Aktor berhasil diperbarui!");
       }
-    } else { 
+    } else { // Mode Tambah
       let defaultStatusForNewUser;
-      // Jika menambah baru, dan privilege adalah Pengguna/Penitip, status diambil dari selectedStatus
-      // Jika Admin/Pegawai, status default "bukan anggota"
       if (privilegeToSend === "admin" || privilegeToSend === "pegawai") {
         defaultStatusForNewUser = "bukan anggota";
       } else if (privilegeToSend === "pengguna" || privilegeToSend === "penitip") {
-        defaultStatusForNewUser = selectedStatus.toLowerCase(); 
+        defaultStatusForNewUser = "tidak aktif"; 
       } else {
-        defaultStatusForNewUser = "bukan anggota"; 
+        defaultStatusForNewUser = "bukan anggota";
       }
 
-      const { error: addUserError, data: newUserResponse } = await addUser({ 
+      const { error: addUserError, data: newUserResponse } = await addUser({
         fullname: actorName,
         email: actorEmail,
         tipe: privilegeToSend,
         status_keanggotaan: defaultStatusForNewUser,
       });
+      
+      console.log("handleSubmit - priviligeToSend:", privilegeToSend);
+      console.log("handleSubmit - defaultStatusForNewUser:", defaultStatusForNewUser);
+      console.log("Full response from addUser API (should be the ID directly):", newUserResponse);
+      console.log("Error from addUser API (if any):", addUserError);
 
       if (addUserError) {
         console.error("Failed to add user:", addUserError);
@@ -123,14 +148,14 @@ export default function FormActor({ onClose, initialData = null }) {
         return;
       }
 
-      const newUserId = newUserResponse?.id; 
+      const newUserId = newUserResponse;
 
-      if (newUserId) {
+      if (newUserId) { 
         if (privilegeToSend !== "admin" && privilegeToSend !== "pegawai") {
           const paymentResult = await postPaymentMember({
-            user_id: newUserId,
-            payment_method: "link", 
-            amount: 17000, 
+            user_id: newUserId, 
+            payment_method: "link",
+            amount: 17000,
           });
 
           if (paymentResult.error) {
@@ -152,26 +177,27 @@ export default function FormActor({ onClose, initialData = null }) {
               specificError = paymentResult.error;
             }
             alert(
-              `Aktor berhasil ditambahkan, tetapi gagal mencatat pembayaran awal. Detail: ${specificError}`
+              `Aktor (tipe: ${privilegeToSend}, status: ${defaultStatusForNewUser}, ID: ${newUserId}) berhasil ditambahkan, tetapi gagal mencatat pembayaran awal. Detail: ${specificError}`
             );
           } else {
-            alert("Aktor dan pembayaran awal berhasil ditambahkan!");
+            alert(`Aktor (tipe: ${privilegeToSend}, status: ${defaultStatusForNewUser}, ID: ${newUserId}) dan pembayaran awal berhasil ditambahkan!`);
           }
-        } else {
-          alert("Aktor (Admin/Pegawai) berhasil ditambahkan!");
+        } else { 
+          alert(`Aktor (tipe: ${privilegeToSend}, status: ${defaultStatusForNewUser}, ID: ${newUserId}) berhasil ditambahkan!`);
         }
       } else {
         console.error(
-          "User added, but newUserId was not found in addUser response."
+          "User added, but newUserId was not found or was invalid. Actual response:",
+          newUserResponse
         );
         alert(
-          "Aktor berhasil ditambahkan, tetapi ID pengguna tidak ditemukan untuk proses selanjutnya."
+          "Aktor berhasil ditambahkan, tetapi ID pengguna tidak valid atau tidak ditemukan untuk proses selanjutnya."
         );
       }
     }
 
     if (onClose) {
-      onClose(); 
+      onClose();
     }
   };
 
@@ -180,18 +206,6 @@ export default function FormActor({ onClose, initialData = null }) {
     ? "Perbarui informasi aktor ini"
     : "Tambah aktor baru ke list";
   const submitButtonText = initialData ? "Submit" : "Submit";
-
-  // Update selectedStatus jika privilege berubah
-  useEffect(() => {
-    if (!initialData) { // Hanya berlaku saat mode "Add Actor"
-      if (selectedPrivilage === "Admin" || selectedPrivilage === "Pegawai") {
-        setSelectedStatus("Bukan Anggota");
-      } else if (selectedStatus === "Bukan Anggota" && (selectedPrivilage === "Pengguna" || selectedPrivilage === "Penitip")) {
-        setSelectedStatus("Tidak Aktif"); // Default ke "Tidak Aktif" untuk Pengguna/Penitip baru
-      }
-    }
-  }, [selectedPrivilage, initialData, selectedStatus]); // Tambahkan selectedStatus ke dependency
-
 
   return (
     <div className="w-full h-full flex flex-col bg-white">
@@ -207,7 +221,7 @@ export default function FormActor({ onClose, initialData = null }) {
       />
       <div className="flex flex-1">
         <SidebarAdmin />
-        <div className="flex-1 p-6 overflow-y-auto"> 
+        <div className="flex-1 p-6 overflow-y-auto">
           <div className="h-full bg-white">
             <div className="mb-4 inline-flex justify-start items-center gap-2">
               <button
@@ -245,7 +259,7 @@ export default function FormActor({ onClose, initialData = null }) {
               <div className="flex gap-2">
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+                  className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors cursor-pointer"
                   form="actor-form"
                 >
                   {submitButtonText}
@@ -301,7 +315,7 @@ export default function FormActor({ onClose, initialData = null }) {
 
               <div className="flex flex-col md:flex-row gap-6 ">
                 {/* Privilege Dropdown */}
-                <div className="w-full md:w-1/2 flex flex-col gap-2">
+                <div className="w-full flex flex-col gap-2">
                   <label className="text-neutral-700 text-base font-medium font-['Geist'] leading-normal">
                     Privilege
                   </label>
@@ -316,7 +330,6 @@ export default function FormActor({ onClose, initialData = null }) {
                       <span className="text-neutral-900 text-base font-medium font-['Geist']">
                         {selectedPrivilage}
                       </span>
-                      {/* Animasi rotasi ikon panah */}
                       <svg
                         width="20"
                         height="20"
@@ -334,7 +347,6 @@ export default function FormActor({ onClose, initialData = null }) {
                         />
                       </svg>
                     </button>
-                    {/* Animasi untuk dropdown menu */}
                     <div
                       role="listbox"
                       aria-hidden={!privilageDropdownOpen}
@@ -351,7 +363,7 @@ export default function FormActor({ onClose, initialData = null }) {
                             className={`px-4 py-3 text-black text-base font-normal font-['Geist'] cursor-pointer hover:bg-gray-100
                               ${
                                 selectedPrivilage === item
-                                  ? "bg-gray-100" // Menambahkan font-semibold untuk item terpilih
+                                  ? "bg-gray-100" 
                                   : ""
                               }`}
                             onClick={() => {
@@ -374,9 +386,8 @@ export default function FormActor({ onClose, initialData = null }) {
                   </div>
                 </div>
 
-                {/* Status Dropdown */}
-                {(initialData && initialData.status_keanggotaan !== "bukan anggota") || 
-                 (!initialData && (selectedPrivilage === "Pengguna" || selectedPrivilage === "Penitip")) ? (
+                {/* Status Dropdown - Tampil di mode EDIT hanya jika privilege BUKAN Admin/Pegawai */}
+                {initialData && selectedPrivilage !== "Admin" && selectedPrivilage !== "Pegawai" ? (
                   <div className="w-full flex flex-col gap-2">
                     <label className="text-neutral-700 text-base font-medium font-['Geist'] leading-normal">
                       Status Keanggotaan
@@ -384,18 +395,14 @@ export default function FormActor({ onClose, initialData = null }) {
                     <div className="relative self-stretch" ref={statusRef}>
                       <button
                         type="button"
-                        className="w-full h-12 pl-4 pr-3 py-3 bg-gray-100 rounded-xl flex justify-between items-center text-left border border-gray-300 cursor-pointer transition-transform duration-150 ease-in-out active:scale-95" // Animasi tekan
+                        className="w-full h-12 pl-4 pr-3 py-3 bg-gray-100 rounded-xl flex justify-between items-center text-left border border-gray-300 cursor-pointer"
                         onClick={() => setStatusDropdownOpen((prev) => !prev)}
                         aria-haspopup="listbox"
                         aria-expanded={statusDropdownOpen}
-                        disabled={!initialData && selectedPrivilage !== "Pengguna" && selectedPrivilage !== "Penitip"}
                       >
                         <span className="text-neutral-900 text-base font-medium font-['Geist']">
-                          {(!initialData && selectedPrivilage !== "Pengguna" && selectedPrivilage !== "Penitip") 
-                            ? "Tidak Berlaku" 
-                            : selectedStatus}
+                          {selectedStatus} 
                         </span>
-                        {/* Animasi rotasi ikon panah */}
                         <svg
                           width="20"
                           height="20"
@@ -413,8 +420,7 @@ export default function FormActor({ onClose, initialData = null }) {
                           />
                         </svg>
                       </button>
-                      {/* Animasi untuk dropdown menu */}
-                      {statusDropdownOpen && (initialData || selectedPrivilage === "Pengguna" || selectedPrivilage === "Penitip") && (
+                      {statusDropdownOpen && (
                         <div
                           role="listbox"
                           aria-hidden={!statusDropdownOpen}
@@ -422,7 +428,7 @@ export default function FormActor({ onClose, initialData = null }) {
                                     transition-all duration-300 ease-in-out transform
                                     ${statusDropdownOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
                         >
-                          {["Aktif", "Tidak Aktif"].map((item) => ( 
+                          {["Aktif", "Tidak Aktif"].map((item) => (
                             <div
                               key={item}
                               role="option"
@@ -430,7 +436,7 @@ export default function FormActor({ onClose, initialData = null }) {
                               className={`px-4 py-3 text-black text-base font-normal font-['Geist'] cursor-pointer hover:bg-gray-100
                                 ${
                                   selectedStatus === item
-                                    ? "bg-gray-100 font-semibold" // Menambahkan font-semibold
+                                    ? "bg-gray-100"
                                     : ""
                                 }`}
                               onClick={() => {

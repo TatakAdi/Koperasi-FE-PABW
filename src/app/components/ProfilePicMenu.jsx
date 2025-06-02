@@ -14,18 +14,22 @@ export default function ProfilePicMenu({
 
   const handleAdminOrProductPageRedirect = () => {
     if (roles === "admin" || roles === "pegawai") {
-      // Admin dan Pegawai bisa akses admin panel
       if (pathname.startsWith("/Actors")) {
-        // Cek jika sudah di halaman admin (misal /admin/statistic, /admin/actors)
-        router.push("/"); // Kembali ke halaman utama jika sudah di panel admin
+        router.push("/");
       } else {
-        router.push("/Actors"); // Masuk ke panel admin jika belum
+        router.push("/Actors");
       }
     } else if (roles === "penitip" || roles === "pengguna") {
-      // Selain admin/pegawai, ke halaman produk saya
       router.push("/myproducts");
     }
-    // Jika ada peran lain yang tidak memiliki halaman admin/produk spesifik, tidak perlu tindakan
+  };
+
+  // Fungsi baru untuk menangani logout dan pengalihan
+  const handleLogoutAndRedirect = async () => {
+    if (typeof logout === "function") {
+      await logout(); // Panggil fungsi logout, tunggu jika async
+    }
+    router.push("/"); // Alihkan ke halaman utama
   };
 
   const styleBox =
@@ -33,7 +37,7 @@ export default function ProfilePicMenu({
 
   return (
     <div className="w-[420px] flex flex-col bg-[#F2F4F7] rounded-lg">
-      {authed !== null && ( // Menggunakan authed sebagai indikator login
+      {authed !== null && (
         <div className="flex h-[74px] items-center gap-2 mx-2">
           <div className="rounded-full w-10 h-10 bg-gray-400 cursor-pointer "></div>
           <div>
@@ -51,20 +55,16 @@ export default function ProfilePicMenu({
           className={`${styleBox}`}
           onClick={() => router.push("/account-setting")}
         >
-          {" "}
-          {/* Tambahkan rute spesifik */}
           <User size={20} />
           <span>Account Setting</span>{" "}
         </div>
 
         <div className={`${styleBox}`} onClick={() => router.push("/MyOrders")}>
-          {" "}
-          {/* Rute spesifik */}
           <List size={20} />
           <span>My Orders</span>
         </div>
 
-        {authed && ( // Hanya tampilkan tombol ini jika sudah login
+        {authed && (
           <div
             className={`${styleBox}`}
             onClick={handleAdminOrProductPageRedirect}
@@ -75,10 +75,8 @@ export default function ProfilePicMenu({
                 <span>Admin Panel</span>
               </>
             ) : (
-              // Untuk roles selain admin/pegawai (contoh: penitip, pengguna)
               <>
-                <Package size={20} />{" "}
-                {/* Menggunakan Package untuk My Product */}
+                <Package size={20} />
                 <span>My Products</span>
               </>
             )}
@@ -86,7 +84,7 @@ export default function ProfilePicMenu({
         )}
       </div>
 
-      {authed !== null && ( // Saldo hanya ditampilkan jika sudah login
+      {authed !== null && (
         <div className=" border-b border-[#e6e6e6]">
           <div className="flex flex-row gap-1 justify-between items-center m-2 p-2">
             <div>
@@ -100,15 +98,12 @@ export default function ProfilePicMenu({
                   : "0"}
               </p>
               <p className="text-[#666666] font-medium text-xs">
-                Last Payment: 02/12/23 {/* Ini mungkin data statis */}
+                Last Payment: 02/12/23
               </p>
             </div>
             <div>
               <p className="text-[#535353] font-base text-base">Iuran Wajib</p>
-              <p className="font-medium text-base text-black">
-                Rp. 17.000
-              </p>{" "}
-              {/* Ini juga mungkin data statis */}
+              <p className="font-medium text-base text-black">Rp. 17.000</p>
               <p className="text-[#666666] font-medium text-xs">
                 Last Payment: 02/12/23
               </p>
@@ -117,7 +112,10 @@ export default function ProfilePicMenu({
         </div>
       )}
       <div
-        onClick={!authed ? () => router.push("/Login") : logout}
+        // Perbarui onClick untuk menggunakan fungsi baru saat logout
+        onClick={
+          !authed ? () => router.push("/Login") : handleLogoutAndRedirect
+        }
         className={` ${styleBox} `}
       >
         {!authed ? (

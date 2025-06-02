@@ -37,7 +37,7 @@ export async function updateUser(data) {
   return { error: false, data: responseJson.data, status: response.status };
 }
 
-export async function addUser({ fullname, email, tipe,status_keanggotaan, password = "PABW2025" }) {
+export async function addUser({ fullname, email, tipe,status_keanggotaan, password}) {
     let response;
     let responseJson;
     try {
