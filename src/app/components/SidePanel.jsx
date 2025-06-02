@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Hamburger, Popcorn, Coffee, List } from "lucide-react";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function SidePanel({
   category,
@@ -12,6 +13,8 @@ export default function SidePanel({
   salesSort,
   setSalesSort,
 }) {
+  const router = useRouter();
+  const pathname = usePathname();
   const [filterEnabled, setFilterEnabled] = useState(false);
   const categoryBox =
     "flex gap-1.5 w-full py-2 px-2.5 rounded-md cursor-pointer hover:bg-[#E9ECF1] hover:text-[#199F48]";
@@ -24,10 +27,9 @@ export default function SidePanel({
         <div
           id="Order"
           className={`${categoryBox} ${
-            category === "Makanan Berat"
-              ? activeCategoryBox
-              : unactiveCategoryBox
+            pathname === "/MyOrders" ? activeCategoryBox : unactiveCategoryBox
           }`}
+          onClick={() => router.push("/MyOrders")}
         >
           <List size={20} />
           <span>My Order</span>

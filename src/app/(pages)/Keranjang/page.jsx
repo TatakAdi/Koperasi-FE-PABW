@@ -1,13 +1,17 @@
-'use client';
-import Navbar from '@/app/components/Navbar';
-import SidePanel from '@/app/components/SidePanel';
-import CheckoutCard from '@/app/components/keranjang/CheckoutCard';
-import useInput from "@/app/hooks/useInput";
-import { deleteCartItem, getCartItems, updateCartItem } from '@/app/lib/api/cart';
-import { getUserLogged } from '@/app/lib/api/login';
-import { logout } from '@/app/lib/api/logout';
-import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+"use client";
+import Navbar from "@/app/components/Navbar";
+import SidePanel from "@/app/components/SidePanel";
+import CheckoutCard from "@/app/components/keranjang/CheckoutCard";
+import useInput from "app/hooks/useInput";
+import {
+  deleteCartItem,
+  getCartItems,
+  updateCartItem,
+} from "@/app/lib/api/cart";
+import { getUserLogged } from "@/app/lib/api/login";
+import { logout } from "@/app/lib/api/logout";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 export default function KeranjangPage() {
   const [authUser, setAuthUser] = useState(null);
@@ -28,9 +32,9 @@ export default function KeranjangPage() {
       console.log("cartRes", cartRes); // Tambahkan ini
       if (!cartRes.error && cartRes.data && cartRes.data.items) {
         setProducts(
-          cartRes.data.items.map(item => ({
+          cartRes.data.items.map((item) => ({
             ...item,
-            quantity: item.jumlah
+            quantity: item.jumlah,
           }))
         );
       }
@@ -39,9 +43,9 @@ export default function KeranjangPage() {
   }, []);
 
   async function onLogoutHandler() {
-      await logout();
-      setAuthUser(null);
-    }
+    await logout();
+    setAuthUser(null);
+  }
 
   const selectedFiltered = products.filter((item) =>
     selectedItems.includes(item.id)
@@ -56,9 +60,7 @@ export default function KeranjangPage() {
 
   const handleSelect = (id) => {
     setSelectedItems((prev) =>
-      prev.includes(id)
-        ? prev.filter((itemId) => itemId !== id)
-        : [...prev, id]
+      prev.includes(id) ? prev.filter((itemId) => itemId !== id) : [...prev, id]
     );
   };
 
@@ -89,13 +91,9 @@ export default function KeranjangPage() {
 
   const handleSelectAll = () => {
     const idsInView = products.map((p) => p.id);
-    const isAllSelected = idsInView.every((id) =>
-      selectedItems.includes(id)
-    );
+    const isAllSelected = idsInView.every((id) => selectedItems.includes(id));
     if (isAllSelected) {
-      setSelectedItems((prev) =>
-        prev.filter((id) => !idsInView.includes(id))
-      );
+      setSelectedItems((prev) => prev.filter((id) => !idsInView.includes(id)));
     } else {
       setSelectedItems((prev) => [...new Set([...prev, ...idsInView])]);
     }
@@ -132,12 +130,14 @@ export default function KeranjangPage() {
         saldo={authUser !== null && authUser.saldo}
         logout={onLogoutHandler}
       />
-        <div className="flex">
+      <div className="flex">
         <SidePanel />
         <main className="flex-1 bg-white flex flex-col items-start">
           <section className="w-[1124px] min-h-[932px] px-5 py-4 bg-white rounded-xl inline-flex flex-col justify-start items-start gap-4 overflow-hidden mt-8">
             <div className="inline-flex justify-start items-start gap-4">
-              <div className="text-base font-medium text-[#222] font-['Geist'] leading-tight">Keranjang Anda</div>
+              <div className="text-base font-medium text-[#222] font-['Geist'] leading-tight">
+                Keranjang Anda
+              </div>
             </div>
             <div className="flex-1 flex flex-col justify-start items-start gap-12">
               <div className="flex flex-col justify-start items-start">
@@ -145,59 +145,104 @@ export default function KeranjangPage() {
                   <div className="w-[1084px] max-w-[1084px] left-0 top-0 absolute inline-flex justify-start items-center">
                     <div className="w-[360px] h-14 min-w-80 border-r border-[#e5e7eb] flex justify-start items-center gap-[106px]">
                       <div className="w-6 h-6" />
-                      <div className="text-base font-medium text-[#737373] font-['Geist'] leading-normal">Nama Barang</div>
+                      <div className="text-base font-medium text-[#737373] font-['Geist'] leading-normal">
+                        Nama Barang
+                      </div>
                     </div>
                     <div className="flex-1 h-14 border-r border-[#e5e7eb] flex justify-center items-center">
-                      <div className="text-base font-medium text-[#737373] font-['Geist'] leading-normal">Harga</div>
+                      <div className="text-base font-medium text-[#737373] font-['Geist'] leading-normal">
+                        Harga
+                      </div>
                     </div>
                     <div className="flex-1 h-14 border-r border-[#e5e7eb] flex justify-center items-center">
-                      <div className="text-base font-medium text-[#737373] font-['Geist'] leading-normal">Jumlah</div>
+                      <div className="text-base font-medium text-[#737373] font-['Geist'] leading-normal">
+                        Jumlah
+                      </div>
                     </div>
                     <div className="w-[200px] h-14 border-r border-[#e5e7eb] flex justify-center items-center gap-4">
-                      <div className="text-base font-medium text-[#737373] font-['Geist'] leading-normal">Aksi</div>
+                      <div className="text-base font-medium text-[#737373] font-['Geist'] leading-normal">
+                        Aksi
+                      </div>
                     </div>
                   </div>
                 </div>
                 {products.map((product) => (
                   <div
                     key={product.id}
-                    className={`w-[1084px] h-[120px] relative border-b border-[#e5e7eb] flex items-center ${selectedItems.includes(product.id) ? 'bg-[#e6f7ec]' : ''}`}
+                    className={`w-[1084px] h-[120px] relative border-b border-[#e5e7eb] flex items-center ${
+                      selectedItems.includes(product.id) ? "bg-[#e6f7ec]" : ""
+                    }`}
                   >
                     <div className="w-[360px] min-w-80 min-h-[120px] py-7 border-r border-[#e5e7eb] flex items-center gap-4">
                       <img
-                        src={selectedItems.includes(product.id) ? "/checked_box.svg" : "/unchecked_box.svg"}
-                        alt={selectedItems.includes(product.id) ? "Checked" : "Unchecked"}
+                        src={
+                          selectedItems.includes(product.id)
+                            ? "/checked_box.svg"
+                            : "/unchecked_box.svg"
+                        }
+                        alt={
+                          selectedItems.includes(product.id)
+                            ? "Checked"
+                            : "Unchecked"
+                        }
                         className="w-6 h-6 cursor-pointer"
                         onClick={() => handleSelect(product.id)}
                       />
                       <div className="flex items-center gap-4">
-                        <img className="w-16 h-16 rounded-lg" src={product.image} alt={product.name} />
+                        <img
+                          className="w-16 h-16 rounded-lg"
+                          src={product.image || "Piscok.svg"}
+                          alt={product.name}
+                        />
                         <div className="flex flex-col gap-1">
-                          <div className="text-base font-medium text-neutral-900 font-['Geist'] leading-tight">{product.name}</div>
-                          <div className="text-sm text-[#999] font-normal font-['Geist'] leading-tight">{product.category}</div>
+                          <div className="text-base font-medium text-neutral-900 font-['Geist'] leading-tight">
+                            {product.name}
+                          </div>
+                          <div className="text-sm text-[#999] font-normal font-['Geist'] leading-tight">
+                            {product.category}
+                          </div>
                         </div>
                       </div>
                     </div>
                     <div className="flex-1 h-full px-4 py-7 border-r border-[#e5e7eb] flex items-center justify-center">
                       <div className="text-base font-medium text-[#222] font-['Geist']">
-                        Rp. {product.price.toLocaleString('id-ID')}
+                        Rp. {product.price.toLocaleString("id-ID")}
                       </div>
                     </div>
                     <div className="flex-1 h-full px-4 py-7 border-r border-[#e5e7eb] flex justify-center items-center gap-3">
                       <img
                         src="/minus.svg"
                         alt="Kurangi"
-                        className={`w-6 h-6 cursor-pointer ${product.quantity <= 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        onClick={() => product.quantity > 1 && handleQuantityChange(product.id, -1)}
-                        style={{ pointerEvents: product.quantity <= 1 ? 'none' : 'auto' }}
+                        className={`w-6 h-6 cursor-pointer ${
+                          product.quantity <= 1
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                        }`}
+                        onClick={() =>
+                          product.quantity > 1 &&
+                          handleQuantityChange(product.id, -1)
+                        }
+                        style={{
+                          pointerEvents:
+                            product.quantity <= 1 ? "none" : "auto",
+                        }}
                       />
-                      <div className="w-8 text-center text-base text-neutral-900">{product.quantity}</div>
+                      <div className="w-8 text-center text-base text-neutral-900">
+                        {product.quantity}
+                      </div>
                       <img
                         src="/plus.svg"
                         alt="Tambah"
-                        className={`w-6 h-6 cursor-pointer ${product.quantity >= (product.stock ?? product.stok ?? 99) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        className={`w-6 h-6 cursor-pointer ${
+                          product.quantity >=
+                          (product.stock ?? product.stok ?? 99)
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                        }`}
                         onClick={() =>
-                          product.quantity < (product.stock ?? product.stok ?? 99) && handleQuantityChange(product.id, 1)
+                          product.quantity <
+                            (product.stock ?? product.stok ?? 99) &&
+                          handleQuantityChange(product.id, 1)
                         }
                       />
                     </div>
@@ -217,7 +262,8 @@ export default function KeranjangPage() {
                   <div className="w-[360px] min-w-80 h-12 border-r border-[#e5e7eb] flex items-center gap-[106px]">
                     <img
                       src={
-                        products.length > 0 && products.every((p) => selectedItems.includes(p.id))
+                        products.length > 0 &&
+                        products.every((p) => selectedItems.includes(p.id))
                           ? "/checked_box.svg"
                           : "/unchecked_box.svg"
                       }
@@ -239,9 +285,13 @@ export default function KeranjangPage() {
                   </div>
                   <div className="w-[262px] h-12 flex items-center justify-center">
                     <div>
-                      <span className="text-base font-normal text-[#222] font-['Geist']">Total ({selectedFiltered.length} Produk):</span>
+                      <span className="text-base font-normal text-[#222] font-['Geist']">
+                        Total ({selectedFiltered.length} Produk):
+                      </span>
                       <br />
-                      <span className="text-xl font-semibold text-[#222] font-['Geist']">Rp. {total.toLocaleString('id-ID')}</span>
+                      <span className="text-xl font-semibold text-[#222] font-['Geist']">
+                        Rp. {total.toLocaleString("id-ID")}
+                      </span>
                     </div>
                   </div>
                   <div className="w-[200px] h-12 flex items-center justify-center">

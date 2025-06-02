@@ -75,6 +75,7 @@ export default function Home() {
 
       if (error) {
         console.error("Tidak dapat mengambil produk dari server");
+        setIsLoading(false);
         return;
       }
       console.log(data);
@@ -128,7 +129,6 @@ export default function Home() {
   };
 
   const filteredContent = () => {
-    console.log({ category, minPrice, maxPrice, keyword, sellSort });
     const categoryMap = {
       "Makanan Berat": 1,
       "Makanan Ringan": 2,
@@ -211,6 +211,7 @@ export default function Home() {
                     id={produk.id}
                     name={produk.name}
                     price={produk.price}
+                    deskripsi={produk.description}
                     stock={produk.stock}
                     onClickFocus={(focus) => {
                       setSelectedProduk(produk.id);
