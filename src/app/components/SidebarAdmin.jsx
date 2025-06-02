@@ -17,13 +17,13 @@ const ALL_MENU_ITEMS = [
     label: "Selling Statistics",
     icon: <img src="/statistic.svg" alt="statistic" className="size-6" />,
     href: "/Statistic",
-    roles: ["admin", "pegawai", "pengguna", "penitip"],
+    roles: ["admin"],
   },
   {
-    label: "Sellings Data",
-    icon: <img src="/carbon.svg" alt="sellings-data" className="size-6" />,
+    label: "Sellings Statistics",
+    icon: <img src="/statistic.svg" alt="sellings-data" className="size-6" />,
     href: "/Sellings",
-    roles: ["admin", "pegawai", "pengguna", "penitip"],
+    roles: ["pegawai"],
   },
   {
     label: "Product Management",
@@ -32,10 +32,10 @@ const ALL_MENU_ITEMS = [
     roles: ["admin", "pegawai"],
   },
   {
-    label: "Product Management",
+    label: "Product Setup",
     icon: <img src="/carbon.svg" alt="carbon" className="size-6"/>,
     href: "/MyProduct",
-    roles: ["admin", "pegawai"],
+    roles: ["admin", "pegawai", "pengguna", "penitip"],
     },
   {
     label: "Actors",

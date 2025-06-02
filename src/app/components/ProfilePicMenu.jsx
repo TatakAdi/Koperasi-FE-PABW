@@ -27,7 +27,7 @@ export default function ProfilePicMenu({
         router.push("/Actors"); 
       }
     } else if (roles === "penitip" || roles === "pengguna") {
-      router.push("/myproducts");
+      router.push("/MyProduct");
     }
   };
 

@@ -81,7 +81,7 @@ export default function ProductPage() {
 
     const handleOpenEditForm = (product) => {
         setProductToEdit(product);
-        setFormMode('edit');
+        setFormMode("edit");
     };
 
     const handleCloseForm = () => {

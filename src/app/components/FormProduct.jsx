@@ -133,7 +133,7 @@ export default function FormProduct({ productData, onClose, onSave }) {
       id: productData.id,
       price: finalHarga,
       stock: finalStok,
-      category_name: kategori,
+      category: kategori,
     });
   };
 
