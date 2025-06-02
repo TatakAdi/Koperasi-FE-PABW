@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import FormActor from "@/app/components/FormActor";
 import Navbar from "@/app/components/Navbar";
@@ -295,7 +295,7 @@ export default function ActorsPage() {
                 <button
                   type="button"
                   onClick={() => setShowDropdown((v) => !v)}
-                  className="px-3 py-2 bg-black rounded-lg outline-1 outline-offset-[-1px] flex justify-start items-center gap-1 overflow-hidden cursor-pointer transition-transform duration-150 ease-in-out active:scale-95" // Animasi scale saat ditekan
+                  className="px-3 py-2 bg-black rounded-lg outline-1 outline-offset-[-1px] flex justify-start items-center gap-1 overflow-hidden cursor-pointer transition-transform duration-150 ease-in-out active:scale-95"
                 >
                   <span className="w-6 h-6 flex items-center justify-center">
                     <Image
@@ -313,7 +313,11 @@ export default function ActorsPage() {
                     </div>
                   </div>
                   {/* Animasi rotasi ikon panah */}
-                  <span className={`w-6 h-6 flex items-center justify-center transition-transform duration-300 ease-in-out ${showDropdown ? 'rotate-180' : ''}`}>
+                  <span
+                    className={`w-6 h-6 flex items-center justify-center transition-transform duration-300 ease-in-out ${
+                      showDropdown ? "rotate-180" : ""
+                    }`}
+                  >
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                       <path
                         d="M6 9L12 15L18 9"
@@ -329,7 +333,11 @@ export default function ActorsPage() {
                 <div
                   className={`absolute p-2 right-0 mt-2 bg-white rounded-md shadow-lg inline-flex flex-col justify-start items-start gap-1 z-30
                             transition-all duration-300 ease-in-out transform
-                            ${showDropdown ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
+                            ${
+                              showDropdown
+                                ? "opacity-100 scale-100"
+                                : "opacity-0 scale-95 pointer-events-none"
+                            }`}
                   style={{ minWidth: "180px" }}
                   aria-hidden={!showDropdown}
                 >
@@ -457,14 +465,18 @@ export default function ActorsPage() {
                     <div className="flex-1 self-stretch max-w-40 p-2 border-r border-[#E5E5E5] flex justify-center items-center">
                       <div
                         className={`flex-1 text-center text-base font-medium font-['Geist'] leading-normal ${
-                          actor.payment_status === "settlement" ||
-                          actor.payment_status === "capture"
+                          actor.tipe === "admin" || actor.tipe === "pegawai"
+                            ? "text-gray-700"
+                            : actor.payment_status === "settlement" ||
+                              actor.payment_status === "capture"
                             ? "text-green-600"
                             : "text-red-600"
                         }`}
                       >
-                        {actor.payment_status === "settlement" ||
-                        actor.payment_status === "capture"
+                        {actor.tipe === "admin" || actor.tipe === "pegawai"
+                          ? "-"
+                          : actor.payment_status === "settlement" ||
+                            actor.payment_status === "capture"
                           ? "Sudah Bayar"
                           : "Belum Bayar"}
                       </div>
