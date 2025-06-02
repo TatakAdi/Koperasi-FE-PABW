@@ -3,11 +3,11 @@ export default function MyOrderNotPayItems({
   image,
   name,
   category,
-  price,
+  subtotal,
   quantity,
   onPayHandle,
 }) {
-  const finalPrice = price * quantity;
+  // const finalPrice = price * quantity;
 
   return (
     <div
@@ -27,7 +27,7 @@ export default function MyOrderNotPayItems({
               {name}
             </div>
             <div className="text-sm text-[#999] font-normal font-['Geist'] leading-tight">
-              {category}
+              {category.name}
             </div>
           </div>
         </div>
@@ -35,7 +35,7 @@ export default function MyOrderNotPayItems({
       {/**Kolom 2: Harga */}
       <div className="flex-1 h-full px-4 py-7 border-r border-[#e5e7eb] flex items-center justify-center">
         <div className="text-base font-medium text-[#222] font-['Geist']">
-          Rp. {finalPrice.toLocaleString("id-ID")}
+          Rp. {subtotal.toLocaleString("id-ID")}
         </div>
       </div>
       {/**Kolom 3: Harga */}

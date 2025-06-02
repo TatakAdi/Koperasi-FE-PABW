@@ -199,7 +199,7 @@ export default function KeranjangPage() {
                             {product.name}
                           </div>
                           <div className="text-sm text-[#999] font-normal font-['Geist'] leading-tight">
-                            {product.category}
+                            {product.category.name}
                           </div>
                         </div>
                       </div>

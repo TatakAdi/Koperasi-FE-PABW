@@ -5,17 +5,17 @@ import { useRouter } from "next/navigation";
 import { getUserLogged } from "app/lib/api/login";
 import { logout } from "app/lib/api/logout";
 import { getCartItems } from "app/lib/api/cart";
+import { checkout } from "@/app/lib/api/checkout";
 import useInput from "app/hooks/useInput";
 import CheckoutCard from "app/components/keranjang/CheckoutCard";
 import Navbar from "app/components/Navbar";
 import SidePanel from "app/components/SidePanel";
 import MyOrderNotPayItems from "app/components/myOrders/MyOrderNotPayItems";
-import { Noto_Sans_Tamil_Supplement } from "next/font/google";
 
 export default function MyOrders() {
   const [authUser, setAuthUser] = useState(null);
   const [category, setCategory] = useState(null);
-  const [cart, setCart] = useState();
+  const [cart, setCart] = useState([]);
   const [cartItems, setCartItems] = useState([]);
   const [status, setStatus] = useState("Belum Dibayar"); // "Belum Dibayar", "Sedang Diproses", "Sedang Dikirim", "Selesai"
   const [minPrice, setMinPrice] = useInput();
@@ -44,17 +44,17 @@ export default function MyOrders() {
 
       const cartRes = await getCartItems(data.id);
       console.log("CartRes: ", cartRes);
-      setCart(cartRes);
+      setCart(cartRes.data);
       if (!cartRes.error && cartRes.data && cartRes.data.items) {
         const items = cartRes.data.items.map((item) => ({
           ...item,
           quantity: item.jumlah,
         }));
 
-        console.log("cart = ", cart);
         setCartItems(items);
         setProducts(items);
       }
+      console.log("cart = ", cart);
     };
     getUser();
   }, []);
@@ -87,9 +87,35 @@ export default function MyOrders() {
     const selectedItem = cartItems.find((item) => item.id === itemId);
     if (selectedItem) {
       setSelectedItems([itemId]);
-      setTotal(selectedItem.price * selectedItem.quantity);
+      console.log("Selecteditem =", selectedItems);
+      setTotal(selectedItem.subtotal);
+      console.log("Products: ", products);
       setIsFocus(true);
     }
+  };
+
+  const onCheckoutHandle = async ({ items, payment_method }) => {
+    if (!cart || selectedItems.length === 0) return;
+
+    // const itemToPay = cartItems
+    //   .filter((item) => selectedItems.includes(item.id))
+    //   .map((item) => ({ product_id: item.product_id, jumlah: item.quantity }));
+
+    const { error, data } = await checkout({
+      cart_id: cart.cart_id,
+      items,
+      payment_method,
+    });
+
+    if (error) {
+      console.error("Gagal melakukan pembayaran, error: ", error);
+      return;
+    }
+
+    console.log("checkout berhasil dilakukan: ", data.message);
+    setIsFocus(false);
+    sessionStorage.removeItem("payment_method");
+    router.refresh();
   };
 
   return (
@@ -254,6 +280,7 @@ export default function MyOrders() {
             products={products}
             selectedItems={selectedItems}
             onCancel={() => setIsFocus(false)}
+            onSubmitCheckout={onCheckoutHandle}
           />
         )}
       </main>
