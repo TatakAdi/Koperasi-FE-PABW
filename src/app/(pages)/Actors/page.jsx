@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import FormActor from "@/app/components/FormActor";
 import Navbar from "@/app/components/Navbar";
@@ -71,7 +71,6 @@ export default function ActorsPage() {
       const mergedActors = usersData.map((actor) => ({
         ...actor,
         payment_status: paymentStatusMap.get(actor.id) || "belum bayar",
-
         saldoWajib: actor.saldoWajib !== undefined ? actor.saldoWajib : "N/A",
       }));
       setAllActors(mergedActors);
@@ -260,7 +259,6 @@ export default function ActorsPage() {
                     </div>
                     <div className="text-neutral-900 text-base font-medium font-['Geist'] leading-normal">
                       172.659.267{" "}
-                      {/* Data dummy, ganti dengan data dinamis jika ada */}
                     </div>
                   </div>
                 </div>
@@ -292,11 +290,12 @@ export default function ActorsPage() {
                   </div>
                 </div>
               </div>
+              {/* Actions Button and Dropdown */}
               <div className="relative" ref={dropdownRef}>
                 <button
                   type="button"
                   onClick={() => setShowDropdown((v) => !v)}
-                  className="px-3 py-2 bg-black rounded-lg outline-1 outline-offset-[-1px] flex justify-start items-center gap-1 overflow-hidden cursor-pointer"
+                  className="px-3 py-2 bg-black rounded-lg outline-1 outline-offset-[-1px] flex justify-start items-center gap-1 overflow-hidden cursor-pointer transition-transform duration-150 ease-in-out active:scale-95" // Animasi scale saat ditekan
                 >
                   <span className="w-6 h-6 flex items-center justify-center">
                     <Image
@@ -313,7 +312,8 @@ export default function ActorsPage() {
                       Actions
                     </div>
                   </div>
-                  <span className="w-6 h-6 flex items-center justify-center">
+                  {/* Animasi rotasi ikon panah */}
+                  <span className={`w-6 h-6 flex items-center justify-center transition-transform duration-300 ease-in-out ${showDropdown ? 'rotate-180' : ''}`}>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                       <path
                         d="M6 9L12 15L18 9"
@@ -325,43 +325,47 @@ export default function ActorsPage() {
                     </svg>
                   </span>
                 </button>
-                {showDropdown && (
+                {/* Animasi untuk dropdown menu */}
+                <div
+                  className={`absolute p-2 right-0 mt-2 bg-white rounded-md shadow-lg inline-flex flex-col justify-start items-start gap-1 z-30
+                            transition-all duration-300 ease-in-out transform
+                            ${showDropdown ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
+                  style={{ minWidth: "180px" }}
+                  aria-hidden={!showDropdown}
+                >
                   <div
-                    className="absolute p-2 right-0 mt-2 bg-white rounded-md shadow-lg inline-flex flex-col justify-start items-start gap-1 z-30"
-                    style={{ minWidth: "180px" }}
+                    className="w-full px-3 py-2 text-left text-black text-base font-normal font-['Geist'] leading-tight cursor-pointer hover:bg-gray-100 rounded"
+                    onClick={() => {
+                      setShowEditActor(null);
+                      setShowAddActor(true);
+                      setShowDropdown(false);
+                    }}
                   >
-                    <div
-                      className="w-full px-3 py-2 text-left text-black text-base font-normal font-['Geist'] leading-tight cursor-pointer hover:bg-gray-100 rounded"
-                      onClick={() => {
-                        setShowEditActor(null);
-                        setShowAddActor(true);
-                        setShowDropdown(false);
-                      }}
-                    >
-                      Tambah Aktor
-                    </div>
-                    <div
-                      className="w-full px-3 py-2 text-left text-black text-base font-normal font-['Geist'] leading-tight cursor-pointer hover:bg-gray-100 rounded"
-                      onClick={() => {
-                        setShowDropdown(false);
-                      }}
-                    >
-                      Edit Iuran
-                    </div>
-                    <div
-                      className="w-full px-3 py-2 text-left text-black text-base font-normal font-['Geist'] leading-tight cursor-pointer hover:bg-gray-100 rounded"
-                      onClick={() => {
-                        setShowDropdown(false);
-                      }}
-                    >
-                      Edit Tenggat Bayar
-                    </div>
+                    Tambah Aktor
                   </div>
-                )}
+                  <div
+                    className="w-full px-3 py-2 text-left text-black text-base font-normal font-['Geist'] leading-tight cursor-pointer hover:bg-gray-100 rounded"
+                    onClick={() => {
+                      setShowDropdown(false);
+                    }}
+                  >
+                    Edit Iuran
+                  </div>
+                  <div
+                    className="w-full px-3 py-2 text-left text-black text-base font-normal font-['Geist'] leading-tight cursor-pointer hover:bg-gray-100 rounded"
+                    onClick={() => {
+                      setShowDropdown(false);
+                    }}
+                  >
+                    Edit Tenggat Bayar
+                  </div>
+                </div>
               </div>
             </div>
 
+            {/* Table Container */}
             <div className="w-full flex flex-col">
+              {/* Table Header */}
               <div className="w-full border-b border-[#E5E5E5] flex flex-col justify-start items-start gap-2.5">
                 <div className="self-stretch inline-flex justify-start items-center">
                   <div className="w-14 h-14 max-w-16 border-r border-[#E5E5E5] flex justify-center items-center gap-2 px-2 text-center">
@@ -380,36 +384,26 @@ export default function ActorsPage() {
                     </div>
                   </div>
                   <div className="flex-1 h-14 max-w-40 border-r border-[#E5E5E5] flex justify-center items-center gap-2 px-2 text-center">
-                    {" "}
-                    {/* Disesuaikan max-w */}
                     <div className="text-[#737373] text-base font-medium font-['Geist'] leading-normal capitalize">
                       Status Pembayaran
                     </div>
                   </div>
                   <div className="flex-1 h-14 max-w-40 border-r border-[#E5E5E5] flex justify-center items-center gap-2 px-2 text-center">
-                    {" "}
-                    {/* Disesuaikan max-w */}
                     <div className="text-[#737373] text-base font-medium font-['Geist'] leading-normal capitalize">
                       Status Anggota
                     </div>
                   </div>
                   <div className="flex-1 h-14 max-w-40 border-r border-[#E5E5E5] flex justify-center items-center gap-2 px-2 text-center">
-                    {" "}
-                    {/* Disesuaikan max-w */}
                     <div className="text-[#737373] text-base font-medium font-['Geist'] leading-normal capitalize">
                       Saldo sukarela
                     </div>
                   </div>
                   <div className="flex-1 h-14 max-w-32 border-r border-[#E5E5E5] flex justify-center items-center gap-2 px-2 text-center">
-                    {" "}
-                    {/* Disesuaikan max-w */}
                     <div className="text-[#737373] text-base font-medium font-['Geist'] leading-normal capitalize">
                       Saldo wajib
                     </div>
                   </div>
                   <div className="flex-1 h-14 max-w-32 border-r border-[#E5E5E5] flex justify-center items-center gap-2 px-2 text-center">
-                    {" "}
-                    {/* Disesuaikan max-w */}
                     <div className="text-[#737373] text-base font-medium font-['Geist'] leading-normal capitalize">
                       Privilege
                     </div>
@@ -422,7 +416,7 @@ export default function ActorsPage() {
                 </div>
               </div>
 
-              {/* Kondisi Loading untuk Tabel */}
+              {/* Table Rows */}
               {isLoading ? (
                 <div className="w-full text-center py-10 text-gray-500 font-medium">
                   Memuat data aktor...
@@ -461,7 +455,6 @@ export default function ActorsPage() {
                       </div>
                     </div>
                     <div className="flex-1 self-stretch max-w-40 p-2 border-r border-[#E5E5E5] flex justify-center items-center">
-                      {" "}
                       <div
                         className={`flex-1 text-center text-base font-medium font-['Geist'] leading-normal ${
                           actor.payment_status === "settlement" ||
@@ -477,7 +470,6 @@ export default function ActorsPage() {
                       </div>
                     </div>
                     <div className="flex-1 self-stretch max-w-40 p-2 border-r border-[#E5E5E5] flex justify-center items-center">
-                      {" "}
                       <div
                         className={`flex-1 text-center text-base font-medium font-['Geist'] leading-normal ${
                           actor.status_keanggotaan === "aktif"
@@ -494,19 +486,16 @@ export default function ActorsPage() {
                       </div>
                     </div>
                     <div className="flex-1 self-stretch max-w-40 p-2 border-r border-[#E5E5E5] flex justify-center items-center">
-                      {" "}
                       <div className="flex-1 text-center text-black text-base font-medium font-['Geist'] leading-normal">
                         {formatRupiah(actor.saldo)}{" "}
                       </div>
                     </div>
                     <div className="flex-1 self-stretch max-w-32 p-2 border-r border-[#E5E5E5] flex justify-center items-center">
-                      {" "}
                       <div className="flex-1 text-center text-black text-base font-medium font-['Geist'] leading-normal">
                         {formatRupiah(actor.saldoWajib)}{" "}
                       </div>
                     </div>
                     <div className="flex-1 self-stretch max-w-32 p-2 border-r border-[#E5E5E5] flex justify-center items-center">
-                      {" "}
                       <Privilage value={actor.tipe} />
                     </div>
                     <div className="w-24 self-stretch p-2 border-r border-[#E5E5E5] flex justify-center items-center gap-2">
@@ -541,6 +530,7 @@ export default function ActorsPage() {
                   </div>
                 ))
               )}
+              {/* Pagination */}
               {totalPages > 1 && !isLoading && currentActors.length > 0 && (
                 <div className="w-full mt-6 flex justify-center items-center gap-2">
                   <div className="flex justify-center items-center gap-1 sm:gap-2">
