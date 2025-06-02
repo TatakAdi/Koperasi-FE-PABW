@@ -7,10 +7,7 @@ import { startTransition, useEffect, useMemo, useState } from "react";
 function LoadingOverlay() {
   return (
     <div className="fixed inset-0 bg-white opacity-40 flex items-center justify-center z-[9999]"> {/* Ubah background agar spinner lebih terlihat */}
-      {/* Spinner */}
       <div className="w-16 h-16 border-4 border-black border-t-transparent border-solid rounded-full animate-spin"></div>
-      {/* Opsional: Anda bisa menambahkan teks "Loading..." di bawah atau di samping spinner jika diinginkan */}
-      {/* <span className="ml-4 text-white text-xl font-semibold">Loading...</span> */}
     </div>
   );
 }
