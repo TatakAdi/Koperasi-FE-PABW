@@ -8,6 +8,15 @@ export default function SearchBar({
 }) {
   const pathname = usePathname();
 
+  const getPlaceholder = () => {
+    if (pathname === "/Actors") {
+      return "Cari Nama, Email, atau Privilage";
+    } else if (pathname === "/Product") {
+      return "Cari Produk, Kategori, atau Penjual";
+    }
+    return "Cari Produk";
+  };
+
   return (
     <div className="relative">
       <input
@@ -15,9 +24,7 @@ export default function SearchBar({
         name=""
         id=""
         className="bg-[#F2F4F7] rounded-4xl w-[800px] font-normal text-base px-5 py-3"
-        placeholder={
-          pathname.startsWith("/Admin") ? "Cari aktor" : "Cari produk"
-        }
+        placeholder={getPlaceholder()}
         value={keyword}
         onChange={onKeywordChange}
       />

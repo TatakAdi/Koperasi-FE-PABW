@@ -11,7 +11,7 @@ export default async function handler(req, res) {
         }
 
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_APP_URL}/api/admin/user/${id}`,
+            `${process.env.NEXT_PUBLIC_APP_URL}/api/product/${id}`,
             {
                 method: "PUT",
                 headers: {

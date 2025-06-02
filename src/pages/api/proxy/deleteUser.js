@@ -1,10 +1,7 @@
-"use server";
-
 export default async function handler(req, res) {
     try {
-        const { fullname, email, tipe, status_keanggotaan, password } = req.body;
+        const {id_user} = req.query;
     
-        // Ambil token dari cookie
         const cookies = req.headers.cookie || "";
         const tokenMatch = cookies.match(/TOKENID=([^;]+)/);
         const token = tokenMatch ? decodeURIComponent(tokenMatch[1]) : null;
@@ -14,21 +11,19 @@ export default async function handler(req, res) {
         }
     
         const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL}/api/admin/user`,
+        `${process.env.NEXT_PUBLIC_APP_URL}/api/admin/user/${id_user}`,
         {
-            method: "POST",
+            method: "DELETE",
             headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
             "X-Requested-With": "XMLHttpRequest",
             },
-            body: JSON.stringify({fullname, email, tipe, status_keanggotaan, password }),
         }
         );
     
         const data = await response.json();
         res.status(response.status).json(data);
-        return { data: data.user_id };
     } catch (error) {
         console.error("Proxy error:", error);
         res

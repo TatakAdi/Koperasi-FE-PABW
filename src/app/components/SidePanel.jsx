@@ -1,7 +1,7 @@
 "use client";
+import { Coffee, Hamburger, List, Popcorn } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { Hamburger, Popcorn, Coffee, List } from "lucide-react";
-import { useRouter, usePathname } from "next/navigation";
 
 export default function SidePanel({
   category,
@@ -22,7 +22,7 @@ export default function SidePanel({
   const activeCategoryBox = "bg-[#E9ECF1] text-[#199F48]";
 
   return (
-    <aside className="w-[296px] min-h-screen bg-[#F2F4F7] sticky top-0 h-full">
+    <aside className="w-[296px] min-h-screen bg-[#F2F4F7] sticky rounded-xl top-0 h-full">
       <div id="OrderOrderISay" className="m-2.5">
         <div
           id="Order"

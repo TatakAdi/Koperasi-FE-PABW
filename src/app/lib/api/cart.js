@@ -42,6 +42,25 @@ export async function getCartItems(userId) {
   return { error: false, data: responseJson, status: response.status };
 }
 
+export async function getAllCart() {
+  const response = await fetch(`/api/proxy/getAllCart`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  const responseJson = await response.json();
+
+  if (response.status !== 200) {
+    console.error(responseJson.message);
+    return { error: true, data: null, status: response.status };
+  }
+
+  console.log(responseJson);
+  return { error: false, data: responseJson, status: response.status };
+}
+
 export async function deleteCartItem(userId, productId) {
   const response = await fetch(
     `/api/proxy/deleteCart?id_user=${userId}&id_product=${productId}`,

@@ -4,45 +4,44 @@ import {
   LogIn,
   LogOut,
   Package,
-  User,
-  Store,
+  User
 } from "lucide-react";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function ProfilePicMenu({
   fullName,
   email,
   roles,
-  authed,
-  logout,
+  authed, // Asumsi ini adalah boolean atau truthy/falsy untuk status autentikasi
+  logout, // Fungsi logout
   saldo,
 }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const adminButtonEventHandler = () => {
-    if (roles === "admin") {
-      if (pathname.startsWith("/Admin")) {
-        router.push("/");
+  const handleAdminOrProductPageRedirect = () => {
+    if (roles === "admin" || roles === "pegawai") { // Admin dan Pegawai bisa akses admin panel
+      if (pathname.startsWith("/Actors")) { // Cek jika sudah di halaman admin (misal /admin/statistic, /admin/actors)
+        router.push("/"); // Kembali ke halaman utama jika sudah di panel admin
       } else {
-        router.push("/Admin/Statistic");
+        router.push("/Actors"); // Masuk ke panel admin jika belum
       }
-    } else {
-      router.push("/MyProducts");
+    } else if (roles === "penitip" || roles === "pengguna") { // Selain admin/pegawai, ke halaman produk saya
+      router.push("/myproducts");
     }
+    // Jika ada peran lain yang tidak memiliki halaman admin/produk spesifik, tidak perlu tindakan
   };
 
-  const styleBox =
-    "flex flex-row text-sm font-medium text-[#535353] p-2 cursor-pointer hover:bg-[#EDEDED] rounded-lg gap-2 m-2";
+  const styleBox = "flex flex-row text-sm font-medium text-[#535353] p-2 cursor-pointer hover:bg-[#EDEDED] rounded-lg gap-2 m-2";
 
   return (
     <div className="w-[420px] flex flex-col bg-[#F2F4F7] rounded-lg">
-      {authed !== null && (
+      {authed !== null && ( // Menggunakan authed sebagai indikator login
         <div className="flex h-[74px] items-center gap-2 mx-2">
-          <div className="rounded-full w-10 h-10  bg-gray-400 cursor-pointer "></div>
+          <div className="rounded-full w-10 h-10 bg-gray-400 cursor-pointer "></div>
           <div>
-            <p className="font-medium text-black">{fullName}</p>
-            <p className="font-medium text-[#737373]">{email}</p>
+            <p className="font-medium text-black">{fullName || "Guest"}</p>
+            <p className="font-medium text-[#737373]">{email || "N/A"}</p>
           </div>
         </div>
       )}
@@ -51,37 +50,34 @@ export default function ProfilePicMenu({
           authed !== null ? "border-y " : "border-b "
         } border-[#E6E6E6]`}
       >
-        <div className={`${styleBox}`}>
+        <div className={`${styleBox}`} onClick={() => router.push("/account-setting")}> {/* Tambahkan rute spesifik */}
           <User size={20} />
-          <span className=""> Account Setting</span>{" "}
+          <span>Account Setting</span>{" "}
         </div>
 
-        <div className={`${styleBox}`} onClick={() => router.push("/MyOrders")}>
+        <div className={`${styleBox}`} onClick={() => router.push("/my-orders")}> {/* Rute spesifik */}
           <List size={20} />
-          <span> My Orders</span>
+          <span>My Orders</span>
         </div>
-        <div className={`${styleBox}`} onClick={adminButtonEventHandler}>
-          {roles === "admin" ? (
-            !pathname.startsWith("/Admin") ? (
+
+        {authed && ( // Hanya tampilkan tombol ini jika sudah login
+          <div className={`${styleBox}`} onClick={handleAdminOrProductPageRedirect}>
+            {roles === "admin" || roles === "pegawai" ? (
               <>
                 <KeyRound size={20} />
                 <span>Admin Panel</span>
               </>
-            ) : (
+            ) : ( // Untuk roles selain admin/pegawai (contoh: penitip, pengguna)
               <>
-                <Store size={20} />
-                <span>Main Page</span>
+                <Package size={20} /> {/* Menggunakan Package untuk My Product */}
+                <span>My Products</span>
               </>
-            )
-          ) : (
-            <>
-              <Package size={20} />
-              <span>My Product</span>
-            </>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
-      {authed !== null && (
+
+      {authed !== null && ( // Saldo hanya ditampilkan jika sudah login
         <div className=" border-b border-[#e6e6e6]">
           <div className="flex flex-row gap-1 justify-between items-center m-2 p-2">
             <div>
@@ -89,15 +85,15 @@ export default function ProfilePicMenu({
                 Iuran Sukarela
               </p>
               <p className="font-medium text-base text-black">
-                Rp. {saldo.toLocaleString("id-ID")}
+                Rp. {saldo !== null && saldo !== undefined ? saldo.toLocaleString("id-ID") : "0"}
               </p>
               <p className="text-[#666666] font-medium text-xs">
-                Last Payment: 02/12/23
+                Last Payment: 02/12/23 {/* Ini mungkin data statis */}
               </p>
             </div>
             <div>
               <p className="text-[#535353] font-base text-base">Iuran Wajib</p>
-              <p className="font-medium text-base text-black">Rp. 17.000</p>
+              <p className="font-medium text-base text-black">Rp. 17.000</p> {/* Ini juga mungkin data statis */}
               <p className="text-[#666666] font-medium text-xs">
                 Last Payment: 02/12/23
               </p>
@@ -106,7 +102,7 @@ export default function ProfilePicMenu({
         </div>
       )}
       <div
-        onClick={!authed ? () => router.push("/Login") : logout}
+        onClick={!authed ? () => router.push("/login") : logout}
         className={` ${styleBox} `}
       >
         {!authed ? (
