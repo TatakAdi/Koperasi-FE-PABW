@@ -53,14 +53,14 @@ export default function ProductBox({
               }`}
             >
               <p
-                className={`text-white font-medium mr-1 transition-opacity duration-300 ease-in-out ${
+                className={`text-white font-medium p-2 transition-opacity duration-300 ease-in-out ${
                   isHover ? "opacity-100" : "opacity-0 overflow-hidden"
                 }`}
               >
                 Beli
               </p>
               <PlusIcon
-                stroke={!isHover ? "green" : "white"}
+                stroke={!isHover ? "#199F48" : "white"}
                 onClick={() => onClickFocus(true)}
               />
             </div>
