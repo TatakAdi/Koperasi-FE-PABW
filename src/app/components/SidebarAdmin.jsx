@@ -22,13 +22,13 @@ const ALL_MENU_ITEMS = [
     label: "Selling Statistics",
     icon: <img src="/statistic.svg" alt="statistic" className="size-6" />,
     href: "/Statistic",
-    roles: ["admin", "pegawai"], // Semua role yang terotentikasi
+    roles: ["admin", "pegawai","pengguna","penitip"], // Semua role yang terotentikasi
   },
   {
     label: "Sellings Data",
     icon: <img src="/carbon.svg" alt="sellings-data" className="size-6" />,
     href: "/Sellings",
-    roles: ["admin", "pegawai"], // Semua role yang terotentikasi
+    roles: ["admin", "pegawai", "pengguna", "penitip"], // Semua role yang terotentikasi
   },
   {
     label: "Product Management",
