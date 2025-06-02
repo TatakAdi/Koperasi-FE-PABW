@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { PlusIcon } from "lucide-react";
+import { useState } from "react";
 
 export default function ProductBox({
   id,
@@ -22,11 +22,11 @@ export default function ProductBox({
       <img
         src="image.png"
         alt="Pratinjau Produk"
-        className="w-[259px] h-[194px] object-contain relative rounded-t-lg"
+        className="w-full h-full object-contain relative rounded-t-lg"
       />
       <div className="grid grid-cols-1 gap-4 px-4 mt-4">
         <div className="grid grid-cols-1 gap-2">
-          <h5>{name}</h5>
+          <h5 className="font-medium text-[20px]">{name}</h5>
           <p className="font-normal text-sm text-[#737373]">
             {pangkasDeskripsi(deskripsi, 28) ||
               "Diperoleh dari kedelai pilihan"}
