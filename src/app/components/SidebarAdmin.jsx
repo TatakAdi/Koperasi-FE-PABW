@@ -32,6 +32,12 @@ const ALL_MENU_ITEMS = [
     roles: ["admin", "pegawai"],
   },
   {
+    label: "Product Management",
+    icon: <img src="/carbon.svg" alt="carbon" className="size-6"/>,
+    href: "/MyProduct",
+    roles: ["admin", "pegawai"],
+    },
+  {
     label: "Actors",
     icon: <img src="/actor.svg" alt="actor" className="size-6" />,
     href: "/Actors",
