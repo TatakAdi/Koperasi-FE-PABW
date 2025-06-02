@@ -1,7 +1,6 @@
-import React from "react";
 
 export default function Kategori({ value, className = "" }) {
-  if (value === "berat") {
+  if (value === "Makanan Berat") {
     return (
       <div className={`px-1.5 py-0.5 bg-purple-100 rounded-lg inline-flex justify-center items-center gap-2.5 ${className}`}>
         <div className="flex justify-start items-center gap-1">
@@ -11,7 +10,7 @@ export default function Kategori({ value, className = "" }) {
       </div>
     );
   }
-  if (value === "minuman") {
+  if (value === "Minuman") {
     return (
       <div className={`px-1.5 py-0.5 bg-cyan-100 rounded-lg outline-offset-[-1px] inline-flex justify-center items-center gap-1 ${className}`}>
         <div className="flex justify-start items-center gap-1">
@@ -21,7 +20,7 @@ export default function Kategori({ value, className = "" }) {
       </div>
     );
   }
-  if (value === "ringan") {
+  if (value === "Makanan Ringan") {
     return (
       <div className={`px-1.5 py-0.5 bg-[#EBFAEB] rounded-lg inline-flex justify-center items-center gap-1 ${className}`}>
         <div className="flex justify-start items-center gap-1">

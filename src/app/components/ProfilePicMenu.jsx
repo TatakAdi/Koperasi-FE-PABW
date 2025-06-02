@@ -21,10 +21,10 @@ export default function ProfilePicMenu({
 
   const handleAdminOrProductPageRedirect = () => {
     if (roles === "admin" || roles === "pegawai") { // Admin dan Pegawai bisa akses admin panel
-      if (pathname.startsWith("/admin")) { // Cek jika sudah di halaman admin (misal /admin/statistic, /admin/actors)
+      if (pathname.startsWith("/Actors")) { // Cek jika sudah di halaman admin (misal /admin/statistic, /admin/actors)
         router.push("/"); // Kembali ke halaman utama jika sudah di panel admin
       } else {
-        router.push("/admin/statistic"); // Masuk ke panel admin jika belum
+        router.push("/Actors"); // Masuk ke panel admin jika belum
       }
     } else if (roles === "penitip" || roles === "pengguna") { // Selain admin/pegawai, ke halaman produk saya
       router.push("/myproducts");

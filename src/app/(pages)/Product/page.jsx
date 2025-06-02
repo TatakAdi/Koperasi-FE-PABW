@@ -1,402 +1,387 @@
+// app/admin/products/page.jsx
 'use client';
 
-import Kategori from "@/app/components/Kategori";
+import FormProduct from "@/app/components/FormProduct";
+import Kategori from "@/app/components/Kategori"; // Digunakan di tabel
 import Navbar from "@/app/components/Navbar";
 import SidebarAdmin from "@/app/components/SidebarAdmin";
 import useInput from "@/app/hooks/useInput";
 import { getUserLogged } from "@/app/lib/api/login";
 import { logout } from "@/app/lib/api/logout";
-import { getProduct } from "@/app/lib/api/product"; // Import getProduct
-import { useEffect, useState } from "react";
+// Impor fungsi API untuk produk
+// Hanya getProduct, updateProduct, dan deleteProduct yang digunakan
+import { deleteProduct, getProduct, updateProduct } from "@/app/lib/api/product";
+import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
 
 export default function ProductPage() {
-  const [keyword, setKeyword] = useInput(''); // Inisialisasi dengan string kosong
-  const [authUser, setAuthUser] = useState(null);
-  const [allProducts, setAllProducts] = useState([]); // State untuk menyimpan semua data produk dari API
-  const [displayedProducts, setDisplayedProducts] = useState([]); // State untuk produk yang akan ditampilkan (setelah filter dan pencarian)
-  const [isLoading, setIsLoading] = useState(true); // Tambahkan state loading
+    const [keyword, setKeyword] = useInput('');
+    const [authUser, setAuthUser] = useState(null);
+    const [allProducts, setAllProducts] = useState([]);
+    const [isLoading, setIsLoading] = useState(false); // Untuk proses simpan/update/delete
+    const [isLoadingData, setIsLoadingData] = useState(true); // Untuk loading data awal
 
-  // State untuk mode edit dan data produk yang diedit
-  const [editIndex, setEditIndex] = useState(null);
+    const [formMode, setFormMode] = useState(null); // Hanya akan 'edit' atau null
+    const [productToEdit, setProductToEdit] = useState(null);
 
-  // State untuk form edit
-  const [editHarga, setEditHarga] = useState("");
-  const [editStok, setEditStok] = useState("");
-  const [editKategori, setEditKategori] = useState("");
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [productsPerPage] = useState(8);
 
-  // Kategori list
-  const kategoriList = [
-    { label: "Makanan Berat", value: "makanan berat" }, // Pastikan value sesuai dengan nama kategori dari API
-    { label: "Makanan Ringan", value: "makanan ringan" },
-    { label: "Minuman", value: "minuman" },
-  ];
-
-  // Untuk menampilkan label kategori dari value
-  const getKategoriLabel = (val) => {
-    const found = kategoriList.find((k) => k.value === val);
-    return found ? k.label : val; // Return value jika tidak ditemukan
-  };
-
-  // Fungsi untuk memformat angka ke dalam format Rupiah
-  function formatRupiah(angka) {
-    if (angka === null || angka === undefined || angka === "") return "Rp. 0";
-    const number = typeof angka === 'string' ? parseInt(angka.replace(/[^0-9]/g, ""), 10) : angka;
-    if (isNaN(number)) return "Rp. 0";
-    return `Rp. ${number.toLocaleString('id-ID')}`;
-  }
-
-  // Fetch product data
-  const fetchProductsData = async () => {
-    setIsLoading(true);
-    const { error, data } = await getProduct();
-    if (error) {
-      console.error("Gagal mengambil data produk:", error);
-      setAllProducts([]);
-    } else {
-      setAllProducts(data);
-    }
-    setIsLoading(false);
-  };
-
-  // Fetch user logged in
-  useEffect(() => {
-    const fetchUserLogged = async () => {
-      const { error, data } = await getUserLogged();
-      if (error) {
-        console.log("Token Invalid & Data user gagal terambil");
+    async function onLogoutHandler() {
+        await logout();
         setAuthUser(null);
-        return;
-      }
-      setAuthUser(data);
+    }
+
+    function formatRupiah(angka) {
+        if (angka === null || angka === undefined || angka === "") return "Rp. 0";
+        const number = typeof angka === 'string' ? parseInt(angka.toString().replace(/[^0-9]/g, ""), 10) : angka;
+        if (isNaN(number)) return "Rp. 0";
+        return `Rp. ${number.toLocaleString('id-ID')}`;
+    }
+
+    const fetchProductsData = async () => {
+        setIsLoadingData(true);
+        const { error, data } = await getProduct();
+        if (error) {
+            console.error("Gagal mengambil data produk:", error);
+            setAllProducts([]);
+            // Using window.alert here as it's existing pattern in the code, though custom modals are generally preferred.
+            window.alert("Gagal mengambil data produk. Silakan coba lagi.");
+        } else {
+            setAllProducts(Array.isArray(data) ? data : []);
+        }
+        setIsLoadingData(false);
     };
-    fetchUserLogged();
-    fetchProductsData(); // Panggil juga fetchProductsData saat komponen di-mount
-  }, []); // Dependensi kosong, hanya dijalankan sekali saat mount
 
-  // Filter products based on user role and keyword
-  useEffect(() => {
-    let filtered = allProducts;
+    useEffect(() => {
+        const fetchInitialData = async () => {
+            const { error: userError, data: userData } = await getUserLogged();
+            if (userError) {
+                console.log("Token Invalid & Data user gagal terambil:", userError);
+            }
+            setAuthUser(userData);
+            await fetchProductsData();
+        };
+        fetchInitialData();
+    }, []);
 
-    // Filter berdasarkan peran pengguna
-    if (authUser) {
-      const userRole = authUser.tipe;
-      const userId = authUser.id;
+    const filteredProducts = useMemo(() => {
+        if (!allProducts) return [];
+        if (!keyword) {
+            return allProducts;
+        }
+        const lowercasedKeyword = keyword.toLowerCase();
+        return allProducts.filter(product =>
+            product.name?.toLowerCase().includes(lowercasedKeyword) ||
+            (product.category && product.category.name?.toLowerCase().includes(lowercasedKeyword)) ||
+            (product.user && product.user.fullname?.toLowerCase().includes(lowercasedKeyword))
+        );
+    }, [allProducts, keyword]);
 
-      if (userRole !== 'admin' && userRole !== 'pegawai') {
-        // Jika bukan admin atau pegawai, hanya tampilkan produk yang ditambahkan sendiri
-        filtered = filtered.filter(product => product.user_id === userId);
-      }
+
+    const handleOpenEditForm = (product) => {
+        setProductToEdit(product);
+        setFormMode('edit');
+    };
+
+    const handleCloseForm = () => {
+        setFormMode(null);
+        setProductToEdit(null);
+    };
+
+    const handleSaveProduct = async (productDataFromForm) => {
+        setIsLoading(true);
+        let response;
+        let successMessage = "";
+
+        const payload = { ...productDataFromForm };
+
+        if (formMode === 'edit' && payload.id) {
+            console.log("Updating product with data:", payload);
+            response = await updateProduct(payload);
+            successMessage = "Produk berhasil diperbarui!";
+        } else {
+            console.error("Form mode tidak valid atau product ID tidak ada untuk edit.");
+            // Using window.alert here as it's existing pattern in the code.
+            window.alert("Terjadi kesalahan: Hanya mode edit yang didukung untuk penyimpanan.");
+            setIsLoading(false);
+            return;
+        }
+
+        setIsLoading(false);
+
+        if (response && !response.error) { // Jika response.error adalah false atau null/undefined (sukses)
+            // Using window.alert here as it's existing pattern in the code.
+            window.alert(successMessage);
+            handleCloseForm();
+            await fetchProductsData();
+        } else {
+            // Penanganan error yang lebih baik
+            let detailErrorMessage = "Terjadi kesalahan yang tidak diketahui.";
+            if (response && response.error) {
+                if (typeof response.error === 'string' && response.error.trim() !== "") {
+                    detailErrorMessage = response.error;
+                } else if (response.status) {
+                    detailErrorMessage = `Gagal menyimpan produk. Status: ${response.status}. Silakan coba lagi atau hubungi administrator.`;
+                } else {
+                    detailErrorMessage = "Gagal menyimpan produk. Tidak ada detail tambahan dari server.";
+                }
+            }
+            console.error("Gagal menyimpan produk:", response ? response : "Respons tidak diketahui");
+            // Using window.alert here as it's existing pattern in the code.
+            window.alert(detailErrorMessage);
+        }
+    };
+
+    const handleDeleteProduct = async (productId, productName) => {
+        // Using window.confirm here as it's existing pattern in the code.
+        if (window.confirm(`Apakah Anda yakin ingin menghapus produk "${productName}"? Tindakan ini tidak dapat diurungkan.`)) {
+            setIsLoading(true);
+            const { error, status } = await deleteProduct(productId);
+            setIsLoading(false);
+
+            if (error) {
+                let detailErrorMessage = `Gagal menghapus produk: ${productName}.`;
+                if (typeof error === 'string' && error.trim() !== "") {
+                    detailErrorMessage = error;
+                } else if (status) {
+                    detailErrorMessage = `Gagal menghapus produk. Status: ${status}.`;
+                }
+                console.error("Gagal menghapus produk:", error, "Status:", status);
+                // Using window.alert here as it's existing pattern in the code.
+                window.alert(detailErrorMessage);
+            } else {
+                // Using window.alert here as it's existing pattern in the code.
+                window.alert(`Produk "${productName}" berhasil dihapus!`);
+                await fetchProductsData();
+            }
+        }
+    };
+
+    const indexOfLastProduct = currentPage * productsPerPage;
+    const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+    const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+    const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+
+    useEffect(() => {
+        if (currentPage > totalPages && totalPages > 0) {
+            setCurrentPage(totalPages);
+        } else if (totalPages === 0 && filteredProducts.length === 0 && currentPage !== 1) {
+            setCurrentPage(1);
+        }
+    }, [filteredProducts, currentPage, totalPages]);
+
+    const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+    const nextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
+
+    const prevPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
+    const getPaginationGroup = () => {
+        let start = Math.max(1, currentPage - 2);
+        let end = Math.min(totalPages, currentPage + 2);
+        const pages = [];
+        if (totalPages <= 5) {
+            start = 1;
+            end = totalPages;
+        } else {
+            if (currentPage <= 3) {
+                start = 1;
+                end = 5;
+            } else if (currentPage >= totalPages - 2) {
+                start = totalPages - 4;
+                end = totalPages;
+            }
+        }
+
+        if (start > 1 && totalPages > 5) {
+            pages.push(1);
+            if (start > 2) {
+                pages.push('...');
+            }
+        }
+        for (let i = start; i <= end; i++) {
+            if (i > 0) pages.push(i);
+        }
+        if (end < totalPages && totalPages > 5) {
+            if (end < totalPages - 1) {
+                pages.push('...');
+            }
+            pages.push(totalPages);
+        }
+        return pages;
+    };
+
+    if (formMode === 'edit') {
+        return (
+            <div className="w-full min-h-screen flex flex-col bg-white">
+                <Navbar
+                    keyword={keyword}
+                    onKeywordChange={setKeyword}
+                    authUser={authUser}
+                    roles={authUser ? authUser.tipe : null}
+                    fullName={authUser ? authUser.fullname : null}
+                    email={authUser ? authUser.email : null}
+                    saldo={authUser ? authUser.saldo : null}
+                    logout={onLogoutHandler}
+                />
+                <div className="flex flex-1">
+                    <SidebarAdmin />
+                    <FormProduct
+                        productData={productToEdit}
+                        onClose={handleCloseForm}
+                        onSave={handleSaveProduct}
+                    />
+                </div>
+            </div>
+        );
     }
-
-    // Filter berdasarkan keyword (nama, kategori, penjual)
-    if (keyword) {
-      const lowercasedKeyword = keyword.toLowerCase();
-      filtered = filtered.filter(product =>
-        product.name.toLowerCase().includes(lowercasedKeyword) ||
-        product.category.name.toLowerCase().includes(lowercasedKeyword) ||
-        (product.user && product.user.fullname.toLowerCase().includes(lowercasedKeyword))
-      );
-    }
-    
-    setDisplayedProducts(filtered);
-  }, [allProducts, authUser, keyword]); // Dependensi: allProducts, authUser, keyword
-
-  // Inisialisasi state edit jika index berubah
-  useEffect(() => {
-    if (editIndex !== null && displayedProducts[editIndex]) {
-      const productToEdit = displayedProducts[editIndex];
-      setEditHarga(productToEdit.price.toString()); // price adalah angka
-      setEditStok(productToEdit.stock.toString());
-      setEditKategori(productToEdit.category.name); // category.name adalah string kategori
-    }
-  }, [editIndex, displayedProducts]); // Tambahkan displayedProducts sebagai dependensi
-
-  async function onLogoutHandler() {
-    await logout();
-    setAuthUser(null);
-  }
-
-  // Jika sedang edit, tampilkan tampilan edit sesuai desain
-  if (editIndex !== null) {
-    const product = displayedProducts[editIndex]; // Ambil dari displayedProducts
 
     return (
-      <div className="w-full h-[1024px] relative bg-white overflow-hidden">
-        <Navbar
-          keyword={keyword}
-          onKeywordChange={setKeyword}
-          authUser={authUser}
-          roles={authUser ? authUser.tipe : null}
-          fullName={authUser ? authUser.fullname : null}
-          email={authUser ? authUser.email : null}
-          saldo={authUser ? authUser.saldo : null}
-          logout={onLogoutHandler}
-        />
-        <div className="w-full h-full flex flex-row">
-          <SidebarAdmin />
-          <div className="w-[1124px] h-[936px] px-5 py-4 bg-white rounded-xl inline-flex flex-col justify-start items-start gap-6 overflow-hidden mt-4">
-            {/* Breadcrumb */}
-            <div className="self-stretch inline-flex justify-start items-center gap-2">
-              <div className="flex justify-center items-center gap-2">
-                <button 
-                  className="text-SIDE-ICON text-base font-normal font-['Geist'] leading-tight hover:text-gray-700 cursor-pointer"
-                  onClick={() => setEditIndex(null)} // Tombol kembali ke daftar produk
-                >
-                  Data Produk
-                </button>
-                {/* Arrow kanan */}
-                <svg width="20" height="20" fill="none" viewBox="0 0 20 20">
-                  <path d="M8 6L12 10L8 14" stroke="#A3A3A3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                <div className="text-17-SOFT-BLACK text-base font-medium font-['Geist'] leading-tight">
-                  Edit Produk
-                </div>
-              </div>
-            </div>
-            {/* Title & Save */}
-            <div className="self-stretch min-w-[1084px] inline-flex justify-between items-end">
-              <div className="inline-flex flex-col justify-start items-start gap-2">
-                <div className="text-black text-2xl font-medium font-['Geist']">
-                  Edit Product
-                </div>
-                <div className="text-neutral-500 text-base font-medium font-['Geist']">
-                  Ubah informasi terkait produk
-                </div>
-              </div>
-              <button
-                className="px-4 py-2 bg-black rounded-lg flex justify-center items-center gap-1 overflow-hidden"
-                onClick={() => { /* Lakukan update produk di sini */ setEditIndex(null); }} // Logika save
-                type="button"
-              >
-                <div className="px-2 flex justify-center items-center">
-                  <div className="text-white text-base font-medium font-['Geist'] leading-normal">
-                    Save
-                  </div>
-                </div>
-              </button>
-            </div>
-            {/* Form Edit */}
-            <div className="self-stretch flex flex-col justify-start items-start gap-6">
-              <div className="inline-flex justify-start items-start gap-6">
-                {/* Input Harga */}
-                <div className="w-96 max-w-96 inline-flex flex-col justify-start items-start gap-2">
-                  <div className="text-neutral-700 text-base font-medium font-['Geist'] leading-normal">
-                    Harga
-                  </div>
-                  <div className="self-stretch h-12 pl-4 pr-3 py-3 bg-gray-100 rounded-xl inline-flex justify-start items-center overflow-hidden">
-                    <span className="text-neutral-900 text-base font-medium font-['Geist'] leading-normal mr-2">Rp.</span>
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-                      className="bg-transparent border-none outline-none w-full text-neutral-900 text-base font-medium font-['Geist'] leading-normal"
-                      value={formatRupiah(editHarga).replace('Rp. ', '')} // Hapus "Rp. " agar input lebih mudah
-                      onChange={e => setEditHarga(e.target.value.replace(/[^0-9]/g, ""))}
-                      placeholder="Masukkan harga"
-                    />
-                  </div>
-                </div>
-                {/* Input Stok */}
-                <div className="w-96 max-w-96 inline-flex flex-col justify-start items-start gap-2">
-                  <div className="text-neutral-700 text-base font-medium font-['Geist'] leading-normal">
-                    Stok
-                  </div>
-                  <div className="self-stretch h-12 pl-4 pr-3 py-3 bg-gray-100 rounded-xl inline-flex justify-start items-center overflow-hidden">
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-                      className="bg-transparent border-none outline-none w-full text-neutral-900 text-base font-medium font-['Geist'] leading-normal"
-                      value={editStok}
-                      onChange={e => setEditStok(e.target.value.replace(/[^0-9]/g, ""))} // Hanya angka
-                      placeholder="Masukkan stok"
-                    />
-                  </div>
-                </div>
-              </div>
-              {/* Dropdown Kategori */}
-              <div className="w-full max-w-[864px] inline-flex justify-start items-start gap-6">
-                <div className="flex-1 inline-flex flex-col justify-start items-start gap-2">
-                  <div className="justify-start text-neutral-700 text-base font-medium font-['Geist'] leading-normal">
-                    Kategori
-                  </div>
-                  {/* Dropdown trigger */}
-                  <div
-                    className="self-stretch h-12 pl-4 pr-3 py-3 bg-gray-100 rounded-xl inline-flex justify-between items-center cursor-pointer"
-                    onClick={() => setDropdownOpen(!dropdownOpen)}
-                  >
-                    <div className="text-black text-base font-normal font-['Inter'] leading-normal select-none">
-                      {getKategoriLabel(editKategori) || "Pilih Kategori"}
-                    </div>
-                    {/* Icon arrow bawah */}
-                    <svg width="20" height="20" fill="none" viewBox="0 0 20 20">
-                      <path d="M6 8L10 12L14 8" stroke="#222" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </div>
-                  {/* Dropdown list */}
-                  {dropdownOpen && (
-                    <div className="absolute top-[320px] left-[calc(320px+120px+16px)] w-[400px] bg-white rounded-md shadow-lg flex flex-col justify-start items-start z-10">
-                      {kategoriList.map((k) => (
-                        <button
-                          key={k.value}
-                          type="button"
-                          className={`self-stretch h-12 pl-4 pr-3 py-3 text-left inline-flex items-center text-black text-base font-normal font-['Inter'] leading-normal transition-colors
-                            ${editKategori === k.value ? "bg-slate-100 rounded-md" : "bg-white"}
-                            hover:bg-[#F1F5F9]`}
-                          onClick={() => {
-                            setEditKategori(k.value);
-                            setDropdownOpen(false);
-                          }}
-                        >
-                          {k.label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Jika tidak sedang edit, tampilkan daftar produk
-  return (
-    <div className="w-full h-full flex flex-col bg-white"> {/* Ubah h-[1024px] jadi h-full */}
-      {/* Navbar */}
-      <Navbar
-        keyword={keyword}
-        onKeywordChange={setKeyword}
-        authUser={authUser}
-        roles={authUser ? authUser.tipe : null}
-        fullName={authUser ? authUser.fullname : null}
-        email={authUser ? authUser.email : null}
-        saldo={authUser ? authUser.saldo : null}
-        logout={onLogoutHandler}
-      />
-      <div className="flex flex-1"> {/* Tambahkan flex-1 agar sidebar dan main content mengisi sisa ruang */}
-        {/* Sidebar */}
-        <SidebarAdmin />
-        {/* Main Content */}
-        <main className="flex-1 p-5 overflow-auto"> {/* Tambahkan flex-1 dan overflow-auto */}
-          <div className="w-full">
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-col gap-2">
-                <div className="text-black text-2xl font-medium font-[Geist]">Data Barang</div>
-                <div className="text-neutral-500 text-base font-medium font-[Geist]">Lihat rincian dari produk yang tersedia</div>
-              </div>
-              <div className="flex flex-col gap-6">
-                <div className="flex flex-col">
-                  {/* Table Header */}
-                  <div className="w-full border-b border-neutral-200 flex flex-col gap-2.5">
-                    <div className="flex items-center">
-                      <div className="w-full h-14 border-r max-w-[10%] border-neutral-200 flex justify-center items-center gap-2">
-                        <div className="text-[#737373] text-base font-medium font-[Geist] leading-normal">Gambar</div>
-                      </div>
-                      <div className="w-full h-14 border-r border-neutral-200 flex justify-center items-center gap-2">
-                        <div className="text-[#737373] text-base font-medium font-[Geist] leading-normal">Nama Barang</div>
-                      </div>
-                      <div className="w-full h-14 border-r max-w-[15%] border-neutral-200 flex justify-center items-center gap-2">
-                        <div className="text-[#737373] text-base font-medium font-[Geist] leading-normal">Kategori</div>
-                      </div>
-                      <div className="w-full h-14 border-r max-w-[10%] border-neutral-200 flex justify-center items-center gap-2">
-                        <div className="text-[#737373] text-base font-medium font-[Geist] leading-normal">Harga</div>
-                      </div>
-                      <div className="w-full h-14 border-r max-w-[10%] border-neutral-200 flex justify-center items-center gap-2">
-                        <div className="text-[#737373] text-base font-medium font-[Geist] leading-normal">Stok</div>
-                      </div>
-                      <div className="w-full h-14 border-r max-w-[15%] border-neutral-200 flex justify-center items-center gap-2">
-                        <div className="text-[#737373] text-base font-medium font-[Geist] leading-normal">Penjual</div>
-                      </div>
-                      <div className="w-full h-14 border-r max-w-[10%] border-neutral-200 flex justify-center items-center gap-2">
-                        <div className="text-[#737373] text-base font-medium font-[Geist] leading-normal">Aksi</div>
-                      </div>
-                    </div>
-                  </div>
-                  {/* Table Rows */}
-                  <div className="w-full flex flex-col">
-                    {isLoading ? (
-                      <div className="text-center py-8 text-gray-500">Loading produk...</div>
-                    ) : displayedProducts.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500">Tidak ada produk yang tersedia.</div>
-                    ) : (
-                      displayedProducts.map((item, idx) => (
-                        <div key={item.id || idx} className="border-b border-neutral-200 flex items-center">
-                          <div className="w-full self-stretch max-w-[10%] p-2 border-r border-neutral-200 flex justify-center items-center">
-                            <img className="size-16 rounded-lg object-cover" src={item.image_url || "https://placehold.co/64x64"} alt={item.name} />
-                          </div>
-                          <div className="w-full self-stretch p-2 border-r border-neutral-200 flex justify-center items-center">
-                            <div className="flex-1 text-black text-base font-medium font-[Geist] leading-normal">{item.name}</div>
-                          </div>
-                          <div className="w-full max-w-[15%] self-stretch p-2 border-r border-neutral-200 flex justify-center items-center">
-                            <Kategori value={item.category.name} />
-                          </div>
-                          <div className="w-full max-w-[10%] self-stretch p-2 border-r border-neutral-200 flex justify-center items-center">
-                            <div className="flex-1 text-center text-black text-base font-medium font-[Geist] leading-normal">{formatRupiah(item.price)}</div>
-                          </div>
-                          <div className="w-full max-w-[10%] self-stretch p-2 border-r border-neutral-200 flex justify-center items-center">
-                            <div className="flex-1 text-center text-black text-base font-medium font-[Geist] leading-normal">{item.stock}</div>
-                          </div>
-                          <div className="w-full max-w-[15%] self-stretch p-2 border-r border-neutral-200 flex justify-center items-center">
-                            <div className="flex-1 text-center text-black text-base font-medium font-[Geist] leading-normal">{item.user?.fullname || 'N/A'}</div>
-                          </div>
-                          <div className="w-full max-w-[10%] self-stretch p-2 border-r border-neutral-200 flex justify-center items-center">
-                            <div className="flex gap-4">
-                              {/* Icon Trash (kiri) */}
-                              <button
-                                className="size-6 flex items-center justify-center"
-                                aria-label="Delete"
-                                onClick={() => alert(`Fitur hapus untuk produk ${item.name} belum diimplementasikan`)}
-                              >
-                                <img src="/trash.svg" alt="Delete" className="size-5" />
-                              </button>
-                              {/* Icon Edit (kanan) */}
-                              <button
-                                className="size-6 flex items-center justify-center"
-                                aria-label="Edit"
-                                onClick={() => setEditIndex(idx)}
-                              >
-                                <img src="/pensil.svg" alt="Edit" className="size-5" />
-                              </button>
+        <div className="w-full min-h-screen flex flex-col bg-white">
+            <Navbar
+                keyword={keyword}
+                onKeywordChange={setKeyword}
+                authUser={authUser}
+                roles={authUser ? authUser.tipe : null}
+                fullName={authUser ? authUser.fullname : null}
+                email={authUser ? authUser.email : null}
+                saldo={authUser ? authUser.saldo : null}
+                logout={onLogoutHandler}
+            />
+            <div className="flex flex-1">
+                <SidebarAdmin />
+                <main className="flex-1 p-5 overflow-auto">
+                    <div className="w-full">
+                        <div className="flex flex-col gap-6">
+                            <div className="flex justify-between items-center">
+                                <div className="flex flex-col gap-2">
+                                    <div className="text-black text-2xl font-medium font-[Geist]">Data Barang</div>
+                                    <div className="text-neutral-500 text-base font-medium font-[Geist]">Lihat rincian dari produk yang tersedia</div>
+                                </div>
                             </div>
-                          </div>
+                            <div className="flex flex-col">
+                                <div className="w-full border-b border-[#E5E5E5] flex flex-col justify-start items-start gap-2.5">
+                                    <div className="self-stretch inline-flex justify-start items-center">
+                                        <div className="w-24 h-14 border-r border-[#E5E5E5] flex justify-center items-center gap-2 px-2 text-center"><div className="text-[#737373] text-base font-medium font-['Geist'] leading-normal capitalize">Gambar</div></div>
+                                        <div className="flex-1 h-14 min-w-[150px] border-r border-[#E5E5E5] flex justify-center items-center gap-2 px-2 text-center"><div className="text-[#737373] text-base font-medium font-['Geist'] leading-normal capitalize">Nama Barang</div></div>
+                                        <div className="flex-1 h-14 max-w-48 border-r border-[#E5E5E5] flex justify-center items-center gap-2 px-2 text-center"><div className="text-[#737373] text-base font-medium font-['Geist'] leading-normal capitalize">Kategori</div></div>
+                                        <div className="flex-1 h-14 max-w-32 border-r border-[#E5E5E5] flex justify-center items-center gap-2 px-2 text-center"><div className="text-[#737373] text-base font-medium font-['Geist'] leading-normal capitalize">Harga</div></div>
+                                        <div className="flex-1 h-14 max-w-28 border-r border-[#E5E5E5] flex justify-center items-center gap-2 px-2 text-center"><div className="text-[#737373] text-base font-medium font-['Geist'] leading-normal capitalize">Stok</div></div>
+                                        <div className="flex-1 h-14 max-w-32 border-r border-[#E5E5E5] flex justify-center items-center gap-2 px-2 text-center"><div className="text-[#737373] text-base font-medium font-['Geist'] leading-normal capitalize">Penjual</div></div>
+                                        <div className="w-24 h-14 border-r border-[#E5E5E5] flex justify-center items-center gap-2 px-2 text-center"><div className="text-[#737373] text-base font-medium font-['Geist'] leading-normal capitalize">Aksi</div></div>
+                                    </div>
+                                </div>
+                                <div className="w-full flex flex-col">
+                                    {isLoadingData ? (
+                                        <div className="text-center py-8 text-gray-500">Memuat data produk...</div>
+                                    ) : currentProducts.length === 0 ? (
+                                        <div className="text-center py-8 text-gray-500">
+                                            {keyword ? `Tidak ada produk yang cocok dengan "${keyword}".` : "Tidak ada produk yang tersedia."}
+                                        </div>
+                                    ) : (
+                                        currentProducts.map((item) => (
+                                            <div
+                                                key={item.id}
+                                                className="border-b border-[#E5E5E5] inline-flex justify-start items-center min-h-[80px]"
+                                            >
+                                                <div className="w-24 self-stretch p-2 border-r border-[#E5E5E5] flex justify-center items-center">
+                                                    {/* MODIFIED IMAGE HANDLING START */}
+                                                    {item.image_url ? (
+                                                        <Image
+                                                            className="size-16 rounded-lg object-cover"
+                                                            src={item.image_url}
+                                                            alt={item.name || "Gambar Produk"}
+                                                            width={64}
+                                                            height={64}
+                                                            onError={(e) => {
+                                                                // Hide the image element if it fails to load
+                                                                e.currentTarget.style.display = 'none';
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        // Render an empty div to maintain layout if no image_url
+                                                        <div className="size-16 rounded-lg bg-transparent"></div>
+                                                    )}
+                                                    {/* MODIFIED IMAGE HANDLING END */}
+                                                </div>
+                                                <div className="flex-1 self-stretch min-w-[150px] p-2 border-r border-[#E5E5E5] flex justify-center items-center"><div className="flex-1 text-center text-black text-sm md:text-base font-medium font-['Geist'] leading-normal">{item.name}</div></div>
+                                                <div className="flex-1 self-stretch max-w-48 p-2 border-r border-[#E5E5E5] flex justify-center items-center">
+                                                    <Kategori value={item.category?.name} />
+                                                </div>
+                                                <div className="flex-1 self-stretch max-w-32 p-2 border-r border-[#E5E5E5] flex justify-center items-center"><div className="flex-1 text-center text-black text-sm md:text-base font-medium font-['Geist'] leading-normal">{formatRupiah(item.price)}</div></div>
+                                                <div className="flex-1 self-stretch max-w-28 p-2 border-r border-[#E5E5E5] flex justify-center items-center"><div className="flex-1 text-center text-black text-sm md:text-base font-medium font-['Geist'] leading-normal">{item.stock}</div></div>
+                                                <div className="flex-1 self-stretch max-w-32 p-2 border-r border-[#E5E5E5] flex justify-center items-center"><div className="flex-1 text-center text-black text-sm md:text-base font-medium font-['Geist'] leading-normal">{item.user?.fullname || 'N/A'}</div></div>
+                                                <div className="w-24 self-stretch p-2 border-r border-[#E5E5E5] flex justify-center items-center gap-2">
+                                                    <button onClick={() => handleDeleteProduct(item.id, item.name)} aria-label={`Hapus ${item.name}`} className="p-1 hover:bg-gray-100 rounded cursor-pointer">
+                                                        <Image src="/Trash.svg" alt="Hapus" width={20} height={20} className="w-5 h-5" />
+                                                    </button>
+                                                    <button onClick={() => handleOpenEditForm(item)} aria-label={`Edit ${item.name}`} className="p-1 hover:bg-gray-100 rounded cursor-pointer">
+                                                        <Image src="/Pensil.svg" alt="Edit" width={20} height={20} className="w-5 h-5" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                    {isLoading && (
+                                        <div className="absolute inset-0 bg-white bg-opacity-75 flex justify-center items-center z-50">
+                                            <div className="text-black text-lg font-medium">Memproses...</div>
+                                        </div>
+                                    )}
+                                </div>
+                                {totalPages > 1 && !isLoadingData && (
+                                    <div className="w-full mt-6 flex justify-center items-center gap-2">
+                                        <div className="flex justify-center items-center gap-1 sm:gap-2">
+                                            <button
+                                                onClick={prevPage}
+                                                disabled={currentPage === 1}
+                                                className="p-1 sm:size-6 flex items-center justify-center rounded hover:bg-gray-200 transition disabled:opacity-50"
+                                                aria-label="Halaman Sebelumnya"
+                                            >
+                                                <svg width="16" height="16" fill="none" viewBox="0 0 16 16"><path d="M10 12L6 8L10 4" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                            </button>
+                                            {getPaginationGroup().map((pageItem, index) => (
+                                                <div key={index}>
+                                                    {pageItem === '...' ? (
+                                                        <div className="text-gray-500 text-sm sm:text-base font-medium font-['Geist'] leading-normal px-1">...</div>
+                                                    ) : (
+                                                        <button
+                                                            onClick={() => paginate(pageItem)}
+                                                            className={`px-2 py-1 sm:size-6 min-w-[24px] sm:min-w-[unset] flex items-center justify-center rounded transition text-sm sm:text-base ${
+                                                                currentPage === pageItem
+                                                                    ? "bg-gray-300 text-black font-semibold"
+                                                                    : "hover:bg-gray-200 text-gray-500"
+                                                            }`}
+                                                        >
+                                                            {pageItem}
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            ))}
+                                            <button
+                                                onClick={nextPage}
+                                                disabled={currentPage === totalPages}
+                                                className="p-1 sm:size-6 flex items-center justify-center rounded hover:bg-gray-200 transition disabled:opacity-50"
+                                                aria-label="Halaman Berikutnya"
+                                            >
+                                                <svg width="16" height="16" fill="none" viewBox="0 0 16 16"><path d="M6 4L10 8L6 12" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                      ))
-                    )}
-                  </div>
-                  {/* Pagination - Dummy saat ini, perlu diimplementasikan logika pagination real */}
-                  <div className="w-[1040px] flex justify-center items-center gap-2 mt-4 mx-auto">
-                    <div className="flex items-center gap-2">
-                      <button
-                        className="size-6 flex items-center justify-center rounded hover:bg-gray-200 transition"
-                        aria-label="Previous Page"
-                      >
-                        <svg width="16" height="16" fill="none" viewBox="0 0 16 16">
-                          <path d="M10 12L6 8L10 4" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </button>
-                      <div className="text-17-SOFT-BLACK text-base font-medium font-[Geist] leading-normal">1</div>
-                      <div className="text-SIDEBAR-MODULE text-base font-medium font-[Geist] leading-normal">...</div>
-                      <div className="text-SIDEBAR-MODULE text-base font-medium font-[Geist] leading-normal">6</div>
-                      <button
-                        className="size-6 flex items-center justify-center rounded hover:bg-gray-200 transition"
-                        aria-label="Next Page"
-                      >
-                        <svg width="16" height="16" fill="none" viewBox="0 0 16 16">
-                          <path d="M6 4L10 8L6 12" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </button>
                     </div>
-                  </div>
-                </div>
-              </div>
+                </main>
             </div>
-          </div>
-        </main>
-      </div>
-    </div>
-  );
+        </div>
+    );
 }
