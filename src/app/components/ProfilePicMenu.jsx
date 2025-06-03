@@ -1,4 +1,12 @@
-import { KeyRound, List, LogIn, LogOut, Package, User } from "lucide-react";
+import {
+  KeyRound,
+  List,
+  LogIn,
+  LogOut,
+  Package,
+  User,
+  Store,
+} from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
 export default function ProfilePicMenu({
@@ -11,10 +19,12 @@ export default function ProfilePicMenu({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const adminPages = ["/Actors", "/Statistic", "/Sellings", "/Product"];
+  const isAdminPages = adminPages.some((page) => pathname.startsWith(page));
 
   const handleAdminOrProductPageRedirect = () => {
     if (roles === "admin" || roles === "pegawai") {
-      if (pathname.startsWith("/Actors")) {
+      if (isAdminPages) {
         router.push("/");
       } else {
         router.push("/Actors");
@@ -69,10 +79,17 @@ export default function ProfilePicMenu({
             onClick={handleAdminOrProductPageRedirect}
           >
             {roles === "admin" || roles === "pegawai" ? (
-              <>
-                <KeyRound size={20} />
-                <span>Admin Panel</span>
-              </>
+              isAdminPages ? (
+                <>
+                  <Store size={20} />
+                  <span>Main Page</span>
+                </>
+              ) : (
+                <>
+                  <KeyRound size={20} />
+                  <span>Admin Panel</span>
+                </>
+              )
             ) : (
               <>
                 <Package size={20} />

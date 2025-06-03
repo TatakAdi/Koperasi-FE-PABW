@@ -6,17 +6,21 @@ import { getUserLogged } from "app/lib/api/login";
 import { logout } from "app/lib/api/logout";
 import { getCartItems } from "app/lib/api/cart";
 import { checkout } from "@/app/lib/api/checkout";
+import { cartHistory } from "@/app/lib/api/cartHistory";
 import useInput from "app/hooks/useInput";
 import CheckoutCard from "app/components/keranjang/CheckoutCard";
 import Navbar from "app/components/Navbar";
 import SidePanel from "app/components/SidePanel";
 import MyOrderNotPayItems from "app/components/myOrders/MyOrderNotPayItems";
+import OnProcessedItem from "@/app/components/myOrders/OnProcessedItem";
 
 export default function MyOrders() {
   const [authUser, setAuthUser] = useState(null);
   const [category, setCategory] = useState(null);
   const [cart, setCart] = useState([]);
-  const [cartItems, setCartItems] = useState([]);
+  const [cartItems, setCartItems] = useState([]); // Cart yang belum dibayar
+  const [buyedItems, setBuyedItems] = useState([]); // Cart yang sudah dibayar + lagi diproses
+  const [processedItems, setProcessedItems] = useState([]);
   const [status, setStatus] = useState("Belum Dibayar"); // "Belum Dibayar", "Sedang Diproses", "Sedang Dikirim", "Selesai"
   const [minPrice, setMinPrice] = useInput();
   const [maxPrice, setMaxPrice] = useInput();
@@ -43,20 +47,44 @@ export default function MyOrders() {
       setAuthUser(data);
 
       const cartRes = await getCartItems(data.id);
+      const payedCartRes = await cartHistory(data.id);
       console.log("CartRes: ", cartRes);
+      console.log("payedCartRes: ", payedCartRes);
       setCart(cartRes.data);
       if (!cartRes.error && cartRes.data && cartRes.data.items) {
         const items = cartRes.data.items.map((item) => ({
           ...item,
           quantity: item.jumlah,
         }));
-
         setCartItems(items);
         setProducts(items);
       }
-      console.log("cart = ", cart);
+      // Masalah di sini wak
+      if (!payedCartRes.error && payedCartRes.data && payedCartRes.data.carts) {
+        const carts = payedCartRes.data.carts.map((item) => ({
+          ...item,
+        }));
+        // const items = carts.items.map((item) => ({
+        //   ...item,
+        // }));
+        setBuyedItems(carts);
+
+        const mergedItems = carts.flatMap((cart) =>
+          (cart.items || []).map((item) => ({
+            ...item,
+            cart_id: cart.cart_id,
+            status_barang: cart.status_barang,
+            sudah_bayar: cart.sudah_bayar,
+            total_harga: cart.total_harga,
+          }))
+        );
+
+        console.log("gabungan item : ", mergedItems);
+        setProcessedItems(mergedItems);
+      }
     };
     getUser();
+    console.log("cart = ", cart);
   }, []);
 
   async function onLogoutHandler() {
@@ -83,15 +111,31 @@ export default function MyOrders() {
     return [];
   };
 
+  const onProcessedCartItem = () => {
+    console.log("Processed Items: ", processedItems);
+    if (processedItems) {
+      const filteredContent = processedItems.filter(
+        (item) => item.status_barang === "akan dikirim"
+      );
+      console.log("filtered: ", filteredContent);
+      return filteredContent;
+    }
+    console.log("Gagal memfilter cart yang akan dikirim");
+    return [];
+  };
+
   const onPayHandle = (itemId) => {
     const selectedItem = cartItems.find((item) => item.id === itemId);
     if (selectedItem) {
       setSelectedItems([itemId]);
-      console.log("Selecteditem =", selectedItems);
       setTotal(selectedItem.subtotal);
       console.log("Products: ", products);
       setIsFocus(true);
     }
+    console.log("Selecteditem =", selectedItems);
+    console.log("cart: ", cart);
+    console.log("buyed cart = ", buyedItems);
+    console.log("processed Items: ", processedItems);
   };
 
   const onCheckoutHandle = async ({ items, payment_method }) => {
@@ -205,7 +249,7 @@ export default function MyOrders() {
               </div>
 
               <div className="divide-y">
-                {cartItems.map((item) => (
+                {notPayedCartItem().map((item) => (
                   <MyOrderNotPayItems
                     key={item.id}
                     {...item}
@@ -230,7 +274,11 @@ export default function MyOrders() {
                 </div>
               </div>
 
-              <div className="divide-y"></div>
+              <div className="divide-y">
+                {onProcessedCartItem().map((item) => (
+                  <OnProcessedItem key={item.id} {...item} />
+                ))}
+              </div>
             </>
           )}
           {status === "Sedang Dikirim" && (
