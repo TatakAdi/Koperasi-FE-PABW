@@ -1,5 +1,6 @@
 "use client";
 
+import { cartHistory } from "@/app/lib/api/cartHistory";
 import Navbar from "app/components/Navbar";
 import Riwayat from "app/components/Riwayat";
 import SidebarAdmin from "app/components/SidebarAdmin";
@@ -43,105 +44,110 @@ export default function StatAdminPage() {
 
   useEffect(() => {
     const fetchDataForStats = async () => {
+      if (!authUser) return;
+
       setIsLoadingSoldProducts(true);
       setIsLoadingProfitDetails(true);
 
-      const { error: fetchError, data: apiResponse } = await getAllCart();
+      try {
+        let apiResponse;
 
-      if (fetchError) {
-        console.error(
-          "Gagal mengambil data keranjang (fetchError):",
-          fetchError
-        );
+        if (authUser.tipe === "pengguna" || authUser.tipe === "penitip") {
+          // Use cartHistory for regular users
+          const result = await cartHistory(authUser.id);
+          if (result.error) {
+            throw new Error("Failed to fetch cart history");
+          }
+          apiResponse = result;
+        } else {
+          // Use getAllCart for admin/pegawai
+          const { error: fetchError, data: response } = await getAllCart();
+          if (fetchError) {
+            throw new Error("Failed to fetch all carts");
+          }
+          apiResponse = response;
+        }
+
+        if (apiResponse && Array.isArray(apiResponse.data)) {
+          const allCarts = apiResponse.data;
+
+          // Calculate pengiriman total
+          let currentTotalPengiriman = 0;
+          allCarts.forEach((cart) => {
+            if (
+              cart.status_barang === "akan dikirim" ||
+              cart.status_barang === "diterima pembeli"
+            ) {
+              currentTotalPengiriman++;
+            }
+          });
+          setTotalPengiriman(currentTotalPengiriman);
+
+          // Filter paid carts
+          const paidCarts = allCarts.filter(
+            (cart) => cart.status === "Paid" || cart.sudah_bayar === 1
+          );
+
+          setTotalTransaksi(paidCarts.length);
+
+          let allLineItemsFromPaidCarts = [];
+          let currentTotalPenjualanProduk = 0;
+
+          // Process cart items
+          paidCarts.forEach((cart) => {
+            if (Array.isArray(cart.items)) {
+              cart.items.forEach((item) => {
+                const quantity = Number(item.jumlah) || 0;
+                allLineItemsFromPaidCarts.push({
+                  product_name: item.name || "Produk Tidak Diketahui",
+                  quantity: quantity,
+                  total_price_for_item: Number(item.subtotal) || 0,
+                });
+                currentTotalPenjualanProduk += quantity;
+              });
+            }
+          });
+
+          setTotalPenjualanProduk(currentTotalPenjualanProduk);
+
+          // Aggregate products data
+          const aggregated = allLineItemsFromPaidCarts.reduce((acc, item) => {
+            const productName = item.product_name;
+            if (!acc[productName]) {
+              acc[productName] = {
+                name: productName,
+                sold: 0,
+                totalRevenue: 0,
+              };
+            }
+            acc[productName].sold += item.quantity;
+            acc[productName].totalRevenue += item.total_price_for_item;
+            return acc;
+          }, {});
+
+          const finalSoldProducts = Object.values(aggregated).map((prod) => ({
+            ...prod,
+            price: formatRupiah(prod.totalRevenue),
+          }));
+
+          setSoldProducts(finalSoldProducts);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
         setSoldProducts([]);
         setTotalTransaksi(0);
         setTotalPenjualanProduk(0);
         setTotalPengiriman(0);
+      } finally {
         setIsLoadingSoldProducts(false);
         setIsLoadingProfitDetails(false);
-        return;
       }
-
-      if (apiResponse && Array.isArray(apiResponse.data)) {
-        const allCarts = apiResponse.data;
-
-        let currentTotalPengiriman = 0;
-        allCarts.forEach((cart) => {
-          if (
-            cart.status_barang === "akan dikirim" ||
-            cart.status_barang === "diterima pembeli"
-          ) {
-            currentTotalPengiriman++;
-          }
-        });
-        setTotalPengiriman(currentTotalPengiriman);
-
-        const paidCarts = allCarts.filter(
-          (cart) => cart.status === "Paid" || cart.sudah_bayar === 1
-        );
-
-        setTotalTransaksi(paidCarts.length);
-
-        let allLineItemsFromPaidCarts = [];
-        let currentTotalPenjualanProduk = 0;
-
-        paidCarts.forEach((cart) => {
-          if (Array.isArray(cart.items)) {
-            cart.items.forEach((item) => {
-              const quantity = Number(item.jumlah) || 0;
-              allLineItemsFromPaidCarts.push({
-                product_name: item.name || "Produk Tidak Diketahui",
-                quantity: quantity,
-                total_price_for_item: Number(item.subtotal) || 0,
-              });
-              currentTotalPenjualanProduk += quantity;
-            });
-          } else {
-            console.warn(
-              "Cart dengan ID:",
-              cart.cart_id,
-              "tidak memiliki array 'items' atau 'items' bukan array."
-            );
-          }
-        });
-        setTotalPenjualanProduk(currentTotalPenjualanProduk);
-
-        const aggregated = allLineItemsFromPaidCarts.reduce((acc, item) => {
-          const productName = item.product_name;
-          if (!acc[productName]) {
-            acc[productName] = {
-              name: productName,
-              sold: 0,
-              totalRevenue: 0,
-            };
-          }
-          acc[productName].sold += item.quantity;
-          acc[productName].totalRevenue += item.total_price_for_item;
-          return acc;
-        }, {});
-
-        const finalSoldProducts = Object.values(aggregated).map((prod) => ({
-          ...prod,
-          price: formatRupiah(prod.totalRevenue),
-        }));
-
-        setSoldProducts(finalSoldProducts);
-      } else {
-        console.error(
-          "Struktur respons API keranjang tidak sesuai atau apiResponse.data bukan array:",
-          apiResponse
-        );
-        setSoldProducts([]);
-        setTotalTransaksi(0);
-        setTotalPenjualanProduk(0);
-        setTotalPengiriman(0);
-      }
-      setIsLoadingSoldProducts(false);
-      setIsLoadingProfitDetails(false);
     };
 
-    fetchDataForStats();
-  }, []);
+    if (authUser) {
+      fetchDataForStats();
+    }
+  }, [authUser]);
 
   async function onLogoutHandler() {
     await logout();

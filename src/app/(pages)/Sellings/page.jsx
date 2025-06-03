@@ -284,7 +284,7 @@ export default function SellingsPage() {
               {" "}
               {/* gap-0 agar border menyatu */}
               {/* Table Header (disesuaikan agar segaris dengan row) */}
-              <div className="w-full flex items-center bg-gray-50">
+              <div className="w-full flex items-center border-b border-neutral-200 bg-gray-50">
                 <div className="flex-1 h-14 flex items-center gap-2 px-4 border-r border-neutral-200">
                   <img src="/Person.svg" alt="person" className="size-5" />
                   <span className="text-neutral-500 text-base font-medium font-['Geist'] leading-normal">
