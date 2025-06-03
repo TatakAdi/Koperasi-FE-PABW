@@ -77,19 +77,17 @@ export default function ProductManagementPage() {
           "[Page] Token Invalid & Data user gagal terambil:",
           userError
         );
+        setAuthUser(null);
+        setAllProducts([]);
+        setIsLoadingData(false);
+        return;
       }
       setAuthUser(userData);
-      if (
-        userData &&
-        (userData.tipe === "admin" ||
-          userData.tipe === "pegawai" ||
-          userData.tipe === "penitip")
-      ) {
+
+      if (userData) {
         await fetchProductsData();
       } else {
-        console.log(
-          "[Page] Pengguna tidak diotorisasi untuk melihat produk atau tidak ada data pengguna."
-        );
+        console.log("[Page] Tidak ada data pengguna, tidak mengambil produk.");
         setAllProducts([]);
         setIsLoadingData(false);
       }
@@ -98,26 +96,35 @@ export default function ProductManagementPage() {
   }, [fetchProductsData]);
 
   const productsToDisplay = useMemo(() => {
-    if (!allProducts) return [];
-    let products = allProducts;
+    if (!allProducts || !authUser) {
+      return [];
+    }
 
-    if (authUser && authUser.tipe === "penitip") {
-      products = products.filter(
-        (product) =>
-          product.user_id === authUser.id || product.user?.id === authUser.id
+    let productsByUser = allProducts.filter(
+      (product) =>
+        product.user_id === authUser.id || product.user?.id === authUser.id
+    );
+
+    let productsByStatus = productsByUser;
+    if (activeListingTab === "On Listing") {
+      productsByStatus = productsByUser.filter(
+        (product) => product.status === "Onlisting"
+      );
+    } else if (activeListingTab === "Inactive") {
+      productsByStatus = productsByUser.filter(
+        (product) => product.status === "Inactive"
       );
     }
 
     if (!keyword) {
-      return products;
+      return productsByStatus;
     }
+
     const lowercasedKeyword = keyword.toLowerCase();
-    return products.filter(
+    return productsByStatus.filter(
       (product) =>
         product.name?.toLowerCase().includes(lowercasedKeyword) ||
-        product.category?.name?.toLowerCase().includes(lowercasedKeyword) ||
-        (authUser?.tipe !== "penitip" &&
-          product.user?.fullname?.toLowerCase().includes(lowercasedKeyword))
+        product.category?.name?.toLowerCase().includes(lowercasedKeyword)
     );
   }, [allProducts, keyword, authUser, activeListingTab]);
 
@@ -337,7 +344,50 @@ export default function ProductManagementPage() {
                 </div>
               </div>
               <div className="self-stretch inline-flex flex-wrap justify-between items-end gap-4">
-                <div className="flex-grow"></div>
+                <div className="h-10 p-1 bg-[#F4F4F5] rounded-md flex justify-center items-center">
+                  {" "}
+                  <button
+                    onClick={() => setActiveListingTab("On Listing")}
+                    className={`h-8 px-3 py-1.5 rounded-sm flex justify-center items-center transition-colors cursor-pointer
+                                        ${
+                                          activeListingTab === "On Listing"
+                                            ? "bg-white shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]"
+                                            : ""
+                                        }`}
+                  >
+                    <div
+                      className={`text-center justify-center text-base font-medium font-['Geist'] leading-normal transition-colors
+                                        ${
+                                          activeListingTab === "On Listing"
+                                            ? "text-black"
+                                            : "text-[#707079] hover:text-black/80"
+                                        }`}
+                    >
+                      {" "}
+                      On Listing
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => setActiveListingTab("Inactive")}
+                    className={`h-8 px-3 py-1.5 rounded-sm flex justify-center items-center transition-colors cursor-pointer
+                                        ${
+                                          activeListingTab === "Inactive"
+                                            ? "bg-white shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]"
+                                            : ""
+                                        }`}
+                  >
+                    <div
+                      className={`text-center justify-center text-base font-medium font-['Geist'] leading-normal transition-colors
+                                        ${
+                                          activeListingTab === "Inactive"
+                                            ? "text-black"
+                                            : "text-[#707079] hover:text-black/80"
+                                        }`}
+                    >
+                      Inactive
+                    </div>
+                  </button>
+                </div>
                 <button
                   onClick={handleOpenAddForm}
                   className="pl-2 pr-3 py-2 bg-black rounded-lg outline-1 outline-offset-[-1px] outline-transparent hover:bg-black/90 flex justify-start items-center gap-2 overflow-hidden transition-colors cursor-pointer"
@@ -383,8 +433,8 @@ export default function ProductManagementPage() {
                         Sales
                       </div>
                     </div>
-                    {(authUser?.tipe === "admin" ||
-                      authUser?.tipe === "pegawai" ||
+                    {/* Show Aksi column if authUser is 'pengguna' or 'penitip', as they are the target roles for MyProduct page */}
+                    {(authUser?.tipe === "pengguna" ||
                       authUser?.tipe === "penitip") && (
                       <div className="flex-1 h-14 min-w-[80px] max-w-[100px] md:max-w-[120px] border-r border-neutral-200 flex justify-center items-center gap-2 px-2 text-center">
                         <div className="text-[#737373] text-sm sm:text-base font-medium font-['Geist'] leading-normal">
@@ -413,10 +463,7 @@ export default function ProductManagementPage() {
                       typeof displayImageUrl === "string" &&
                       displayImageUrl.startsWith("local:")
                     ) {
-                      displayImageUrl = displayImageUrl.replace(
-                        "local:",
-                        "/"
-                      );
+                      displayImageUrl = displayImageUrl.replace("local:", "/");
                     } else if (!displayImageUrl) {
                       displayImageUrl = "/image.png";
                     }
@@ -464,11 +511,10 @@ export default function ProductManagementPage() {
                               : item.sales_count}
                           </div>
                         </div>
-                        {(authUser?.tipe === "admin" ||
-                          authUser?.tipe === "pegawai" ||
-                          (authUser?.tipe === "penitip" &&
-                            (item.user_id === authUser.id ||
-                              item.user?.id === authUser.id))) && (
+                        {/* Show action buttons if user is 'pengguna' or 'penitip'.
+                            The products displayed are already filtered to be their own. */}
+                        {(authUser?.tipe === "pengguna" ||
+                          authUser?.tipe === "penitip") && (
                           <div className="flex-1 self-stretch min-w-[80px] max-w-[100px] md:max-w-[120px] p-2 border-r border-[#E5E5E5] flex justify-center items-center">
                             <div className="flex justify-center items-center gap-1 sm:gap-2">
                               <button

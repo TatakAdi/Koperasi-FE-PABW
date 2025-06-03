@@ -8,6 +8,7 @@ export default function ProductBox({
   stock,
   onClickFocus,
   deskripsi,
+  imageUrl,
 }) {
   const [isHover, setIsHover] = useState(false);
 
@@ -20,9 +21,9 @@ export default function ProductBox({
   return (
     <div className="w-[259px] h-fit rounded-lg border-1 border-[#d1d1d1] bg-white">
       <img
-        src="image.png"
+        src={imageUrl ? imageUrl.replace('local:', '/') : '/image.png'}
         alt="Pratinjau Produk"
-        className="w-full h-full object-contain relative rounded-t-lg"
+        className="w-[257px] h-[190px] object-cover relative rounded-t-lg items-center justify-center"
       />
       <div className="grid grid-cols-1 gap-4 px-4 mt-4">
         <div className="grid grid-cols-1 gap-2">

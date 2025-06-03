@@ -1,7 +1,7 @@
 "use client";
 
 import Navbar from "app/components/Navbar";
-import Riwayat from "app/components/Riwayat"; // Pastikan komponen ini bisa menerima props baru
+import Riwayat from "app/components/Riwayat";
 import SidebarAdmin from "app/components/SidebarAdmin";
 import useInput from "app/hooks/useInput";
 import { getAllCart } from "app/lib/api/cart";
@@ -9,7 +9,6 @@ import { getUserLogged } from "app/lib/api/login";
 import { logout } from "app/lib/api/logout";
 import { useEffect, useMemo, useState } from "react";
 
-// Helper function to format numbers as Rupiah
 function formatRupiah(angka) {
   if (angka === null || angka === undefined || isNaN(Number(angka)))
     return "Rp. 0";
@@ -20,15 +19,13 @@ export default function StatAdminPage() {
   const [keyword, setKeyword] = useInput("");
   const [authUser, setAuthUser] = useState(null);
 
-  // State untuk tabel "Products Sold"
   const [soldProducts, setSoldProducts] = useState([]);
   const [isLoadingSoldProducts, setIsLoadingSoldProducts] = useState(true);
   const [currentSoldProductsPage, setCurrentSoldProductsPage] = useState(1);
   const [soldProductsPerPage] = useState(5);
 
-  // State untuk "Profit Details"
   const [totalTransaksi, setTotalTransaksi] = useState(0);
-  const [totalPenjualanProduk, setTotalPenjualanProduk] = useState(0); // Jumlah item terjual
+  const [totalPenjualanProduk, setTotalPenjualanProduk] = useState(0);
   const [totalPengiriman, setTotalPengiriman] = useState(0);
   const [isLoadingProfitDetails, setIsLoadingProfitDetails] = useState(true);
 
@@ -47,7 +44,7 @@ export default function StatAdminPage() {
   useEffect(() => {
     const fetchDataForStats = async () => {
       setIsLoadingSoldProducts(true);
-      setIsLoadingProfitDetails(true); // Mulai loading untuk detail profit juga
+      setIsLoadingProfitDetails(true);
 
       const { error: fetchError, data: apiResponse } = await getAllCart();
 
@@ -68,7 +65,6 @@ export default function StatAdminPage() {
       if (apiResponse && Array.isArray(apiResponse.data)) {
         const allCarts = apiResponse.data;
 
-        // 1. Hitung Total Pengiriman
         let currentTotalPengiriman = 0;
         allCarts.forEach((cart) => {
           if (
@@ -80,15 +76,12 @@ export default function StatAdminPage() {
         });
         setTotalPengiriman(currentTotalPengiriman);
 
-        // 2. Filter Keranjang yang Sudah Dibayar
         const paidCarts = allCarts.filter(
           (cart) => cart.status === "Paid" || cart.sudah_bayar === 1
         );
 
-        // 3. Hitung Total Transaksi (berdasarkan keranjang yang sudah dibayar)
         setTotalTransaksi(paidCarts.length);
 
-        // 4. Proses item dari keranjang yang sudah dibayar untuk Produk Terjual dan Total Penjualan Produk
         let allLineItemsFromPaidCarts = [];
         let currentTotalPenjualanProduk = 0;
 
@@ -101,7 +94,7 @@ export default function StatAdminPage() {
                 quantity: quantity,
                 total_price_for_item: Number(item.subtotal) || 0,
               });
-              currentTotalPenjualanProduk += quantity; // Akumulasi jumlah produk terjual
+              currentTotalPenjualanProduk += quantity;
             });
           } else {
             console.warn(
@@ -113,13 +106,12 @@ export default function StatAdminPage() {
         });
         setTotalPenjualanProduk(currentTotalPenjualanProduk);
 
-        // Agregasi untuk tabel "Products Sold"
         const aggregated = allLineItemsFromPaidCarts.reduce((acc, item) => {
           const productName = item.product_name;
           if (!acc[productName]) {
             acc[productName] = {
               name: productName,
-              sold: 0, // Ini akan menjadi jumlah item per produk, bukan total semua item
+              sold: 0,
               totalRevenue: 0,
             };
           }
@@ -130,7 +122,7 @@ export default function StatAdminPage() {
 
         const finalSoldProducts = Object.values(aggregated).map((prod) => ({
           ...prod,
-          price: formatRupiah(prod.totalRevenue), // Ini adalah total revenue per produk
+          price: formatRupiah(prod.totalRevenue),
         }));
 
         setSoldProducts(finalSoldProducts);
@@ -238,10 +230,8 @@ export default function StatAdminPage() {
             ) : (
               <Riwayat
                 totalTransaksi={totalTransaksi}
-                totalPenjualan={totalPenjualanProduk} // Ini adalah jumlah item terjual
+                totalPenjualan={totalPenjualanProduk}
                 totalPengiriman={totalPengiriman}
-                // Anda mungkin perlu menambahkan props lain ke Riwayat jika diperlukan
-                // seperti total pendapatan (revenue), dll. yang bisa dihitung juga.
               />
             )}
           </div>

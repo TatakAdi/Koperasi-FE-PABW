@@ -166,7 +166,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen h-screen w-full font-[family-name:var(--font-geist-sans)]  overflow-y-hidden">
+    <div className="min-h-screen h-screen w-full font-[family-name:var(--font-geist-sans)] overflow-y-hidden">
       <Navbar
         keyword={keyword}
         onKeywordChange={setKeyword}
@@ -178,7 +178,7 @@ export default function Home() {
         logout={onLogoutHandler}
       />
       <main
-        className={`flex mx-5 gap-4 ${
+        className={`flex flex-col lg:flex-row mx-5 gap-4 ${
           isFocus ? "-z-10" : "z-0"
         } overflow-hidden h-[calc(100vh-88px)]`}
       >
@@ -204,7 +204,7 @@ export default function Home() {
           </p>
           {!isLoading ? (
             filteredContent().length !== 0 ? (
-              <div className="grid grid-cols-6 gap-4">
+              <div className="flex flex-col md:flex-row gap-4 flex-wrap">
                 {filteredContent().map((produk) => (
                   <ProductBox
                     key={produk.id}
@@ -213,6 +213,7 @@ export default function Home() {
                     price={produk.price}
                     deskripsi={produk.description}
                     stock={produk.stock}
+                    imageUrl={produk.image_url}
                     onClickFocus={(focus) => {
                       setSelectedProduk(produk.id);
                       setIsFocus(focus);
