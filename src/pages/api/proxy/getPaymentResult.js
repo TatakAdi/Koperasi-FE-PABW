@@ -23,17 +23,16 @@ export default async function handler(req, res) {
             return res.status(401).json({ message: "No token found" });
         }
 
-        // Forward the request body to the check-payment-status endpoint
+        const { order_id } = req.body;
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_APP_URL}/api/payment/check-payment-status`,
+            `${process.env.NEXT_PUBLIC_APP_URL}/api/payment/check-payment-status?order_id=${order_id}`,
             {
-                method: "POST",
+                method: "GET",
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                     "X-Requested-With": "XMLHttpRequest",
-                },
-                body: JSON.stringify(req.body), // Forward the body as-is
+                }
             }
         );
 

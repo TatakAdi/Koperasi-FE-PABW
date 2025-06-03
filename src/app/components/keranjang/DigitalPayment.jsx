@@ -368,11 +368,11 @@ export default function DigitalPayment({
             Kembali
           </button>
           <button
-            onClick={handleConfirm}
+            onClick={() => handleCheckPaymentStatus(paymentData.order_id)}
             className="flex h-10 px-4 flex-1 justify-center items-center gap-1 rounded-lg bg-black text-white text-sm font-medium hover:bg-gray-800 transition"
-            disabled={loading || !selected}
+            disabled={loading}
           >
-            {loading ? "Memproses..." : "Konfirmasi"}
+            {loading ? "Memeriksa..." : "Konfirmasi"}
           </button>
         </div>
       </div>
