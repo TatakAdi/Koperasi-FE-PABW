@@ -10,7 +10,7 @@ import TransferStep from './TransferStep';
 import DigitalPay from './DigitalPayment';
 import IuranSukarela from './IuranSukarela';
 
-export default function CheckoutCard({ total, products = [], selectedItems = [], onCancel }) {
+export default function CheckoutCard({ total, products = [], selectedItems = [], onCancel, userId }) {
   const [step, setStep] = useState('orderType');
   const [orderType, setOrderType] = useState(null);
   const [location, setLocation] = useState(null);
@@ -132,6 +132,7 @@ export default function CheckoutCard({ total, products = [], selectedItems = [],
           {step === 'digitalPayment' && (
             <DigitalPay
               total={total}
+              userId={userId}
               onConfirm={handleConfirm}
               onContinue={() => {
                 setStep('confirmation');

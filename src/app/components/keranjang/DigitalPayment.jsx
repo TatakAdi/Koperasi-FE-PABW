@@ -39,7 +39,7 @@ export default function DigitalPayment({ total, cartId, onConfirm, onCancel, use
     let payload = { cart_id: cartId };
     if (selected === 'qris') {
       payload.payment_method = 'qris';
-    } else if (['bni', 'mandiri', 'bri'].includes(selected)) {
+    } else if (['bni', 'bri'].includes(selected)) {
       payload.payment_method = 'bank';
       payload.bank = selected;
     }
@@ -123,9 +123,17 @@ export default function DigitalPayment({ total, cartId, onConfirm, onCancel, use
   );
 
   useEffect(() => {
-    const fetchQris = async () => {
+    const fetchPayment = async () => {
       setLoading(true);
-      let payload = { user_id: 1, payment_method: 'qris' };
+      let payload;
+      if (selected === 'qris') {
+        payload = { cart_id: userId, payment_method: 'qris' };
+      } else if (['bni', 'bri'].includes(selected)) {
+        payload = { cart_id: userId, payment_method: 'bank', bank: selected };
+      } else {
+        setLoading(false);
+        return;
+      }
       try {
         const res = await fetch('/api/proxy/getPaymentData', {
           method: 'POST',
@@ -141,10 +149,10 @@ export default function DigitalPayment({ total, cartId, onConfirm, onCancel, use
       }
     };
 
-    if (selected === 'qris' && !paymentData) {
-      fetchQris();
+    if ((selected === 'qris' || ['bni', 'bri'].includes(selected)) && !paymentData) {
+      fetchPayment();
     }
-  }, [selected, userId]);
+  }, [selected, userId, paymentData]);
 
   console.log('paymentData', paymentData);
 
@@ -197,12 +205,12 @@ export default function DigitalPayment({ total, cartId, onConfirm, onCancel, use
           {selected === 'qris' && paymentData && renderQrisResult()}
 
           {/* VA Bank */}
-          {(selected === '' || ['bni', 'mandiri', 'bri'].includes(selected)) && !paymentData && (
+          {(selected === '' || ['bni', 'bri'].includes(selected)) && !paymentData && (
             <div className="mt-4 space-y-4">
               <div>
                 <p className="text-xs text-gray-500 mb-1">VA Bank</p>
                 <div className="flex gap-3 items-center">
-                  {['bni', 'mandiri', 'bri'].map((bank) => (
+                  {['bni', 'bri'].map((bank) => (
                     <button
                       key={bank}
                       className={`rounded-lg border p-1 transition ${selected === bank ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'}`}
@@ -216,10 +224,11 @@ export default function DigitalPayment({ total, cartId, onConfirm, onCancel, use
             </div>
           )}
 
-          {['bni', 'mandiri', 'bri'].includes(selected) && paymentData && renderVaResult()}
+          {['bni', 'bri'].includes(selected) && paymentData && renderVaResult()}
 
           {/* GOPAY */}
-          {(selected === '' || selected === 'gopay') && (
+          {/*
+          (selected === '' || selected === 'gopay') && (
             <div>
               <p className="text-xs text-gray-500 mb-1">GOPAY</p>
               <button
@@ -228,13 +237,6 @@ export default function DigitalPayment({ total, cartId, onConfirm, onCancel, use
               >
                 <img src="/Gopay.svg" alt="GOPAY" className="h-8" />
               </button>
-              {/* {selected === 'gopay' && (
-                <div className="mt-2 flex flex-col items-center">
-                  <p className="text-sm font-medium">GOPAY</p>
-                  <img src="/QRCODE.svg" alt="Gopay Payment" className="h-40 w-40 object-contain" />
-                  <span className="text-xs text-gray-500 mt-1">Scan kode QR atau transfer ke 0812-xxxx-xxxx (Gopay).</span>
-                </div>
-              )} */}
             </div>
           )}
 
@@ -252,9 +254,10 @@ export default function DigitalPayment({ total, cartId, onConfirm, onCancel, use
               </div>
             </div>
           )}
+          */}
 
           {/* Bank Transfer */}
-          {(selected === '' || ['bni-tf', 'mandiri-tf', 'bri-tf', 'bca'].includes(selected)) && (
+          {/* {(selected === '' || ['bni-tf', 'mandiri-tf', 'bri-tf', 'bca'].includes(selected)) && (
             <div>
               <p className="text-xs text-gray-500 mb-1">Bank Transfer</p>
               <div className="flex gap-3 items-center">
@@ -277,7 +280,7 @@ export default function DigitalPayment({ total, cartId, onConfirm, onCancel, use
               {selected === 'bca' &&
                 renderBankTransferDetail('BCA', '5566778899', '/BCA.svg')}
             </div>
-          )}
+          )} */}
         </div>
 
         <p className="text-xs text-center text-gray-400 pt-2">Segera selesaikan pembayaran sebelum waktu habis.</p>
