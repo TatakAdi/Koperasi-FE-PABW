@@ -8,7 +8,6 @@ import { getUserLogged } from "@/app/lib/api/login";
 import { logout } from "@/app/lib/api/logout";
 import { deleteProduct, getProduct } from "@/app/lib/api/product";
 import { Plus } from "lucide-react";
-import Image from "next/image";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -474,12 +473,10 @@ export default function ProductManagementPage() {
                         className="self-stretch border-b border-[#E5E5E5] inline-flex justify-start items-center min-h-[80px] hover:bg-gray-50 transition-colors"
                       >
                         <div className="w-[100px] sm:w-[120px] self-stretch max-w-36 p-2 border-r border-[#E5E5E5] flex justify-center items-center gap-2">
-                          <Image
+                          <img
                             className="size-16 rounded-lg object-cover"
                             src={displayImageUrl}
                             alt={item.name || "Gambar Produk"}
-                            width={64}
-                            height={64}
                             onError={(e) => {
                               e.target.onerror = null;
                               e.target.src = "/image.png";
@@ -524,11 +521,9 @@ export default function ProductManagementPage() {
                                 aria-label={`Hapus ${item.name}`}
                                 className="p-1 hover:bg-gray-200 rounded cursor-pointer"
                               >
-                                <Image
+                                <img
                                   src="/Trash.svg"
                                   alt="Hapus"
-                                  width={18}
-                                  height={18}
                                   className="w-4 h-4 sm:w-5 sm:h-5"
                                 />
                               </button>
@@ -537,11 +532,9 @@ export default function ProductManagementPage() {
                                 aria-label={`Edit ${item.name}`}
                                 className="p-1 hover:bg-gray-200 rounded cursor-pointer"
                               >
-                                <Image
+                                <img
                                   src="/Pensil.svg"
                                   alt="Edit"
-                                  width={18}
-                                  height={18}
                                   className="w-4 h-4 sm:w-5 sm:h-5"
                                 />
                               </button>
