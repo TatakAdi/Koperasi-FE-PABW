@@ -430,88 +430,79 @@ export default function ActorsPage() {
                 </div>
                 {/* Actions Button and Dropdown */}
                 <div className="relative" ref={dropdownRef}>
-                  <button
-                    type="button"
-                    onClick={() => setShowDropdown((v) => !v)}
-                    className="px-3 py-2 bg-black rounded-lg outline-1 outline-offset-[-1px] flex justify-start items-center gap-1 overflow-hidden cursor-pointer transition-transform duration-150 ease-in-out active:scale-95"
-                  >
-                    <span className="w-6 h-6 flex items-center justify-center">
-                      <Image
-                        src="/listrik.svg"
-                        alt="Actions"
-                        width={24}
-                        height={24}
-                        style={{ filter: "brightness(0) invert(1)" }}
-                        priority
-                      />
-                    </span>
-                    <div className="px-2 flex justify-center items-center">
-                      <div className="text-white text-base font-medium font-['Geist'] leading-normal">
-                        Actions
+                  {(authUser?.tipe === "admin" || authUser?.tipe === "pegawai") && (
+                    <button
+                      type="button"
+                      onClick={() => setShowDropdown((v) => !v)}
+                      className="px-3 py-2 bg-black rounded-lg outline-1 outline-offset-[-1px] flex justify-start items-center gap-1 overflow-hidden cursor-pointer transition-transform duration-150 ease-in-out active:scale-95"
+                    >
+                      <span className="w-6 h-6 flex items-center justify-center">
+                        <Image
+                          src="/listrik.svg"
+                          alt="Actions"
+                          width={24}
+                          height={24}
+                          style={{ filter: "brightness(0) invert(1)" }}
+                          priority
+                        />
+                      </span>
+                      <div className="px-2 flex justify-center items-center">
+                        <div className="text-white text-base font-medium font-['Geist'] leading-normal">
+                          Actions
+                        </div>
+                      </div>
+                      <span
+                        className={`w-6 h-6 flex items-center justify-center transition-transform duration-300 ease-in-out ${
+                          showDropdown ? "rotate-180" : ""
+                        }`}
+                      >
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                          <path
+                            d="M6 9L12 15L18 9"
+                            stroke="#fff"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </span>
+                    </button>
+                  )}
+
+                  {showDropdown && (authUser?.tipe === "admin" || authUser?.tipe === "pegawai") && (
+                    <div className="absolute p-2 right-0 mt-2 bg-white rounded-md shadow-lg inline-flex flex-col justify-start items-start gap-1 z-30">
+                      {authUser?.tipe === "admin" && (
+                        <div
+                          className="w-full px-3 py-2 text-left text-black text-sm font-normal font-['Geist'] leading-tight cursor-pointer hover:bg-gray-100 rounded"
+                          onClick={() => {
+                            setShowEditActor(null);
+                            setShowAddActor(true);
+                            setShowDropdown(false);
+                          }}
+                        >
+                          Tambah Aktor
+                        </div>
+                      )}
+                      <div
+                        className="w-full px-3 py-2 text-left text-black text-sm font-normal font-['Geist'] leading-tight cursor-pointer hover:bg-gray-100 rounded"
+                        onClick={() => {
+                          router.push("/IuranWajib");
+                          setShowDropdown(false);
+                        }}
+                      >
+                        Edit Detail Iuran Wajib
+                      </div>
+                      <div
+                        className="w-full px-3 py-2 text-left text-black text-sm font-normal font-['Geist'] leading-tight cursor-pointer hover:bg-gray-100 rounded"
+                        onClick={() => {
+                          setShowTarikSaldoModal(true);
+                          setShowDropdown(false);
+                        }}
+                      >
+                        Tarik Saldo
                       </div>
                     </div>
-                    <span
-                      className={`w-6 h-6 flex items-center justify-center transition-transform duration-300 ease-in-out ${
-                        showDropdown ? "rotate-180" : ""
-                      }`}
-                    >
-                      <svg
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                      >
-                        <path
-                          d="M6 9L12 15L18 9"
-                          stroke="#fff"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </span>
-                  </button>
-                  <div
-                    className={`absolute p-2 right-0 mt-2 bg-white rounded-md shadow-lg inline-flex flex-col justify-start items-start gap-1 z-30
-                                  transition-all duration-300 ease-in-out transform
-                                  ${
-                                    showDropdown
-                                      ? "opacity-100 scale-100"
-                                      : "opacity-0 scale-95 pointer-events-none"
-                                  }`}
-                    style={{ minWidth: "198px" }}
-                    aria-hidden={!showDropdown}
-                  >
-                    <div
-                      className="w-full px-3 py-2 text-left text-black text-sm font-normal font-['Geist'] leading-tight cursor-pointer hover:bg-gray-100 rounded"
-                      onClick={() => {
-                        setShowEditActor(null);
-                        setShowAddActor(true);
-                        setShowDropdown(false);
-                      }}
-                    >
-                      Tambah Aktor
-                    </div>
-                    <div
-                      className="w-full px-3 py-2 text-left text-black text-sm font-normal font-['Geist'] leading-tight cursor-pointer hover:bg-gray-100 rounded"
-                      onClick={() => {
-                        router.push("/IuranWajib");
-                        setShowDropdown(false);
-                      }}
-                    >
-                      Edit Detail Iuran Wajib
-                    </div>
-                    {/* 4. Modifikasi item dropdown "Tarik Saldo" */}
-                    <div
-                      className="w-full px-3 py-2 text-left text-black text-sm font-normal font-['Geist'] leading-tight cursor-pointer hover:bg-gray-100 rounded"
-                      onClick={() => {
-                        setShowTarikSaldoModal(true);
-                        setShowDropdown(false);
-                      }}
-                    >
-                      Tarik Saldo
-                    </div>
-                  </div>
+                  )}
                 </div>
               </div>
 
@@ -560,11 +551,13 @@ export default function ActorsPage() {
                         Privilege
                       </div>
                     </div>
-                    <div className="w-24 h-14 border-r border-[#E5E5E5] flex justify-center items-center gap-2 px-2 text-center">
-                      <div className="text-[#737373] text-base font-medium font-['Geist'] leading-normal capitalize">
-                        Aksi
+                    {authUser?.tipe === "admin" && (
+                      <div className="w-24 h-14 border-r border-[#E5E5E5] flex justify-center items-center gap-2 px-2 text-center">
+                        <div className="text-[#737373] text-base font-medium font-['Geist'] leading-normal capitalize">
+                          Aksi
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 </div>
 
@@ -654,35 +647,37 @@ export default function ActorsPage() {
                       <div className="flex-1 self-stretch max-w-32 p-2 border-r border-[#E5E5E5] flex justify-center items-center">
                         <Privilage value={actor.tipe} />
                       </div>
-                      <div className="w-24 self-stretch p-2 border-r border-[#E5E5E5] flex justify-center items-center gap-2">
-                        <button
-                          onClick={() => handleDeleteActor(actor)}
-                          aria-label={`Hapus ${actor.fullname}`}
-                          className="p-1 hover:bg-gray-100 rounded cursor-pointer"
-                        >
-                          <Image
-                            src="/Trash.svg"
-                            alt="Hapus"
-                            width={20}
-                            height={20}
-                          />
-                        </button>
-                        <button
-                          onClick={() => {
-                            setShowEditActor(actor);
-                            setShowAddActor(true);
-                          }}
-                          aria-label={`Edit ${actor.fullname}`}
-                          className="p-1 hover:bg-gray-100 rounded cursor-pointer"
-                        >
-                          <Image
-                            src="/Pensil.svg"
-                            alt="Edit"
-                            width={20}
-                            height={20}
-                          />
-                        </button>
-                      </div>
+                      {authUser?.tipe === "admin" && (
+                        <div className="w-24 self-stretch p-2 border-r border-[#E5E5E5] flex justify-center items-center gap-2">
+                          <button
+                            onClick={() => handleDeleteActor(actor)}
+                            aria-label={`Hapus ${actor.fullname}`}
+                            className="p-1 hover:bg-gray-100 rounded cursor-pointer"
+                          >
+                            <Image
+                              src="/Trash.svg"
+                              alt="Hapus"
+                              width={20}
+                              height={20}
+                            />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setShowEditActor(actor);
+                              setShowAddActor(true);
+                            }}
+                            aria-label={`Edit ${actor.fullname}`}
+                            className="p-1 hover:bg-gray-100 rounded cursor-pointer"
+                          >
+                            <Image
+                              src="/Pensil.svg"
+                              alt="Edit"
+                              width={20}
+                              height={20}
+                            />
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ))
                 )}

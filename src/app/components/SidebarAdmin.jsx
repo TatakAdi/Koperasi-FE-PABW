@@ -41,13 +41,13 @@ const ALL_MENU_ITEMS = [
     label: "Actors",
     icon: <img src="/actor.svg" alt="actor" className="size-6" />,
     href: "/Actors",
-    roles: ["admin"],
+    roles: ["admin", "pegawai"],
   },
   {
     label: "Iuran Wajib",
     icon: <img src="/dollar.svg" alt="actor" className="size-6" />,
     href: "/IuranWajib",
-    roles: ["pegawai"],
+    roles: [],
   },
 ];
 
