@@ -315,7 +315,6 @@ export default function KeranjangPage() {
           products={products}
           selectedItems={selectedItems}
           onCancel={() => setShowCheckout(false)}
-          userId={authUser?.id} // <-- pass userId here
           onContinue={(type) => {
             alert(`Pesanan dengan tipe: ${type} berhasil!`);
             setShowCheckout(false);
