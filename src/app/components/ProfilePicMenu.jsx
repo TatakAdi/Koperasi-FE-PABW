@@ -38,10 +38,17 @@ export default function ProfilePicMenu({
         router.push("/Actors");
       }
     } else if (roles === "pegawai") {
-      // Pegawai always routes to /Sellings
-      router.push("/Sellings");
+      if (pathname === "/Sellings") {
+        router.push("/");
+      } else {
+        router.push("/Sellings");
+      }
     } else if (roles === "penitip" || roles === "pengguna") {
-      router.push("/MyProduct");
+      if (pathname === "/MyProduct") {
+        router.push("/");
+      } else {
+        router.push("/MyProduct");
+      }
     }
   };
 
@@ -125,10 +132,7 @@ export default function ProfilePicMenu({
         </div>
 
         {authed && (
-          <div
-            className={`${styleBox}`}
-            onClick={handleAdminOrProductPageRedirect}
-          >
+          <div className={`${styleBox}`} onClick={handleAdminOrProductPageRedirect}>
             {roles === "admin" ? (
               isAdminPages ? (
                 <>
@@ -142,15 +146,29 @@ export default function ProfilePicMenu({
                 </>
               )
             ) : roles === "pegawai" ? (
-              <>
-                <KeyRound size={20} />
-                <span>Pegawai Panel</span>
-              </>
+              pathname === "/Sellings" ? (
+                <>
+                  <Store size={20} />
+                  <span>Main Page</span>
+                </>
+              ) : (
+                <>
+                  <KeyRound size={20} />
+                  <span>Pegawai Panel</span>
+                </>
+              )
             ) : (
-              <>
-                <Package size={20} />
-                <span>My Products</span>
-              </>
+              pathname === "/MyProduct" ? (
+                <>
+                  <Store size={20} />
+                  <span>Main Page</span>
+                </>
+              ) : (
+                <>
+                  <Package size={20} />
+                  <span>My Products</span>
+                </>
+              )
             )}
           </div>
         )}
