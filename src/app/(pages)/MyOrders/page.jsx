@@ -1,20 +1,19 @@
 "use client";
-import React from "react";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { getUserLogged } from "app/lib/api/login";
-import { logout } from "app/lib/api/logout";
-import { getCartItems } from "app/lib/api/cart";
-import { checkout } from "@/app/lib/api/checkout";
+import OnDeliveryItem from "@/app/components/myOrders/OnDeliveryItem";
+import OnProcessedItem from "@/app/components/myOrders/OnProcessedItem";
+import OrderDoneItem from "@/app/components/myOrders/OrderDoneItem";
 import { cartHistory } from "@/app/lib/api/cartHistory";
-import useInput from "app/hooks/useInput";
+import { checkout } from "@/app/lib/api/checkout";
 import CheckoutCard from "app/components/keranjang/CheckoutCard";
+import MyOrderNotPayItems from "app/components/myOrders/MyOrderNotPayItems";
 import Navbar from "app/components/Navbar";
 import SidePanel from "app/components/SidePanel";
-import MyOrderNotPayItems from "app/components/myOrders/MyOrderNotPayItems";
-import OnProcessedItem from "@/app/components/myOrders/OnProcessedItem";
-import OnDeliveryItem from "@/app/components/myOrders/OnDeliveryItem";
-import OrderDoneItem from "@/app/components/myOrders/OrderDoneItem";
+import useInput from "app/hooks/useInput";
+import { getCartItems } from "app/lib/api/cart";
+import { getUserLogged } from "app/lib/api/login";
+import { logout } from "app/lib/api/logout";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function MyOrders() {
   const [authUser, setAuthUser] = useState(null);
@@ -40,53 +39,52 @@ export default function MyOrders() {
   useEffect(() => {
     const getUser = async () => {
       const { error, data } = await getUserLogged();
-
       if (error) {
         console.log("Token Invalid & Data user gagal terambil");
         return;
       }
-
       setAuthUser(data);
 
+      // Get current cart (unpaid items)
       const cartRes = await getCartItems(data.id);
-      const payedCartRes = await cartHistory(data.id);
-      console.log("CartRes: ", cartRes);
-      console.log("payedCartRes: ", payedCartRes);
-      setCart(cartRes.data);
-      if (!cartRes.error && cartRes.data && cartRes.data.items) {
-        const items = cartRes.data.items.map((item) => ({
-          ...item,
-          quantity: item.jumlah,
-        }));
-        setCartItems(items);
-        setProducts(items);
+      if (!cartRes.error && cartRes.data) {
+        setCart(cartRes.data);
+        if (cartRes.data.items) {
+          const items = cartRes.data.items.map((item) => ({
+            ...item,
+            quantity: item.jumlah,
+            cart_id: cartRes.data.cart_id,
+            status_barang: cartRes.data.status_barang,
+            status_bayar: cartRes.data.sudah_bayar,
+            total_harga: cartRes.data.total_harga
+          }));
+          setCartItems(items);
+          setProducts(items);
+        }
       }
-      // Masalah di sini wak
-      if (!payedCartRes.error && payedCartRes.data && payedCartRes.data.carts) {
-        const carts = payedCartRes.data.carts.map((item) => ({
-          ...item,
-        }));
-        // const items = carts.items.map((item) => ({
-        //   ...item,
-        // }));
-        setBuyedItems(carts);
 
-        const mergedItems = carts.flatMap((cart) =>
+      // Get cart history for other tabs
+      const payedCartRes = await cartHistory(data.id);
+      console.log("Cart history:", payedCartRes);
+      if (!payedCartRes.error && payedCartRes.data && payedCartRes.data.carts) {
+        setBuyedItems(payedCartRes.data.carts);
+        
+        // Process items for different status tabs
+        const processedItems = payedCartRes.data.carts.flatMap((cart) =>
           (cart.items || []).map((item) => ({
             ...item,
             cart_id: cart.cart_id,
-            status_barang: cart.status_barang,
-            sudah_bayar: cart.sudah_bayar,
+            status_barang: cart.status_barang || "menunggu pegawai",
+            status_bayar: 1, // All items in history are paid
             total_harga: cart.total_harga,
+            quantity: item.jumlah
           }))
         );
-
-        console.log("gabungan item : ", mergedItems);
-        setProcessedItems(mergedItems);
+        setProcessedItems(processedItems);
       }
     };
+
     getUser();
-    console.log("cart = ", cart);
   }, []);
 
   async function onLogoutHandler() {
@@ -104,49 +102,33 @@ export default function MyOrders() {
 
   // Masih uji coba
   const notPayedCartItem = () => {
-    if (cart && cart.status_barang === "menunggu pegawai") {
-      const filteredContent = cart.items || [];
-      console.log("filtered: ", filteredContent);
-      return filteredContent;
-    }
-    console.log("filtered: [] (cart tidak sedang menunggu pegawai)");
-    return [];
+    if (!cart || !cart.items) return [];
+    return cart.items.map(item => ({
+      ...item,
+      status_bayar: cart.sudah_bayar,
+      status_barang: cart.status_barang
+    }));
   };
 
   const onProcessedCartItem = () => {
-    if (processedItems) {
-      const filteredContent = processedItems.filter(
-        (item) => item.status_barang === "akan dikirim"
-      );
-      console.log("filtered: ", filteredContent);
-      return filteredContent;
-    }
-    console.log("Gagal memfilter cart yang akan dikirim");
-    return [];
+    if (!processedItems) return [];
+    return processedItems.filter(item => 
+      item.status_barang === "menunggu pegawai"
+    );
   };
 
   const onDeliveryCartItem = () => {
-    if (processedItems) {
-      const filteredContent = processedItems.filter((item) => {
-        item.status_barang === "sedang dikirim" ||
-          item.status_barang === "sudah diboking";
-      });
-      return filteredContent;
-    }
-    console.log("Gagal memfilter cart yang akan dikirim");
-    return [];
+    if (!processedItems) return [];
+    return processedItems.filter(item => 
+      item.status_barang === "akan dikirim"
+    );
   };
 
   const onOrderDoneCartItem = () => {
-    if (processedItems) {
-      const filteredContent = processedItems.filter((item) => {
-        item.status_barang === "diterima pembeli" ||
-          item.status_barang === "dibatalkan";
-      });
-      return filteredContent;
-    }
-    console.log("Gagal memfilter cart yang akan dikirim");
-    return [];
+    if (!processedItems) return [];
+    return processedItems.filter(item => 
+      item.status_barang === "diterima pembeli"
+    );
   };
 
   const onPayHandle = (itemId) => {
@@ -181,6 +163,24 @@ export default function MyOrders() {
     setIsFocus(false);
     sessionStorage.removeItem("payment_method");
     router.refresh();
+  };
+
+  const handleUpdateStatus = async (orderId) => {
+    try {
+      // Add your API call here to update the status
+      // const response = await updateOrderStatus(orderId, "diterima pembeli");
+      
+      // Update local state
+      setProcessedItems(prevItems => 
+        prevItems.map(item => 
+          item.id === orderId 
+            ? { ...item, status_barang: "diterima pembeli" }
+            : item
+        )
+      );
+    } catch (error) {
+      console.error("Error updating order status:", error);
+    }
   };
 
   return (
@@ -304,7 +304,7 @@ export default function MyOrders() {
           )}
           {status === "Sedang Dikirim" && (
             <>
-              <div className="grid grid-cols-4 items-center text-center text-[#737373] border-[#E5E5E5] border-b-1">
+              <div className="grid grid-cols-5 items-center text-center text-[#737373] border-[#E5E5E5] border-b-1">
                 <div className="text-lg py-6 border-r-1 border-[#E5E5E5]">
                   Nama Barang
                 </div>
@@ -317,10 +317,17 @@ export default function MyOrders() {
                 <div className="text-lg py-6 border-r-1 border-[#E5E5E5]">
                   Status
                 </div>
+                <div className="text-lg py-6 border-r-1 border-[#E5E5E5]">
+                  Aksi
+                </div>
               </div>
               <div className="divide-y">
                 {onDeliveryCartItem().map((item) => (
-                  <OnDeliveryItem key={item.id} {...item} />
+                  <OnDeliveryItem 
+                    key={item.id} 
+                    {...item} 
+                    onUpdateStatus={handleUpdateStatus}
+                  />
                 ))}
               </div>
             </>
@@ -345,9 +352,9 @@ export default function MyOrders() {
                 </div>
               </div>
               <div className="divide-y">
-                {onOrderDoneCartItem().map((item) => {
-                  <OrderDoneItem key={item.id} {...item} />;
-                })}
+                {onOrderDoneCartItem().map((item) => (
+                  <OrderDoneItem key={item.id} {...item} />
+                ))}
               </div>
             </>
           )}

@@ -6,32 +6,42 @@ export default function OnDeliveryItem({
   category,
   status,
   jumlah,
+  onUpdateStatus, // Add this prop
 }) {
   const statusIcons = {
-    "sedang dikirim": "Sedang-Dikirim-Status.svg",
-    "sudah dibooking": "Siap-Diambil-Status.svg",
+    "akan dikirim": "/Sedang-Dikirim-Status.svg",
+    "sudah dibooking": "/Siap-Diambil-Status.svg",
   };
-  const deliveryStatus = statusIcons[status] || "";
+
+  const handleImageError = (e) => {
+    e.target.onerror = null;
+    e.target.src = "/Piscok.svg";
+  };
+
+  const productImage = image?.startsWith("local:")
+    ? image.replace("local:", "/")
+    : image;
 
   return (
     <div
       key={id}
-      className={`h-[120px] relative border-b border-[#e5e7eb] grid grid-cols-4 items-center`}
+      className={`h-[120px] relative border-b border-[#e5e7eb] grid grid-cols-5 items-center`} // Changed to grid-cols-5
     >
       <div className="min-h-[120px] py-7 border-r border-[#e5e7eb]  items-center gap-4">
         {/**Kolom 1: Nama Produk dan gambar */}
         <div className="flex items-center gap-4 ">
           <img
-            className="w-16 h-16 rounded-lg"
-            src={image || "Piscok.svg"}
+            className="w-16 h-16 rounded-lg object-cover"
+            src={productImage || "/Piscok.svg"}
             alt={name}
+            onError={handleImageError}
           />
           <div className="flex flex-col gap-1">
             <div className="text-base font-medium text-neutral-900 font-['Geist'] leading-tight">
               {name}
             </div>
             <div className="text-sm text-[#999] font-normal font-['Geist'] leading-tight">
-              {category.name}
+              {category?.name || "Uncategorized"}
             </div>
           </div>
         </div>
@@ -48,9 +58,26 @@ export default function OnDeliveryItem({
           {jumlah}
         </div>
       </div>
-      {/**Kolom 4: Tombol aksi bayar */}
-      <div className=" h-full px-4 py-7 border-r border-[#e5e7eb] flex items-center justify-center">
-        <img src={deliveryStatus} alt="Status barang" />
+      {/**Kolom 4: Status barang */}
+      <div className="h-full px-4 py-7 border-r border-[#e5e7eb] flex items-center justify-center">
+        <img
+          src={statusIcons[status] || "/Sedang-Dikirim-Status.svg"}
+          alt={`Status: ${status}`}
+          onError={(e) => {
+            e.target.onerror = null;
+            console.log(`Failed to load status icon for status: ${status}`);
+          }}
+        />
+      </div>
+
+      {/**Kolom 5: Action Button */}
+      <div className="h-full px-4 py-7 flex items-center justify-center">
+        <button
+          onClick={() => onUpdateStatus(id)}
+          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+        >
+          Terima Barang
+        </button>
       </div>
     </div>
   );
