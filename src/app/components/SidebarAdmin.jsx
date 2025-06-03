@@ -43,6 +43,12 @@ const ALL_MENU_ITEMS = [
     href: "/Actors",
     roles: ["admin"],
   },
+  {
+    label: "Iuran Wajib",
+    icon: <img src="/actor.svg" alt="actor" className="size-6" />,
+    href: "/IuranWajib",
+    roles: ["pegawai"],
+  },
 ];
 
 export default function SidebarAdmin() {

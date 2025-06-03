@@ -1,6 +1,6 @@
 
 export default function Kategori({ value, className = "" }) {
-  if (value === "Makanan Berat") {
+  if (value === "makanan berat") {
     return (
       <div className={`px-1.5 py-0.5 bg-purple-100 rounded-lg inline-flex justify-center items-center gap-2.5 ${className}`}>
         <div className="flex justify-start items-center gap-1">
@@ -10,7 +10,7 @@ export default function Kategori({ value, className = "" }) {
       </div>
     );
   }
-  if (value === "Minuman") {
+  if (value === "minuman") {
     return (
       <div className={`px-1.5 py-0.5 bg-cyan-100 rounded-lg outline-offset-[-1px] inline-flex justify-center items-center gap-1 ${className}`}>
         <div className="flex justify-start items-center gap-1">
@@ -20,7 +20,7 @@ export default function Kategori({ value, className = "" }) {
       </div>
     );
   }
-  if (value === "Makanan Ringan") {
+  if (value === "makanan ringan") {
     return (
       <div className={`px-1.5 py-0.5 bg-[#EBFAEB] rounded-lg inline-flex justify-center items-center gap-1 ${className}`}>
         <div className="flex justify-start items-center gap-1">

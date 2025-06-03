@@ -284,22 +284,22 @@ export default function SellingsPage() {
               {" "}
               {/* gap-0 agar border menyatu */}
               {/* Table Header (disesuaikan agar segaris dengan row) */}
-              <div className="w-full flex items-center border-b border-neutral-200 bg-gray-50">
+              <div className="w-full flex items-center bg-gray-50">
                 <div className="flex-1 h-14 flex items-center gap-2 px-4 border-r border-neutral-200">
                   <img src="/Person.svg" alt="person" className="size-5" />
-                  <span className="text-neutral-500 text-sm font-medium font-['Geist'] leading-normal">
+                  <span className="text-neutral-500 text-base font-medium font-['Geist'] leading-normal">
                     Nama Pembeli
                   </span>
                 </div>
                 <div className="flex-1 h-14 flex items-center gap-2 px-4 border-r border-neutral-200">
                   <img src="/Delivery.svg" alt="delivery" className="size-5" />
-                  <span className="text-neutral-500 text-sm font-medium font-['Geist'] leading-normal">
+                  <span className="text-neutral-500 text-base font-medium font-['Geist'] leading-normal">
                     Metode Pengiriman
                   </span>
                 </div>
                 <div className="flex-1 h-14 flex items-center gap-2 px-4 border-r border-neutral-200">
                   <img src="/Build.svg" alt="build" className="size-5" />
-                  <span className="text-neutral-500 text-sm font-medium font-['Geist'] leading-normal">
+                  <span className="text-neutral-500 text-base font-medium font-['Geist'] leading-normal">
                     Lokasi Gedung
                   </span>
                 </div>
@@ -307,7 +307,7 @@ export default function SellingsPage() {
                   {" "}
                   {/* Kolom terakhir tanpa border-r */}
                   <img src="/Uang.svg" alt="uang" className="size-5" />
-                  <span className="text-neutral-500 text-sm font-medium font-['Geist'] leading-normal">
+                  <span className="text-neutral-500 text-base font-medium font-['Geist'] leading-normal">
                     Transaction Date
                   </span>
                 </div>
@@ -327,7 +327,7 @@ export default function SellingsPage() {
                   >
                     <div className="flex-1 min-w-0 py-3 px-4 h-auto md:h-14 flex items-center border-r border-neutral-200">
                       <span
-                        className="text-black text-sm font-medium font-['Geist'] leading-normal truncate"
+                        className="text-black text-base font-medium font-['Geist'] leading-normal truncate"
                         title={row.nama}
                       >
                         {row.nama}
@@ -335,7 +335,7 @@ export default function SellingsPage() {
                     </div>
                     <div className="flex-1 min-w-0 py-3 px-4 h-auto md:h-14 flex items-center border-r border-neutral-200">
                       <span
-                        className="text-black text-sm font-medium font-['Geist'] leading-normal truncate"
+                        className="text-black text-base font-medium font-['Geist'] leading-normal truncate"
                         title={row.metode}
                       >
                         {row.metode}
@@ -343,14 +343,14 @@ export default function SellingsPage() {
                     </div>
                     <div className="flex-1 min-w-0 py-3 px-4 h-auto md:h-14 flex items-center border-r border-neutral-200">
                       <span
-                        className="text-black text-sm font-medium font-['Geist'] leading-normal truncate"
+                        className="text-black text-base font-medium font-['Geist'] leading-normal truncate"
                         title={row.lokasi}
                       >
                         {row.lokasi}
                       </span>
                     </div>
                     <div className="flex-1 min-w-0 py-3 px-4 h-auto md:h-14 flex items-center">
-                      <span className="text-black text-sm font-medium font-['Geist'] leading-normal">
+                      <span className="text-black text-base font-medium font-['Geist'] leading-normal">
                         {row.tanggal}
                       </span>
                     </div>
@@ -379,13 +379,13 @@ export default function SellingsPage() {
                   {getPaginationGroup().map((pageItem, index) => (
                     <div key={`${pageItem}-${index}`}>
                       {pageItem === "..." ? (
-                        <div className="text-gray-500 text-sm sm:text-base font-medium font-['Geist'] leading-normal px-1">
+                        <div className="text-gray-500 text-base sm:text-base font-medium font-['Geist'] leading-normal px-1">
                           ...
                         </div>
                       ) : (
                         <button
                           onClick={() => paginate(pageItem)}
-                          className={`px-2 py-1 sm:size-6 min-w-[24px] sm:min-w-[unset] flex items-center justify-center rounded transition text-sm sm:text-base ${
+                          className={`px-2 py-1 sm:size-6 min-w-[24px] sm:min-w-[unset] flex items-center justify-center rounded transition text-base sm:text-base ${
                             currentPage === pageItem
                               ? "bg-gray-300 text-black font-semibold"
                               : "hover:bg-gray-200 text-gray-500"

@@ -1,13 +1,15 @@
+import { showIuranWajib } from "@/app/lib/api/config";
 import {
   KeyRound,
   List,
   LogIn,
   LogOut,
   Package,
-  User,
   Store,
+  User,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function ProfilePicMenu({
   fullName,
@@ -21,14 +23,21 @@ export default function ProfilePicMenu({
   const pathname = usePathname();
   const adminPages = ["/Actors", "/Statistic", "/Sellings", "/Product"];
   const isAdminPages = adminPages.some((page) => pathname.startsWith(page));
+  const [iuranWajib, setIuranWajib] = useState({
+    jumlah: "0",
+    tanggal: 1,
+  });
 
   const handleAdminOrProductPageRedirect = () => {
-    if (roles === "admin" || roles === "pegawai") {
+    if (roles === "admin") {
       if (isAdminPages) {
         router.push("/");
       } else {
         router.push("/Actors");
       }
+    } else if (roles === "pegawai") {
+      // Pegawai always routes to /Sellings
+      router.push("/Sellings");
     } else if (roles === "penitip" || roles === "pengguna") {
       router.push("/MyProduct");
     }
@@ -36,10 +45,28 @@ export default function ProfilePicMenu({
 
   // Fungsi baru untuk menangani logout dan pengalihan
   const handleLogoutAndRedirect = async () => {
-      router.push("/");
-      await logout();
-
+    router.push("/");
+    await logout();
   };
+
+  useEffect(() => {
+    const fetchIuranWajib = async () => {
+      try {
+        const result = await showIuranWajib();
+        if (!result.error && result.data?.data) {
+          const configData = result.data.data;
+          setIuranWajib({
+            jumlah: configData.value || "0",
+            tanggal: parseInt(configData.key2, 10) || 1,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching iuran wajib:", error);
+      }
+    };
+
+    fetchIuranWajib();
+  }, []);
 
   const styleBox =
     "flex flex-row text-sm font-medium text-[#535353] p-2 cursor-pointer hover:bg-[#EDEDED] rounded-lg gap-2 m-2";
@@ -78,7 +105,7 @@ export default function ProfilePicMenu({
             className={`${styleBox}`}
             onClick={handleAdminOrProductPageRedirect}
           >
-            {roles === "admin" || roles === "pegawai" ? (
+            {roles === "admin" ? (
               isAdminPages ? (
                 <>
                   <Store size={20} />
@@ -90,6 +117,11 @@ export default function ProfilePicMenu({
                   <span>Admin Panel</span>
                 </>
               )
+            ) : roles === "pegawai" ? (
+              <>
+                <KeyRound size={20} />
+                <span>Pegawai Panel</span>
+              </>
             ) : (
               <>
                 <Package size={20} />
@@ -119,7 +151,9 @@ export default function ProfilePicMenu({
             </div>
             <div>
               <p className="text-[#535353] font-base text-base">Iuran Wajib</p>
-              <p className="font-medium text-base text-black">Rp. 17.000</p>
+              <p className="font-medium text-base text-black">
+                Rp. {parseInt(iuranWajib.jumlah).toLocaleString("id-ID")}
+              </p>
               <p className="text-[#666666] font-medium text-xs">
                 Last Payment: 02/12/23
               </p>

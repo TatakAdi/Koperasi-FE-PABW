@@ -211,29 +211,13 @@ export default function IuranWajibPage({ onClose, onSaveSuccess }) {
       <div className="flex flex-1">
         <SidebarAdmin />
         <main className="flex-1 p-6 overflow-y-auto">
-          <div className="mb-6 inline-flex justify-start items-center gap-2">
-            <button
-              type="button"
-              onClick={() => router.push("/Actors")}
-              className="text-[#969696] text-base font-normal font-['Geist'] leading-tight hover:text-neutral-700 cursor-pointer"
-            >
-              Iuran Wajib
-            </button>
-            <span className="w-5 h-5 flex items-center justify-center">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path
-                  d="M7 5L12 10L7 15"
-                  stroke="#969696"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </span>
-            <div className="text-neutral-900 text-base font-medium font-['Geist'] leading-tight">
-              {formTitle}
+          {authUser && authUser.tipe === "pegawai" && (
+            <div className="mb-6 inline-flex justify-start items-center gap-2">
+              <div className="text-neutral-900 text-base font-medium font-['Geist'] leading-tight">
+                {formTitle}
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
             <div className="flex-grow">
