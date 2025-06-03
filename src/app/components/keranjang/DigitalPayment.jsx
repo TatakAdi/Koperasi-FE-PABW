@@ -67,6 +67,24 @@ export default function DigitalPayment({
     }
   };
 
+  const handleCheckPaymentStatus = async (orderId) => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/proxy/getPaymentResult", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ order_id: orderId }),
+      });
+      const data = await res.json();
+      // Handle the result as needed (show status, redirect, etc)
+      alert(`Status pembayaran: ${data.status || JSON.stringify(data)}`);
+    } catch (err) {
+      alert("Gagal memeriksa status pembayaran");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const renderBankTransferDetail = (name, accountNumber, logoPath) => (
     <div className="mt-4">
       {/* <h3 className="text-md font-semibold mb-2">Transfer Bank {name}</h3>
