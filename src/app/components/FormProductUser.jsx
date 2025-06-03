@@ -7,6 +7,39 @@ import { useCallback, useEffect, useRef, useState } from "react";
 // Impor ConfirmationDialog dari path yang benar
 import ConfirmationDialog from '@/app/components/ConfirmationDialog'; // Atau '@/app/components/ConfirmationDialog'
 
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = 'https://vwmtcpqpxrncxzaytvjw.supabase.co'
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ3bXRjcHFweHJuY3h6YXl0dmp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg5NzUwMTAsImV4cCI6MjA2NDU1MTAxMH0.lSRGK7PwkQSyvwpj9fZMiy8TncokL_9hFNjwun-B-F0'
+const supabase = createClient(supabaseUrl, supabaseKey)
+
+const uploadImageToSupabase = async (file) => {
+	  if (!file) return null;
+	
+	  const fileExt = file.name.split('.').pop();
+	  const fileName = `${Date.now()}.${fileExt}`;
+	  const filePath = `${fileName}`;
+	
+	  const { data, error } = await supabase
+	    .storage
+	    .from('pabw-storage') // your bucket name
+	    .upload(filePath, file, {
+	      contentType: file.type,
+	    });
+	
+	  if (error) {
+	    console.error("Upload error:", error);
+	    return null;
+	  }
+	
+	  const { data: publicUrlData } = supabase
+	    .storage
+	    .from('product-images')
+	    .getPublicUrl(filePath);
+	
+	  return publicUrlData?.publicUrl || null;
+	};
+
 // ... (fungsi formatRupiahForDisplay dan cleanRupiah tetap sama)
 function formatRupiahForDisplay(angka) {
   if (angka === null || angka === undefined || angka === "") return "0";
@@ -177,6 +210,8 @@ export default function FormProductUser({
         console.warn("[Form] Tidak ada gambar dipilih untuk produk baru. Backend Anda mungkin memerlukan image_url.");
     }
 
+		const imageUrl = imageFile ? await uploadImageToSupabase(imageFile) : null;
+
     setIsSaving(true);
 
     let payload = {
@@ -185,7 +220,7 @@ export default function FormProductUser({
       price: finalHarga,
       stock: finalStok,
       category: kategori,
-      image_url: null,
+      image_url: imageUrl,
       status: formMode === "edit" ? currentProductStatus : "Onlisting", 
     };
 
