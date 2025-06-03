@@ -120,7 +120,7 @@ export default function ProfilePicMenu({
       >
         <div
           className={`${styleBox}`}
-          onClick={() => router.push("/account-setting")}
+          onClick={() => router.push("/MyProfile")}
         >
           <User size={20} />
           <span>Account Setting</span>{" "}
