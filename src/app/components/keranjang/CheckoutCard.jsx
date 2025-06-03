@@ -10,8 +10,16 @@ import OrderTypeStep from "./OrderTypeStep";
 import PaymentMethodStep from "./PaymentMethodStep";
 import TransferStep from "./TransferStep";
 
-export default function CheckoutCard({ total, products = [], selectedItems = [], onCancel, userId }) {
-  const [step, setStep] = useState('orderType');
+export default function CheckoutCard({
+  total,
+  products = [],
+  selectedItems = [],
+  onCancel,
+  userId,
+  onSubmitCheckout,
+  cartId,
+}) {
+  const [step, setStep] = useState("orderType");
   const [orderType, setOrderType] = useState(null);
   const [location, setLocation] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState(null);

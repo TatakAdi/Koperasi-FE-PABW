@@ -13,6 +13,8 @@ import Navbar from "app/components/Navbar";
 import SidePanel from "app/components/SidePanel";
 import MyOrderNotPayItems from "app/components/myOrders/MyOrderNotPayItems";
 import OnProcessedItem from "@/app/components/myOrders/OnProcessedItem";
+import OnDeliveryItem from "@/app/components/myOrders/OnDeliveryItem";
+import OrderDoneItem from "@/app/components/myOrders/OrderDoneItem";
 
 export default function MyOrders() {
   const [authUser, setAuthUser] = useState(null);
@@ -112,12 +114,35 @@ export default function MyOrders() {
   };
 
   const onProcessedCartItem = () => {
-    console.log("Processed Items: ", processedItems);
     if (processedItems) {
       const filteredContent = processedItems.filter(
         (item) => item.status_barang === "akan dikirim"
       );
       console.log("filtered: ", filteredContent);
+      return filteredContent;
+    }
+    console.log("Gagal memfilter cart yang akan dikirim");
+    return [];
+  };
+
+  const onDeliveryCartItem = () => {
+    if (processedItems) {
+      const filteredContent = processedItems.filter((item) => {
+        item.status_barang === "sedang dikirim" ||
+          item.status_barang === "sudah diboking";
+      });
+      return filteredContent;
+    }
+    console.log("Gagal memfilter cart yang akan dikirim");
+    return [];
+  };
+
+  const onOrderDoneCartItem = () => {
+    if (processedItems) {
+      const filteredContent = processedItems.filter((item) => {
+        item.status_barang === "diterima pembeli" ||
+          item.status_barang === "dibatalkan";
+      });
       return filteredContent;
     }
     console.log("Gagal memfilter cart yang akan dikirim");
@@ -140,10 +165,6 @@ export default function MyOrders() {
 
   const onCheckoutHandle = async ({ items, payment_method }) => {
     if (!cart || selectedItems.length === 0) return;
-
-    // const itemToPay = cartItems
-    //   .filter((item) => selectedItems.includes(item.id))
-    //   .map((item) => ({ product_id: item.product_id, jumlah: item.quantity }));
 
     const { error, data } = await checkout({
       cart_id: cart.cart_id,
@@ -294,8 +315,13 @@ export default function MyOrders() {
                   Jumlah
                 </div>
                 <div className="text-lg py-6 border-r-1 border-[#E5E5E5]">
-                  status
+                  Status
                 </div>
+              </div>
+              <div className="divide-y">
+                {onDeliveryCartItem().map((item) => (
+                  <OnDeliveryItem key={item.id} {...item} />
+                ))}
               </div>
             </>
           )}
@@ -317,6 +343,11 @@ export default function MyOrders() {
                 <div className="text-lg py-6 border-r-1 border-[#E5E5E5]">
                   Aksi
                 </div>
+              </div>
+              <div className="divide-y">
+                {onOrderDoneCartItem().map((item) => {
+                  <OrderDoneItem key={item.id} {...item} />;
+                })}
               </div>
             </>
           )}
