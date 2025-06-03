@@ -67,6 +67,24 @@ export default function DigitalPayment({
     }
   };
 
+  const handleCheckPaymentStatus = async (orderId) => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/proxy/getPaymentResult", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ order_id: orderId }),
+      });
+      const data = await res.json();
+      // Handle the result as needed (show status, redirect, etc)
+      alert(`Status pembayaran: ${data.status || JSON.stringify(data)}`);
+    } catch (err) {
+      alert("Gagal memeriksa status pembayaran");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const renderBankTransferDetail = (name, accountNumber, logoPath) => (
     <div className="mt-4">
       {/* <h3 className="text-md font-semibold mb-2">Transfer Bank {name}</h3>
@@ -350,11 +368,11 @@ export default function DigitalPayment({
             Kembali
           </button>
           <button
-            onClick={handleConfirm}
+            onClick={() => handleCheckPaymentStatus(paymentData.order_id)}
             className="flex h-10 px-4 flex-1 justify-center items-center gap-1 rounded-lg bg-black text-white text-sm font-medium hover:bg-gray-800 transition"
-            disabled={loading || !selected}
+            disabled={loading}
           >
-            {loading ? "Memproses..." : "Konfirmasi"}
+            {loading ? "Memeriksa..." : "Konfirmasi"}
           </button>
         </div>
       </div>
