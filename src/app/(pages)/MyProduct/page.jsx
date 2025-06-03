@@ -302,6 +302,7 @@ export default function ProductManagementPage() {
           roles={authUser ? authUser.tipe : null}
           fullName={authUser ? authUser.fullname : null}
           email={authUser ? authUser.email : null}
+          saldo={authUser ? authUser.saldo : null}
           logout={onLogoutHandler}
         />
         <div className="flex flex-1 overflow-hidden">
@@ -327,6 +328,7 @@ export default function ProductManagementPage() {
         roles={authUser ? authUser.tipe : null}
         fullName={authUser ? authUser.fullname : null}
         email={authUser ? authUser.email : null}
+        saldo={authUser ? authUser.saldo : null}
         logout={onLogoutHandler}
       />
       <div className="flex flex-1 overflow-hidden">
