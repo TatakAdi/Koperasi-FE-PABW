@@ -36,9 +36,8 @@ export default function ProfilePicMenu({
 
   // Fungsi baru untuk menangani logout dan pengalihan
   const handleLogoutAndRedirect = async () => {
-      router.push("/");
-      await logout();
-
+    router.push("/");
+    await logout();
   };
 
   const styleBox =
@@ -62,7 +61,7 @@ export default function ProfilePicMenu({
       >
         <div
           className={`${styleBox}`}
-          onClick={() => router.push("/account-setting")}
+          onClick={() => router.push("/MyProfile")}
         >
           <User size={20} />
           <span>Account Setting</span>{" "}
