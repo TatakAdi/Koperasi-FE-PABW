@@ -57,6 +57,30 @@ export default function FormProductUser({
     productName: "",
   });
 
+  const [status, setStatus] = useState("idle");
+  const [notification, setNotification] = useState({
+    show: false,
+    message: "",
+    type: ""
+  });
+
+  // Helper function to show notification
+  const showNotification = (message, type) => {
+    setNotification({
+      show: true,
+      message,
+      type
+    });
+    
+    setTimeout(() => {
+      setNotification({
+        show: false,
+        message: "",
+        type: ""
+      });
+    }, 3000);
+  };
+
   // ... (useEffect untuk fetchKategoriList tetap sama)
   useEffect(() => {
     const fetchKategoriList = async () => {
@@ -164,19 +188,28 @@ export default function FormProductUser({
     event.preventDefault();
     console.log("[Form] handleSubmit dipanggil.");
 
-    if (!namaProduk.trim() || !deskripsiProduk.trim()) { alert("Nama produk dan deskripsi harus diisi."); return; }
-    if (!kategori && !(kategoriOptions.length === 1 && kategoriOptions[0].value === "")) { alert("Kategori harus dipilih."); return; }
-    
+    if (!namaProduk.trim() || !deskripsiProduk.trim()) {
+      showNotification("Nama produk dan deskripsi harus diisi.", "error");
+      return;
+    }
+    if (!kategori && !(kategoriOptions.length === 1 && kategoriOptions[0].value === "")) {
+      showNotification("Kategori harus dipilih.", "error");
+      return;
+    }
+
     const finalHarga = parseInt(cleanRupiah(harga), 10);
     const finalStok = parseInt(stok, 10);
 
-    if (isNaN(finalHarga) || finalHarga <= 0) { alert("Harga tidak valid (harus > 0)."); return; }
-    if (isNaN(finalStok) || finalStok < 0) { alert("Stok tidak valid (boleh 0)."); return; }
-    
-    if (formMode === "add" && !imageFile) {
-        console.warn("[Form] Tidak ada gambar dipilih untuk produk baru. Backend Anda mungkin memerlukan image_url.");
+    if (isNaN(finalHarga) || finalHarga <= 0) {
+      showNotification("Harga tidak valid (harus > 0).", "error");
+      return;
+    }
+    if (isNaN(finalStok) || finalStok < 0) {
+      showNotification("Stok tidak valid (boleh 0).", "error");
+      return;
     }
 
+    setStatus("loading");
     setIsSaving(true);
 
     let payload = {
@@ -201,50 +234,54 @@ export default function FormProductUser({
     let response;
     let successMessage = "";
 
-    if (formMode === "edit") {
-      const editId = productData?.id;
-      console.log(`[Form] handleSubmit (edit) - ID Produk yang akan digunakan: '${editId}', Tipe: '${typeof editId}'`);
-      if (editId === undefined || editId === null || String(editId).trim() === "" || String(editId).toLowerCase() === "undefined") {
-        console.error("[Form] handleSubmit CRITICAL (edit): ID produk tidak valid sebelum memanggil API!", editId);
-        alert("Error Internal: ID produk tidak valid untuk pembaruan. Operasi dibatalkan.");
-        setIsSaving(false); return;
-      }
-      payload.id = editId;
-      
-      console.log("[Form] Memanggil updateProduct (JSON) dengan payload:", payload);
-      response = await updateProduct(payload);
-      successMessage = "Produk berhasil diperbarui!";
+    try {
+      if (formMode === "edit") {
+        const editId = productData?.id;
+        console.log(`[Form] handleSubmit (edit) - ID Produk yang akan digunakan: '${editId}', Tipe: '${typeof editId}'`);
+        if (editId === undefined || editId === null || String(editId).trim() === "" || String(editId).toLowerCase() === "undefined") {
+          console.error("[Form] handleSubmit CRITICAL (edit): ID produk tidak valid sebelum memanggil API!", editId);
+          alert("Error Internal: ID produk tidak valid untuk pembaruan. Operasi dibatalkan.");
+          setIsSaving(false); return;
+        }
+        payload.id = editId;
+        
+        console.log("[Form] Memanggil updateProduct (JSON) dengan payload:", payload);
+        response = await updateProduct(payload);
+        successMessage = "Produk berhasil diperbarui!";
 
-    } else if (formMode === "add") {
-      if (authUser && authUser.id) {
-        payload.user_id = authUser.id;
+      } else if (formMode === "add") {
+        if (!authUser?.id) {
+          showNotification("Tidak dapat menambahkan produk, informasi pengguna tidak ditemukan.", "error");
+          console.error("[Form] Auth user ID is missing for adding new product.");
+          setIsSaving(false);
+          setStatus("idle");
+          return;
+        }
+        console.log("[Form] Memanggil addProduct (JSON) dengan payload:", payload);
+        response = await addProduct(payload);
+        successMessage = "Produk berhasil ditambahkan!";
+      }
+
+      if (response && !response.error) {
+        showNotification(response.message || successMessage, "success");
+        if (onSaveSuccess) onSaveSuccess();
       } else {
-        alert("Tidak dapat menambahkan produk, informasi pengguna tidak ditemukan.");
-        console.error("[Form] Auth user ID is missing for adding new product.");
-        setIsSaving(false); return;
+        let detailErrorMessage = "Gagal menyimpan produk.";
+        if (response?.message || typeof response?.error === 'string') {
+          detailErrorMessage = response.message || response.error;
+        } else if (response?.status) {
+          detailErrorMessage = `Terjadi kesalahan server (Status: ${response.status})`;
+        } else if (!response) {
+          detailErrorMessage = "Gagal menghubungi server atau respons tidak diterima.";
+        }
+        showNotification(detailErrorMessage, "error");
       }
-      console.log("[Form] Memanggil addProduct (JSON) dengan payload:", payload);
-      response = await addProduct(payload);
-      successMessage = "Produk berhasil ditambahkan!";
-    }
-
-    setIsSaving(false);
-    console.log("[Form] Respons dari API client (addProduct/updateProduct):", response);
-
-    if (response && response.error === false) {
-      window.alert(response.message || successMessage);
-      if (onSaveSuccess) onSaveSuccess();
-    } else {
-      let detailErrorMessage = "Gagal menyimpan produk."; 
-      if (response && (response.message || typeof response.error === 'string')) {
-        detailErrorMessage = response.message || response.error; 
-      } else if (response && response.status) {
-         detailErrorMessage = `Terjadi kesalahan server (Status: ${response.status})`;
-      } else if (!response) {
-         detailErrorMessage = "Gagal menghubungi server atau respons tidak diterima.";
-      }
-      console.error("[Form] Gagal menyimpan produk (kondisi else tercapai):", response);
-      window.alert(detailErrorMessage);
+    } catch (error) {
+      showNotification("Terjadi kesalahan saat menyimpan produk.", "error");
+      console.error("[Form] Error:", error);
+    } finally {
+      setIsSaving(false);
+      setStatus("idle");
     }
   }, [
       namaProduk, deskripsiProduk, harga, stok, kategori, imageFile, 
@@ -402,11 +439,19 @@ export default function FormProductUser({
                 </>
             )}
             {/* --- Tombol Simpan/Tambah Produk --- */}
-            <button type="submit" form="product-form"
-                className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 min-w-[120px] cursor-pointer"
-                disabled={(isLoadingKategori && (!kategoriOptions.length || kategoriOptions[0]?.value === "")) || isSaving}
+            <button 
+              type="submit" 
+              form="product-form"
+              disabled={isLoadingKategori || status === "loading"}
+              className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 min-w-[120px] cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
             >
-                {isSaving ? "Menyimpan..." : ((isLoadingKategori && (!kategoriOptions.length || kategoriOptions[0]?.value === "")) ? "Memuat..." : submitButtonText)}
+              {status === "loading" ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-white mx-auto"></div>
+              ) : isLoadingKategori ? (
+                "Memuat..."
+              ) : (
+                submitButtonText
+              )}
             </button>
             </div>
         </div>
@@ -512,6 +557,35 @@ export default function FormProductUser({
         // activateConfirmBgColor={confirmDialogProps.activateConfirmBgColor} 
         // activateConfirmTextColor={confirmDialogProps.activateConfirmTextColor}
       />
+
+      {/* Notification component */}
+      {notification.show && (
+        <div
+          className={`fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg transition-all duration-300 ease-in-out transform ${
+            notification.type === 'success' ? 'bg-[#199F48] text-white' : 'bg-red-500 text-white'
+          }`}
+          style={{
+            zIndex: 1000,
+            animation: 'slideIn 0.3s ease-out'
+          }}
+        >
+          <p className="font-medium">{notification.message}</p>
+        </div>
+      )}
+
+      {/* Add CSS animation */}
+      <style jsx>{`
+        @keyframes slideIn {
+          from {
+            transform: translateY(100px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+      `}</style>
     </>
   );
 }

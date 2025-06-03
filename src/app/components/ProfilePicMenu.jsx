@@ -1,4 +1,5 @@
 import { showIuranWajib } from "@/app/lib/api/config";
+import { getUserLogged } from "@/app/lib/api/login";
 import {
   KeyRound,
   List,
@@ -27,6 +28,7 @@ export default function ProfilePicMenu({
     jumlah: "0",
     tanggal: 1,
   });
+  const [lastPayment, setLastPayment] = useState(null);
 
   const handleAdminOrProductPageRedirect = () => {
     if (roles === "admin") {
@@ -65,8 +67,30 @@ export default function ProfilePicMenu({
       }
     };
 
+    const fetchUserData = async () => {
+      if (!authed) return;
+
+      try {
+        const { error, data } = await getUserLogged();
+        if (!error && data) {
+          // Format the payment date if exists
+          const paymentDate = data.last_payment_date
+            ? new Date(data.last_payment_date).toLocaleDateString("id-ID", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "2-digit",
+              })
+            : "02/12/23"; // fallback date
+          setLastPayment(paymentDate);
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
     fetchIuranWajib();
-  }, []);
+    fetchUserData();
+  }, [authed]);
 
   const styleBox =
     "flex flex-row text-sm font-medium text-[#535353] p-2 cursor-pointer hover:bg-[#EDEDED] rounded-lg gap-2 m-2";
@@ -133,7 +157,7 @@ export default function ProfilePicMenu({
       </div>
 
       {authed !== null && (
-        <div className=" border-b border-[#e6e6e6]">
+        <div className="border-b border-[#e6e6e6]">
           <div className="flex flex-row gap-1 justify-between items-center m-2 p-2">
             <div>
               <p className="text-[#535353] font-base text-base">
@@ -146,7 +170,7 @@ export default function ProfilePicMenu({
                   : "0"}
               </p>
               <p className="text-[#666666] font-medium text-xs">
-                Last Payment: 02/12/23
+                Last Payment: {lastPayment || "02/12/23"}
               </p>
             </div>
             <div>
@@ -155,7 +179,7 @@ export default function ProfilePicMenu({
                 Rp. {parseInt(iuranWajib.jumlah).toLocaleString("id-ID")}
               </p>
               <p className="text-[#666666] font-medium text-xs">
-                Last Payment: 02/12/23
+                Last Payment: {lastPayment || "02/12/23"}
               </p>
             </div>
           </div>

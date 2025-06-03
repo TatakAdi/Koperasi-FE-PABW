@@ -105,3 +105,37 @@ export async function updateCartItem(userId, productId, { jumlah }) {
   console.log("Produk berhasil diperbarui di keranjang");
   return { error: false, data: responseJson.data, status: response.status };
 }
+
+export async function updateCartStatus(userId, status) {
+  console.log('Updating cart status:', { userId, status });
+  
+  const response = await fetch(
+    `/api/proxy/updateCartStatus?id_user=${userId}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      body: JSON.stringify({ status }),
+      credentials: 'include',
+    }
+  );
+
+  const responseJson = await response.json();
+
+  if (!response.ok) {
+    console.error("Error updating cart status:", responseJson.message);
+    return { 
+      error: true, 
+      message: responseJson.message, 
+      status: response.status
+    };
+  }
+
+  return { 
+    error: false, 
+    data: responseJson.cart || responseJson.data,
+    status: response.status 
+  };
+}

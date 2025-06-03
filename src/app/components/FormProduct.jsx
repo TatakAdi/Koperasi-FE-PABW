@@ -27,6 +27,12 @@ export default function FormProduct({ productData, onClose, onSaveSuccess }) {
   const [kategoriOptions, setKategoriOptions] = useState([]);
   const [isLoadingKategori, setIsLoadingKategori] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [status, setStatus] = useState("idle");
+  const [notification, setNotification] = useState({
+    show: false,
+    message: "",
+    type: "",
+  });
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -115,24 +121,43 @@ export default function FormProduct({ productData, onClose, onSaveSuccess }) {
     };
   }, []);
 
+  const showNotification = (message, type) => {
+    setNotification({
+      show: true,
+      message,
+      type,
+    });
+
+    setTimeout(() => {
+      setNotification({
+        show: false,
+        message: "",
+        type: "",
+      });
+    }, 3000);
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+
     if (!kategori) {
-      alert("Kategori harus dipilih.");
+      showNotification("Kategori harus dipilih.", "error");
       return;
     }
+
     const finalHarga = parseInt(cleanRupiah(harga), 10);
     const finalStok = parseInt(stok, 10);
 
     if (isNaN(finalHarga) || finalHarga < 0) {
-      alert("Harga tidak valid. Masukkan angka positif.");
+      showNotification("Harga tidak valid. Masukkan angka positif.", "error");
       return;
     }
     if (isNaN(finalStok) || finalStok < 0) {
-      alert("Stok tidak valid. Masukkan angka positif.");
+      showNotification("Stok tidak valid. Masukkan angka positif.", "error");
       return;
     }
 
+    setStatus("loading");
     setIsSaving(true);
     const payload = {
       id: productData.id,
@@ -143,10 +168,12 @@ export default function FormProduct({ productData, onClose, onSaveSuccess }) {
 
     console.log("Updating product with data (from FormProduct):", payload);
     const response = await updateProduct(payload);
+
     setIsSaving(false);
+    setStatus("idle");
 
     if (response && !response.error) {
-      alert("Produk berhasil diperbarui!");
+      showNotification("Produk berhasil diperbarui!", "success");
       if (onSaveSuccess) {
         onSaveSuccess();
       }
@@ -159,17 +186,17 @@ export default function FormProduct({ productData, onClose, onSaveSuccess }) {
         ) {
           detailErrorMessage = response.error;
         } else if (response.status) {
-          detailErrorMessage = `Gagal menyimpan produk. Status: ${response.status}. Silakan coba lagi atau hubungi administrator.`;
+          detailErrorMessage = `Gagal menyimpan produk. Status: ${response.status}`;
         } else {
           detailErrorMessage =
-            "Gagal menyimpan produk. Tidak ada detail tambahan dari server.";
+            "Gagal menyimpan produk. Tidak ada detail dari server.";
         }
       }
       console.error(
-        "Gagal menyimpan produk (from FormProduct):",
+        "Gagal menyimpan produk:",
         response ? response : "Respons tidak diketahui"
       );
-      alert(detailErrorMessage);
+      showNotification(detailErrorMessage, "error");
     }
   };
 
@@ -217,15 +244,16 @@ export default function FormProduct({ productData, onClose, onSaveSuccess }) {
           <button
             type="submit"
             form="product-edit-form"
-            className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
-            disabled={isLoadingKategori || isSaving}
+            disabled={isLoadingKategori || status === "loading"}
+            className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-75 disabled:cursor-not-allowed"
           >
-            {isLoadingKategori
-              ? "Memuat..."
-              : isSaving
-              ? "Menyimpan..."
-              : submitButtonText}{" "}
-            {/* Updated button text */}
+            {status === "loading" ? (
+              <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-white"></div>
+            ) : isLoadingKategori ? (
+              "Memuat..."
+            ) : (
+              submitButtonText
+            )}
           </button>
         </div>
       </div>
@@ -274,7 +302,9 @@ export default function FormProduct({ productData, onClose, onSaveSuccess }) {
                 inputMode="numeric"
                 className="bg-transparent outline-none border-none w-full text-neutral-900 text-base font-medium font-['Geist'] placeholder-gray-400"
                 value={stok}
-                onChange={(e) => setStok(e.target.value.replace(/[^0-9]/g, ""))}
+                onChange={(e) =>
+                  setStok(e.target.value.replace(/[^0-9]/g, ""))
+                }
                 placeholder="0"
                 required
               />
@@ -370,6 +400,35 @@ export default function FormProduct({ productData, onClose, onSaveSuccess }) {
           </div>
         </div>
       </form>
+
+      {notification.show && (
+        <div
+          className={`fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg transition-all duration-300 ease-in-out transform ${
+            notification.type === "success"
+              ? "bg-[#199F48] text-white"
+              : "bg-red-500 text-white"
+          }`}
+          style={{
+            zIndex: 1000,
+            animation: "slideIn 0.3s ease-out",
+          }}
+        >
+          <p className="font-medium">{notification.message}</p>
+        </div>
+      )}
+
+      <style jsx>{`
+        @keyframes slideIn {
+          from {
+            transform: translateY(100px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+      `}</style>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import ConfirmationDialog from "@/app/components/ConfirmationDialog";
 import FormActor from "@/app/components/FormActor";
 import Navbar from "@/app/components/Navbar";
 import Privilage from "@/app/components/Privilage";
@@ -27,6 +28,8 @@ export default function ActorsPage() {
   const [showAddActor, setShowAddActor] = useState(false);
   const [showEditActor, setShowEditActor] = useState(null);
   const [showTarikSaldoModal, setShowTarikSaldoModal] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [actorToDelete, setActorToDelete] = useState(null);
 
   const [iuranWajib, setIuranWajib] = useState({
     jumlah: "0",
@@ -247,21 +250,24 @@ export default function ActorsPage() {
     return pages;
   };
 
-  const handleDeleteActor = async (actorId) => {
-    if (
-      window.confirm(
-        "Apakah Anda yakin ingin menghapus aktor ini? (Ini akan menghapus permanen)"
-      )
-    ) {
-      const { error } = await deleteUser(actorId);
-      if (error) {
-        alert("Gagal menghapus aktor. Silakan coba lagi.");
-        console.error("Error deleting actor:", error);
-      } else {
-        alert("Aktor berhasil dihapus!");
-        fetchAllActors();
-      }
+  const handleDeleteActor = (actor) => {
+    setActorToDelete(actor);
+    setShowDeleteConfirmation(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!actorToDelete) return;
+
+    const { error } = await deleteUser(actorToDelete.id);
+    if (error) {
+      alert("Gagal menghapus aktor. Silakan coba lagi.");
+      console.error("Error deleting actor:", error);
+    } else {
+      alert("Aktor berhasil dihapus!");
+      fetchAllActors();
     }
+    setShowDeleteConfirmation(false);
+    setActorToDelete(null);
   };
 
   const handleKembaliTarikSaldo = () => {
@@ -390,7 +396,7 @@ export default function ActorsPage() {
                         Rp
                       </div>
                       <div className="text-neutral-900 text-base font-medium font-['Geist'] leading-normal">
-                        {formatRupiah(iuranWajib.jumlah).replace('Rp. ', '')}
+                        {formatRupiah(iuranWajib.jumlah).replace("Rp. ", "")}
                       </div>
                     </div>
                   </div>
@@ -415,7 +421,8 @@ export default function ActorsPage() {
                           {iuranWajib.tanggal}
                         </span>
                         <span className="text-neutral-500 text-base font-medium font-['Geist'] leading-normal">
-                          {" "}/ Bulan
+                          {" "}
+                          / Bulan
                         </span>
                       </div>
                     </div>
@@ -649,7 +656,7 @@ export default function ActorsPage() {
                       </div>
                       <div className="w-24 self-stretch p-2 border-r border-[#E5E5E5] flex justify-center items-center gap-2">
                         <button
-                          onClick={() => handleDeleteActor(actor.id)}
+                          onClick={() => handleDeleteActor(actor)}
                           aria-label={`Hapus ${actor.fullname}`}
                           className="p-1 hover:bg-gray-100 rounded cursor-pointer"
                         >
@@ -761,6 +768,21 @@ export default function ActorsPage() {
           initialJumlahPenarikan={0}
           onKembali={() => setShowTarikSaldoModal(false)}
           onKonfirmasi={handleKonfirmasiTarikSaldo}
+        />
+      )}
+      {showDeleteConfirmation && actorToDelete && (
+        <ConfirmationDialog
+          isOpen={showDeleteConfirmation}
+          title="Hapus Aktor"
+          message={`Apakah Anda yakin ingin menghapus? <br>Tindakan ini tidak dapat dibatalkan.`}
+          confirmText="Hapus"
+          cancelText="Batal"
+          onConfirm={confirmDelete}
+          onCancel={() => {
+            setShowDeleteConfirmation(false);
+            setActorToDelete(null);
+          }}
+          isDestructive={true}
         />
       )}
     </>

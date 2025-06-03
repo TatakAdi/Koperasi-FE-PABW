@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import Navbar from "@/app/components/Navbar";
 import SidebarAdmin from "@/app/components/SidebarAdmin";
@@ -10,6 +10,7 @@ import { addUser, updateUser } from "@/app/lib/api/user";
 import { useEffect, useRef, useState } from "react";
 
 export default function FormActor({ onClose, initialData = null }) {
+  const [status, setStatus] = useState("idle");
   const [actorName, setActorName] = useState(
     initialData ? initialData.fullname : ""
   );
@@ -23,8 +24,8 @@ export default function FormActor({ onClose, initialData = null }) {
   const [selectedPrivilage, setSelectedPrivilage] = useState(
     initialData && initialData.tipe
       ? initialData.tipe.charAt(0).toUpperCase() +
-        initialData.tipe.slice(1).toLowerCase()
-      : "Admin" 
+          initialData.tipe.slice(1).toLowerCase()
+      : "Admin"
   );
 
   const [selectedStatus, setSelectedStatus] = useState(() => {
@@ -34,7 +35,7 @@ export default function FormActor({ onClose, initialData = null }) {
         initialData.status_keanggotaan.slice(1).toLowerCase()
       );
     }
-    return "Bukan Anggota"; 
+    return "Bukan Anggota";
   });
 
   const privilageRef = useRef(null);
@@ -77,127 +78,154 @@ export default function FormActor({ onClose, initialData = null }) {
     };
   }, []);
 
-  // useEffect untuk sinkronisasi selectedStatus saat selectedPrivilage berubah di mode EDIT
   useEffect(() => {
-    if (initialData) { // Hanya berjalan di mode Edit
+    if (initialData) {
       if (selectedPrivilage === "Admin" || selectedPrivilage === "Pegawai") {
         if (selectedStatus !== "Bukan Anggota") {
-           setSelectedStatus("Bukan Anggota");
+          setSelectedStatus("Bukan Anggota");
         }
-      } else if (selectedPrivilage === "Pengguna" || selectedPrivilage === "Penitip") {
+      } else if (
+        selectedPrivilage === "Pengguna" ||
+        selectedPrivilage === "Penitip"
+      ) {
         if (selectedStatus === "Bukan Anggota") {
-          // Jika status sebelumnya "Bukan Anggota" (misal dari Admin/Pegawai), set default ke "Tidak Aktif"
-          // Jika sudah "Aktif" atau "Tidak Aktif" dari initialData, tidak diubah.
           setSelectedStatus("Tidak Aktif");
         }
       }
     }
-  }, [selectedPrivilage, initialData]); // Perhatikan dependency array
+  }, [selectedPrivilage, initialData]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const privilegeToSend = selectedPrivilage.toLowerCase();
+    setStatus("loading");
 
-    if (initialData) { // Mode Edit
-      let statusToSendOnEdit;
-      if (privilegeToSend === "admin" || privilegeToSend === "pegawai") {
-        statusToSendOnEdit = "bukan anggota"; // Otomatis untuk Admin/Pegawai
-      } else { // Untuk Pengguna atau Penitip
-        statusToSendOnEdit = selectedStatus.toLowerCase();
-      }
+    try {
+      const privilegeToSend = selectedPrivilage.toLowerCase();
 
-      const { error: updateError } = await updateUser({
-        id: initialData.id,
-        fullname: actorName,
-        email: actorEmail,
-        tipe: privilegeToSend,
-        status_keanggotaan: statusToSendOnEdit,
-      });
+      if (initialData) {
+        let statusToSendOnEdit;
+        if (privilegeToSend === "admin" || privilegeToSend === "pegawai") {
+          statusToSendOnEdit = "bukan anggota";
+        } else {
+          statusToSendOnEdit = selectedStatus.toLowerCase();
+        }
 
-      if (updateError) {
-        console.error("Failed to update user:", updateError);
-        alert(`Gagal memperbarui aktor: ${updateError.message || updateError}`);
-      } else {
-        alert("Aktor berhasil diperbarui!");
-      }
-    } else { // Mode Tambah
-      let defaultStatusForNewUser;
-      if (privilegeToSend === "admin" || privilegeToSend === "pegawai") {
-        defaultStatusForNewUser = "bukan anggota";
-      } else if (privilegeToSend === "pengguna" || privilegeToSend === "penitip") {
-        defaultStatusForNewUser = "tidak aktif"; 
-      } else {
-        defaultStatusForNewUser = "bukan anggota";
-      }
+        const { error: updateError } = await updateUser({
+          id: initialData.id,
+          fullname: actorName,
+          email: actorEmail,
+          tipe: privilegeToSend,
+          status_keanggotaan: statusToSendOnEdit,
+        });
 
-      const { error: addUserError, data: newUserResponse } = await addUser({
-        fullname: actorName,
-        email: actorEmail,
-        tipe: privilegeToSend,
-        status_keanggotaan: defaultStatusForNewUser,
-      });
-      
-      console.log("handleSubmit - priviligeToSend:", privilegeToSend);
-      console.log("handleSubmit - defaultStatusForNewUser:", defaultStatusForNewUser);
-      console.log("Full response from addUser API (should be the ID directly):", newUserResponse);
-      console.log("Error from addUser API (if any):", addUserError);
-
-      if (addUserError) {
-        console.error("Failed to add user:", addUserError);
-        alert(`Gagal menambahkan aktor: ${addUserError.message || addUserError}. Silakan coba lagi.`);
-        return;
-      }
-
-      const newUserId = newUserResponse;
-
-      if (newUserId) { 
-        if (privilegeToSend !== "admin" && privilegeToSend !== "pegawai") {
-          const paymentResult = await postPaymentMember({
-            user_id: newUserId, 
-            payment_method: "link",
-            amount: 17000,
-          });
-
-          if (paymentResult.error) {
-            console.error(
-              "Failed to post payment for new member:",
-              paymentResult.error
-            );
-            let specificError = "Unknown error";
-            if (
-              typeof paymentResult.error === "object" &&
-              paymentResult.error !== null
-            ) {
-              specificError = JSON.stringify(
-                paymentResult.error.errors ||
-                  paymentResult.error.message ||
-                  paymentResult.error
-              );
-            } else if (typeof paymentResult.error === "string") {
-              specificError = paymentResult.error;
-            }
-            alert(
-              `Aktor (tipe: ${privilegeToSend}, status: ${defaultStatusForNewUser}, ID: ${newUserId}) berhasil ditambahkan, tetapi gagal mencatat pembayaran awal. Detail: ${specificError}`
-            );
-          } else {
-            alert(`Aktor (tipe: ${privilegeToSend}, status: ${defaultStatusForNewUser}, ID: ${newUserId}) dan pembayaran awal berhasil ditambahkan!`);
-          }
-        } else { 
-          alert(`Aktor (tipe: ${privilegeToSend}, status: ${defaultStatusForNewUser}, ID: ${newUserId}) berhasil ditambahkan!`);
+        if (updateError) {
+          console.error("Failed to update user:", updateError);
+          alert(
+            `Gagal memperbarui aktor: ${updateError.message || updateError}`
+          );
+        } else {
+          alert("Aktor berhasil diperbarui!");
         }
       } else {
-        console.error(
-          "User added, but newUserId was not found or was invalid. Actual response:",
+        let defaultStatusForNewUser;
+        if (privilegeToSend === "admin" || privilegeToSend === "pegawai") {
+          defaultStatusForNewUser = "bukan anggota";
+        } else if (
+          privilegeToSend === "pengguna" ||
+          privilegeToSend === "penitip"
+        ) {
+          defaultStatusForNewUser = "tidak aktif";
+        } else {
+          defaultStatusForNewUser = "bukan anggota";
+        }
+
+        const { error: addUserError, data: newUserResponse } = await addUser({
+          fullname: actorName,
+          email: actorEmail,
+          tipe: privilegeToSend,
+          status_keanggotaan: defaultStatusForNewUser,
+        });
+
+        console.log("handleSubmit - priviligeToSend:", privilegeToSend);
+        console.log(
+          "handleSubmit - defaultStatusForNewUser:",
+          defaultStatusForNewUser
+        );
+        console.log(
+          "Full response from addUser API (should be the ID directly):",
           newUserResponse
         );
-        alert(
-          "Aktor berhasil ditambahkan, tetapi ID pengguna tidak valid atau tidak ditemukan untuk proses selanjutnya."
-        );
-      }
-    }
+        console.log("Error from addUser API (if any):", addUserError);
 
-    if (onClose) {
-      onClose();
+        if (addUserError) {
+          console.error("Failed to add user:", addUserError);
+          alert(
+            `Gagal menambahkan aktor: ${
+              addUserError.message || addUserError
+            }. Silakan coba lagi.`
+          );
+          return;
+        }
+
+        const newUserId = newUserResponse;
+
+        if (newUserId) {
+          if (privilegeToSend !== "admin" && privilegeToSend !== "pegawai") {
+            const paymentResult = await postPaymentMember({
+              user_id: newUserId,
+              payment_method: "link",
+              amount: 17000,
+            });
+
+            if (paymentResult.error) {
+              console.error(
+                "Failed to post payment for new member:",
+                paymentResult.error
+              );
+              let specificError = "Unknown error";
+              if (
+                typeof paymentResult.error === "object" &&
+                paymentResult.error !== null
+              ) {
+                specificError = JSON.stringify(
+                  paymentResult.error.errors ||
+                    paymentResult.error.message ||
+                    paymentResult.error
+                );
+              } else if (typeof paymentResult.error === "string") {
+                specificError = paymentResult.error;
+              }
+              alert(
+                `Aktor (tipe: ${privilegeToSend}, status: ${defaultStatusForNewUser}, ID: ${newUserId}) berhasil ditambahkan, tetapi gagal mencatat pembayaran awal. Detail: ${specificError}`
+              );
+            } else {
+              alert(
+                `Aktor (tipe: ${privilegeToSend}, status: ${defaultStatusForNewUser}, ID: ${newUserId}) dan pembayaran awal berhasil ditambahkan!`
+              );
+            }
+          } else {
+            alert(
+              `Aktor (tipe: ${privilegeToSend}, status: ${defaultStatusForNewUser}, ID: ${newUserId}) berhasil ditambahkan!`
+            );
+          }
+        } else {
+          console.error(
+            "User added, but newUserId was not found or was invalid. Actual response:",
+            newUserResponse
+          );
+          alert(
+            "Aktor berhasil ditambahkan, tetapi ID pengguna tidak valid atau tidak ditemukan untuk proses selanjutnya."
+          );
+        }
+      }
+
+      if (onClose) {
+        onClose();
+      }
+    } catch (error) {
+      console.error("Error in form submission:", error);
+    } finally {
+      setStatus("idle");
     }
   };
 
@@ -259,10 +287,19 @@ export default function FormActor({ onClose, initialData = null }) {
               <div className="flex gap-2">
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors cursor-pointer"
+                  disabled={status === "loading"}
+                  className={`px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors ${
+                    status === "loading"
+                      ? "cursor-not-allowed opacity-75"
+                      : "cursor-pointer"
+                  }`}
                   form="actor-form"
                 >
-                  {submitButtonText}
+                  {status === "loading" ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-white"></div>
+                  ) : (
+                    submitButtonText
+                  )}
                 </button>
               </div>
             </div>
@@ -352,7 +389,11 @@ export default function FormActor({ onClose, initialData = null }) {
                       aria-hidden={!privilageDropdownOpen}
                       className={`absolute left-0 right-0 mt-1 z-20 bg-white rounded-md shadow-lg border border-gray-200 flex flex-col overflow-hidden max-h-60 overflow-y-auto
                                 transition-all duration-300 ease-in-out transform
-                                ${privilageDropdownOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
+                                ${
+                                  privilageDropdownOpen
+                                    ? "opacity-100 scale-100"
+                                    : "opacity-0 scale-95 pointer-events-none"
+                                }`}
                     >
                       {["Admin", "Pegawai", "Pengguna", "Penitip"].map(
                         (item) => (
@@ -362,9 +403,7 @@ export default function FormActor({ onClose, initialData = null }) {
                             aria-selected={selectedPrivilage === item}
                             className={`px-4 py-3 text-black text-base font-normal font-['Geist'] cursor-pointer hover:bg-gray-100
                               ${
-                                selectedPrivilage === item
-                                  ? "bg-gray-100" 
-                                  : ""
+                                selectedPrivilage === item ? "bg-gray-100" : ""
                               }`}
                             onClick={() => {
                               setSelectedPrivilage(item);
@@ -387,7 +426,9 @@ export default function FormActor({ onClose, initialData = null }) {
                 </div>
 
                 {/* Status Dropdown - Tampil di mode EDIT hanya jika privilege BUKAN Admin/Pegawai */}
-                {initialData && selectedPrivilage !== "Admin" && selectedPrivilage !== "Pegawai" ? (
+                {initialData &&
+                selectedPrivilage !== "Admin" &&
+                selectedPrivilage !== "Pegawai" ? (
                   <div className="w-full flex flex-col gap-2">
                     <label className="text-neutral-700 text-base font-medium font-['Geist'] leading-normal">
                       Status Keanggotaan
@@ -401,7 +442,7 @@ export default function FormActor({ onClose, initialData = null }) {
                         aria-expanded={statusDropdownOpen}
                       >
                         <span className="text-neutral-900 text-base font-medium font-['Geist']">
-                          {selectedStatus} 
+                          {selectedStatus}
                         </span>
                         <svg
                           width="20"
@@ -426,7 +467,11 @@ export default function FormActor({ onClose, initialData = null }) {
                           aria-hidden={!statusDropdownOpen}
                           className={`absolute left-0 right-0 mt-1 z-20 bg-white rounded-md shadow-lg border border-gray-200 flex flex-col overflow-hidden max-h-60 overflow-y-auto
                                     transition-all duration-300 ease-in-out transform
-                                    ${statusDropdownOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
+                                    ${
+                                      statusDropdownOpen
+                                        ? "opacity-100 scale-100"
+                                        : "opacity-0 scale-95 pointer-events-none"
+                                    }`}
                         >
                           {["Aktif", "Tidak Aktif"].map((item) => (
                             <div
@@ -435,9 +480,7 @@ export default function FormActor({ onClose, initialData = null }) {
                               aria-selected={selectedStatus === item}
                               className={`px-4 py-3 text-black text-base font-normal font-['Geist'] cursor-pointer hover:bg-gray-100
                                 ${
-                                  selectedStatus === item
-                                    ? "bg-gray-100"
-                                    : ""
+                                  selectedStatus === item ? "bg-gray-100" : ""
                                 }`}
                               onClick={() => {
                                 setSelectedStatus(item);

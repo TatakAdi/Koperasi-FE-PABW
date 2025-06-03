@@ -3,7 +3,7 @@
 import Navbar from "@/app/components/Navbar";
 import SidebarAdmin from "@/app/components/SidebarAdmin";
 import useInput from "@/app/hooks/useInput";
-import { getAllCart } from "@/app/lib/api/cart";
+import { getAllCart, updateCartStatus } from "@/app/lib/api/cart";
 import { getUserLogged } from "@/app/lib/api/login";
 import { logout } from "@/app/lib/api/logout";
 import { useEffect, useMemo, useState } from "react";
@@ -38,6 +38,12 @@ export default function SellingsPage() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+  const [updateLoading, setUpdateLoading] = useState(false);
+  const [notification, setNotification] = useState({
+    show: false,
+    message: "",
+    type: "",
+  });
 
   useEffect(() => {
     const getUser = async () => {
@@ -181,6 +187,53 @@ export default function SellingsPage() {
     setSelectedRow(rowData);
   };
 
+  const showNotification = (message, type) => {
+    setNotification({
+      show: true,
+      message,
+      type,
+    });
+    setTimeout(() => {
+      setNotification({ show: false, message: "", type: "" });
+    }, 3000);
+  };
+
+  const handleStatusUpdate = async (cartId) => {
+    setUpdateLoading(true);
+    try {
+      // Get the cart data to find user_id
+      const cartData = currentTableData.find((row) => row.id === cartId);
+      if (!cartData?.originalCartData?.user_id) {
+        showNotification("Data pengguna tidak ditemukan", "error");
+        return;
+      }
+
+      const userId = cartData.originalCartData.user_id;
+      console.log("Updating status for user:", userId);
+
+      const response = await updateCartStatus(userId, "akan dikirim");
+
+      if (!response.error) {
+        showNotification("Status berhasil diperbarui", "success");
+        // Refresh data
+        const { error: fetchError, data: apiResponse } = await getAllCart();
+        if (!fetchError && apiResponse?.data) {
+          setAllCartsData(apiResponse.data);
+        }
+      } else {
+        showNotification(
+          response.message || "Gagal memperbarui status",
+          "error"
+        );
+      }
+    } catch (error) {
+      console.error("Error updating status:", error);
+      showNotification("Terjadi kesalahan saat memperbarui status", "error");
+    } finally {
+      setUpdateLoading(false);
+    }
+  };
+
   return (
     <div className="w-full min-h-screen bg-white flex flex-col">
       <Navbar
@@ -311,6 +364,13 @@ export default function SellingsPage() {
                     Transaction Date
                   </span>
                 </div>
+                {activeTab === "Sedang Proses" && (
+                  <div className="w-32 h-14 flex items-center gap-2 px-4 border-l border-neutral-200">
+                    <span className="text-neutral-500 text-base font-medium font-['Geist'] leading-normal">
+                      Aksi
+                    </span>
+                  </div>
+                )}
               </div>
               {/* Table Rows */}
               {currentTableData.length === 0 ? (
@@ -319,11 +379,17 @@ export default function SellingsPage() {
                 </div>
               ) : (
                 currentTableData.map((row) => (
-                  <button
+                  <div
                     key={row.id}
-                    type="button"
                     className="w-full flex items-center border-b border-neutral-200 hover:bg-gray-50 transition text-left cursor-pointer"
                     onClick={() => handleRowClick(row)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        handleRowClick(row);
+                      }
+                    }}
                   >
                     <div className="flex-1 min-w-0 py-3 px-4 h-auto md:h-14 flex items-center border-r border-neutral-200">
                       <span
@@ -354,7 +420,26 @@ export default function SellingsPage() {
                         {row.tanggal}
                       </span>
                     </div>
-                  </button>
+                    {activeTab === "Sedang Proses" && (
+                      <div className="w-32 py-3 px-4 h-auto md:h-14 flex items-center justify-center border-l border-neutral-200">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent row click
+                            // Pass the row id which is cart_id
+                            handleStatusUpdate(row.id);
+                          }}
+                          disabled={updateLoading}
+                          className="px-3 py-1.5 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                        >
+                          {updateLoading ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-white"></div>
+                          ) : (
+                            "Kirim"
+                          )}
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 ))
               )}
               {/* Pagination */}
