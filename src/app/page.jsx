@@ -192,7 +192,7 @@ export default function Home() {
           onMaxPriceChange={setMaxPrice}
           onMinPriceChange={setMinPrice}
         />
-        <div className="flex-grow overflow-y-auto h-full">
+        <div className="w-full overflow-y-auto h-full">
           <p className="h-5 my-4">
             {!category ? (
               <>Semua Produk ({filteredContent().length})</>
@@ -204,7 +204,7 @@ export default function Home() {
           </p>
           {!isLoading ? (
             filteredContent().length !== 0 ? (
-              <div className="flex-grow grid grid-cols-4 gap-4  ">
+              <div className="grid grid-cols-6 gap-4">
                 {filteredContent().map((produk) => (
                   <ProductBox
                     key={produk.id}

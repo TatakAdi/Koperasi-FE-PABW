@@ -28,7 +28,6 @@ export default async function handler(req, res) {
     
         const data = await response.json();
         res.status(response.status).json(data);
-        return { data: data.user_id };
     } catch (error) {
         console.error("Proxy error:", error);
         res

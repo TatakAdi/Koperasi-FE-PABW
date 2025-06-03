@@ -17,7 +17,7 @@ const ALL_MENU_ITEMS = [
     label: "Selling Statistics",
     icon: <img src="/statistic.svg" alt="statistic" className="size-6" />,
     href: "/Statistic",
-    roles: ["admin"],
+    roles: ["admin","pengguna", "penitip"],
   },
   {
     label: "Sellings Statistics",
@@ -35,7 +35,7 @@ const ALL_MENU_ITEMS = [
     label: "Product Setup",
     icon: <img src="/carbon.svg" alt="carbon" className="size-6"/>,
     href: "/MyProduct",
-    roles: ["admin", "pegawai", "pengguna", "penitip"],
+    roles: ["pengguna", "penitip"],
     },
   {
     label: "Actors",
@@ -85,22 +85,12 @@ export default function SidebarAdmin() {
       return ALL_MENU_ITEMS.filter((item) => {
         if (!authUser) return false;
 
-        if (item.href === "/Statistic" || item.href === "/Sellings") {
-          return true;
-        }
 
         return item.roles && item.roles.includes(authUser.tipe);
       });
     }
 
     return ALL_MENU_ITEMS.filter((item) => {
-      if (
-        (item.href === "/Statistic" || item.href === "/Sellings") &&
-        authUser
-      ) {
-        return true;
-      }
-
       return item.roles && item.roles.includes(authUser.tipe);
     });
   }, [authUser]);

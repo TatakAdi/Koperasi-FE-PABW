@@ -33,10 +33,9 @@ export default function ProfilePicMenu({
 
   // Fungsi baru untuk menangani logout dan pengalihan
   const handleLogoutAndRedirect = async () => {
-    if (typeof logout === 'function') {
-      await logout(); // Panggil fungsi logout, tunggu jika async
-    }
-    router.push("/"); // Alihkan ke halaman utama
+      router.push("/");
+      await logout();
+
   };
 
   const styleBox = "flex flex-row text-sm font-medium text-[#535353] p-2 cursor-pointer hover:bg-[#EDEDED] rounded-lg gap-2 m-2";

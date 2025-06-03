@@ -1,6 +1,7 @@
 "use client";
 
 import { getCategory } from "@/app/lib/api/category";
+import { updateProduct } from "@/app/lib/api/product";
 import { useEffect, useRef, useState } from "react";
 
 function formatRupiahForDisplay(angka) {
@@ -18,13 +19,14 @@ function cleanRupiah(formattedAngka) {
   return String(formattedAngka).replace(/[^0-9]/g, "");
 }
 
-export default function FormProduct({ productData, onClose, onSave }) {
+export default function FormProduct({ productData, onClose, onSaveSuccess }) {
   const [harga, setHarga] = useState("");
   const [stok, setStok] = useState("");
   const [kategori, setKategori] = useState("");
 
   const [kategoriOptions, setKategoriOptions] = useState([]);
   const [isLoadingKategori, setIsLoadingKategori] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -84,13 +86,15 @@ export default function FormProduct({ productData, onClose, onSave }) {
 
       const initialCategoryValue = productData.category?.name || "";
 
-      if (kategoriOptions.length > 1) {
-        const categoryExists = kategoriOptions.some(
-          (opt) => opt.value === initialCategoryValue
-        );
-        setKategori(categoryExists ? initialCategoryValue : "");
-      } else if (!isLoadingKategori && kategoriOptions.length === 1) {
-        setKategori("");
+      if (!isLoadingKategori) {
+        if (kategoriOptions.length > 0) {
+          const categoryExists = kategoriOptions.some(
+            (opt) => opt.value === initialCategoryValue
+          );
+          setKategori(categoryExists ? initialCategoryValue : "");
+        } else {
+          setKategori("");
+        }
       }
     } else {
       setHarga("");
@@ -111,7 +115,7 @@ export default function FormProduct({ productData, onClose, onSave }) {
     };
   }, []);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     if (!kategori) {
       alert("Kategori harus dipilih.");
@@ -129,12 +133,44 @@ export default function FormProduct({ productData, onClose, onSave }) {
       return;
     }
 
-    onSave({
+    setIsSaving(true);
+    const payload = {
       id: productData.id,
       price: finalHarga,
       stock: finalStok,
       category: kategori,
-    });
+    };
+
+    console.log("Updating product with data (from FormProduct):", payload);
+    const response = await updateProduct(payload);
+    setIsSaving(false);
+
+    if (response && !response.error) {
+      alert("Produk berhasil diperbarui!");
+      if (onSaveSuccess) {
+        onSaveSuccess();
+      }
+    } else {
+      let detailErrorMessage = "Terjadi kesalahan yang tidak diketahui.";
+      if (response && response.error) {
+        if (
+          typeof response.error === "string" &&
+          response.error.trim() !== ""
+        ) {
+          detailErrorMessage = response.error;
+        } else if (response.status) {
+          detailErrorMessage = `Gagal menyimpan produk. Status: ${response.status}. Silakan coba lagi atau hubungi administrator.`;
+        } else {
+          detailErrorMessage =
+            "Gagal menyimpan produk. Tidak ada detail tambahan dari server.";
+        }
+      }
+      console.error(
+        "Gagal menyimpan produk (from FormProduct):",
+        response ? response : "Respons tidak diketahui"
+      );
+      alert(detailErrorMessage);
+    }
   };
 
   const formTitle = "Edit Produk";
@@ -182,9 +218,14 @@ export default function FormProduct({ productData, onClose, onSave }) {
             type="submit"
             form="product-edit-form"
             className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
-            disabled={isLoadingKategori}
+            disabled={isLoadingKategori || isSaving}
           >
-            {isLoadingKategori ? "Memuat..." : submitButtonText}
+            {isLoadingKategori
+              ? "Memuat..."
+              : isSaving
+              ? "Menyimpan..."
+              : submitButtonText}{" "}
+            {/* Updated button text */}
           </button>
         </div>
       </div>
@@ -264,7 +305,6 @@ export default function FormProduct({ productData, onClose, onSave }) {
               <span className="text-neutral-900 text-base font-medium font-['Geist']">
                 {getKategoriLabel(kategori)}
               </span>
-              {/* Animasi rotasi ikon panah */}
               <svg
                 width="20"
                 height="20"
@@ -282,7 +322,6 @@ export default function FormProduct({ productData, onClose, onSave }) {
                 />
               </svg>
             </button>
-            {/* Animasi untuk dropdown menu */}
             <div
               role="listbox"
               aria-hidden={
@@ -291,14 +330,14 @@ export default function FormProduct({ productData, onClose, onSave }) {
                 kategoriOptions.length === 0
               }
               className={`absolute left-0 right-0 mt-1 z-20 bg-white rounded-md shadow-lg border border-gray-200 flex flex-col overflow-hidden max-h-60 overflow-y-auto
-                                      transition-all duration-300 ease-in-out transform
-                                      ${
-                                        dropdownOpen &&
-                                        !isLoadingKategori &&
-                                        kategoriOptions.length > 0
-                                          ? "opacity-100 scale-100"
-                                          : "opacity-0 scale-95 pointer-events-none"
-                                      }`}
+                                         transition-all duration-300 ease-in-out transform
+                                         ${
+                                           dropdownOpen &&
+                                           !isLoadingKategori &&
+                                           kategoriOptions.length > 0
+                                             ? "opacity-100 scale-100"
+                                             : "opacity-0 scale-95 pointer-events-none"
+                                         }`}
             >
               {!isLoadingKategori &&
                 kategoriOptions.length > 0 &&
