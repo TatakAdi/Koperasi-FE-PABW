@@ -1,23 +1,17 @@
 "use client";
 import { useState } from "react";
-import OrderTypeStep from "./OrderTypeStep";
-import LocationStep from "./LocationStep";
-import PaymentMethodStep from "./PaymentMethodStep";
-import DeliveryPesan from "./Delivery_PesanAntar";
-import DeliveryAmbil from "./Delivery_AmbilDiTempat";
 import ConfirmationStep from "./ConfirmationCOD";
-import TransferStep from "./TransferStep";
+import DeliveryAmbil from "./Delivery_AmbilDiTempat";
+import DeliveryPesan from "./Delivery_PesanAntar";
 import DigitalPay from "./DigitalPayment";
 import IuranSukarela from "./IuranSukarela";
+import LocationStep from "./LocationStep";
+import OrderTypeStep from "./OrderTypeStep";
+import PaymentMethodStep from "./PaymentMethodStep";
+import TransferStep from "./TransferStep";
 
-export default function CheckoutCard({
-  total,
-  products = [],
-  selectedItems = [],
-  onCancel,
-  onSubmitCheckout,
-}) {
-  const [step, setStep] = useState("orderType");
+export default function CheckoutCard({ total, products = [], selectedItems = [], onCancel, userId }) {
+  const [step, setStep] = useState('orderType');
   const [orderType, setOrderType] = useState(null);
   const [location, setLocation] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState(null);
@@ -155,6 +149,7 @@ export default function CheckoutCard({
           {step === "digitalPayment" && (
             <DigitalPay
               total={total}
+              userId={userId}
               onConfirm={handleConfirm}
               onContinue={() => {
                 setStep("confirmation");

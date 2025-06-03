@@ -1,10 +1,12 @@
 'use client';
 import { useEffect, useState } from 'react';
 
-export default function DigitalPayment({ total, onConfirm, onCancel }) {
+export default function DigitalPayment({ total, cartId, onConfirm, onCancel, userId }) {
   const [timeLeft, setTimeLeft] = useState(5 * 60);
   const [selected, setSelected] = useState('');
   const [expired, setExpired] = useState(false);
+  const [paymentData, setPaymentData] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (timeLeft === 0) {
@@ -29,6 +31,32 @@ export default function DigitalPayment({ total, onConfirm, onCancel }) {
 
   const handleSelect = (method) => {
     setSelected(prev => (prev === method ? '' : method));
+  };
+
+  const handleConfirm = async () => {
+    if (!selected) return;
+    setLoading(true);
+    let payload = { cart_id: cartId };
+    if (selected === 'qris') {
+      payload.payment_method = 'qris';
+    } else if (['bni', 'bri'].includes(selected)) {
+      payload.payment_method = 'bank';
+      payload.bank = selected;
+    }
+    try {
+      const res = await fetch('/api/proxy/getPaymentData', { // use your proxy
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      setPaymentData(data.data); // or setPaymentData(data.result) if that's the structure
+      if (onConfirm) onConfirm(data);
+    } catch (err) {
+      alert('Gagal memulai pembayaran');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const renderBankTransferDetail = (name, accountNumber, logoPath) => (
@@ -57,6 +85,76 @@ export default function DigitalPayment({ total, onConfirm, onCancel }) {
       </div>
     </div>
   );
+
+  const renderQrisResult = () => {
+    console.log('renderQrisResult paymentData:', paymentData);
+    return (
+      <div className="mt-4 rounded-xl p-4 space-y-4 text-sm bg-white ">
+        <div className="flex justify-center">
+          {paymentData?.payment_url ? (
+            <img
+              src={paymentData.payment_url}
+              alt="Kode QR"
+              className="h-40 w-40 object-contain"
+            />
+          ) : (
+            <span>QR tidak tersedia</span>
+          )}
+        </div>
+        <div>
+          <p className="font-semibold">Order ID:</p>
+          <div className="bg-gray-100 rounded-md px-4 py-3 text-sm">{paymentData?.order_id}</div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderVaResult = () => (
+    <div className="mt-4 rounded-xl p-4 space-y-4 text-sm bg-white ">
+      <div>
+        <p className="font-semibold">Virtual Account {paymentData?.extra?.bank?.toUpperCase()}</p>
+        <div className="bg-gray-100 rounded-md px-4 py-3 text-lg font-mono">{paymentData?.extra?.va_number}</div>
+      </div>
+      <div>
+        <p className="font-semibold">Order ID:</p>
+        <div className="bg-gray-100 rounded-md px-4 py-3 text-sm">{paymentData?.order_id}</div>
+      </div>
+    </div>
+  );
+
+  useEffect(() => {
+    const fetchPayment = async () => {
+      setLoading(true);
+      let payload;
+      if (selected === 'qris') {
+        payload = { cart_id: userId, payment_method: 'qris' };
+      } else if (['bni', 'bri'].includes(selected)) {
+        payload = { cart_id: userId, payment_method: 'bank', bank: selected };
+      } else {
+        setLoading(false);
+        return;
+      }
+      try {
+        const res = await fetch('/api/proxy/getPaymentData', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        setPaymentData(data);
+      } catch (err) {
+        alert('Gagal memulai pembayaran');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if ((selected === 'qris' || ['bni', 'bri'].includes(selected)) && !paymentData) {
+      fetchPayment();
+    }
+  }, [selected, userId, paymentData]);
+
+  console.log('paymentData', paymentData);
 
   if (expired) {
     return (
@@ -92,37 +190,45 @@ export default function DigitalPayment({ total, onConfirm, onCancel }) {
           <p className="font-medium">Pilih metode pembayaran:</p>
 
           {/* QRIS */}
-          {(selected === '' || selected === 'qris') && (
+          {(selected === '' || selected === 'qris') && !paymentData && (
             <div>
               <p className="text-xs text-gray-500 mb-1">QRIS</p>
               <button
                 className={`flex items-center rounded-lg border transition ${selected === 'qris' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'}`}
-                onClick={() => handleSelect('qris')}
+                onClick={() => setSelected('qris')}
               >
                 <img src="/QRIS.svg" alt="QRIS" className="h-8" />
               </button>
             </div>
           )}
 
-          {selected === 'qris' && (
-            <div className="mt-4 rounded-xl p-4 space-y-4 text-sm bg-white ">
-              <div className="flex justify-center">
-                <img src="/QRCODE.svg" alt="Kode QR" className="h-40 w-40 object-contain" />
-              </div>
+          {selected === 'qris' && paymentData && renderQrisResult()}
 
+          {/* VA Bank */}
+          {(selected === '' || ['bni', 'bri'].includes(selected)) && !paymentData && (
+            <div className="mt-4 space-y-4">
               <div>
-                <p className="font-semibold text-">Keterangan Toko:</p>
-                <div className="bg-gray-100 rounded-md px-4 py-3 space-y-1 text-sm">
-                  <p className="font-semibold">Koperasi ITK</p>
-                  <p className="text-gray-500"> Gedung A, Kampus ITK, Karang Joang, Balikpapan Barat, Balikpapan.</p>
-                  <p className="text-sm font-semibold">NMID: ID1234567890</p>
+                <p className="text-xs text-gray-500 mb-1">VA Bank</p>
+                <div className="flex gap-3 items-center">
+                  {['bni', 'bri'].map((bank) => (
+                    <button
+                      key={bank}
+                      className={`rounded-lg border p-1 transition ${selected === bank ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'}`}
+                      onClick={() => setSelected(bank)}
+                    >
+                      <img src={`/${bank.toUpperCase()}.svg`} alt={bank.toUpperCase()} className="h-10" />
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
           )}
 
+          {['bni', 'bri'].includes(selected) && paymentData && renderVaResult()}
+
           {/* GOPAY */}
-          {(selected === '' || selected === 'gopay') && (
+          {/*
+          (selected === '' || selected === 'gopay') && (
             <div>
               <p className="text-xs text-gray-500 mb-1">GOPAY</p>
               <button
@@ -131,13 +237,6 @@ export default function DigitalPayment({ total, onConfirm, onCancel }) {
               >
                 <img src="/Gopay.svg" alt="GOPAY" className="h-8" />
               </button>
-              {/* {selected === 'gopay' && (
-                <div className="mt-2 flex flex-col items-center">
-                  <p className="text-sm font-medium">GOPAY</p>
-                  <img src="/QRCODE.svg" alt="Gopay Payment" className="h-40 w-40 object-contain" />
-                  <span className="text-xs text-gray-500 mt-1">Scan kode QR atau transfer ke 0812-xxxx-xxxx (Gopay).</span>
-                </div>
-              )} */}
             </div>
           )}
 
@@ -155,111 +254,10 @@ export default function DigitalPayment({ total, onConfirm, onCancel }) {
               </div>
             </div>
           )}
-
-          {/* VA Bank */}
-          {(selected === '' || ['bni', 'mandiri', 'bri'].includes(selected)) && (
-            <div className="mt-4 space-y-4">
-              <div>
-                <p className="text-xs text-gray-500 mb-1">VA Bank</p>
-                <div className="flex gap-3 items-center">
-                  {['bni', 'mandiri', 'bri'].map((bank) => (
-                    <button
-                      key={bank}
-                      className={`rounded-lg border p-1 transition ${selected === bank ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'}`}
-                      onClick={() => handleSelect(bank)}
-                    >
-                      <img src={`/${bank.toUpperCase()}.svg`} alt={bank.toUpperCase()} className="h-10" />
-                    </button>
-                  ))}
-                </div>
-              </div>
-              {['mandiri'].includes(selected) && (
-                <div className="space-y-4 text-sm rounded-lg p-4 bg-white">
-                  <div>
-                    <p className="text-sm font-medium">Company Code</p>
-                    <div className="bg-gray-100 rounded-md px-4 py-2 text-center font-mono text-lg mb-2">
-                      {selected === 'mandiri' && '70012'}
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">Nomor VA {selected.toUpperCase()}</p>
-                    <div className="bg-gray-100 rounded-md px-4 py-2 text-center font-mono text-lg mb-2">
-                      {selected === 'mandiri' && '9876543210'}
-                    </div>
-                  </div>
-
-                  <div className="text-sm">
-                    <p className="font-medium mb-1">Petunjuk Pembayaran:</p>
-                    <div className="bg-gray-200 rounded-md px-4 py-2 text-xs leading-relaxed">
-                      <ol className="list-decimal pl-5 space-y-1">
-                        <li>Buka app <strong>Livin' by Mandiri</strong> anda.</li>
-                        <li>Pilih menu <strong>Transfer</strong> atau <strong>Bank Transfer</strong>.</li>
-                        <li>Pilih <strong>e-commerce</strong>.</li>
-                        <li>Pilih <strong>Midtrans</strong> atau masukkan kode <strong>70012</strong>.</li>
-                        <li>Masukkan <strong>nomor VA</strong> sesuai pada kolom di atas.</li>
-                        <li>Masukkan nominal transfer yang sesuai.</li>
-                        <li>Konfirmasi dan pembayaran selesai.</li>
-                      </ol>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {['bni'].includes(selected) && (
-                <div className="space-y-4 text-sm rounded-lg p-4 bg-white">
-                  <div>
-                    <p className="text-sm font-medium">Nomor VA {selected.toUpperCase()}</p>
-                    <div className="bg-gray-100 rounded-md px-4 py-2 text-center font-mono text-lg mb-2">
-                      {selected === 'bni' && '1234567890'}
-                    </div>
-                  </div>
-
-                  <div className="text-sm">
-                    <p className="font-medium mb-1">Petunjuk Pembayaran:</p>
-                    <div className="bg-gray-200 rounded-md px-4 py-2 text-xs leading-relaxed">
-                      <ol className="list-decimal pl-5 space-y-1">
-                        <li>Buka app <strong>BNI</strong> mobile banking anda.</li>
-                        <li>Pilih menu <strong>Transfer</strong>.</li>
-                        <li>Pilih <strong>Virtual Account Billing</strong>.</li>
-                        <li>Pilih <strong>Akun Debit</strong> yang ingin digunakan.</li>
-                        <li>Masukkan <strong>nomor VA</strong> sesuai pada kolom di atas.</li>
-                        <li>Masukkan nominal transfer yang sesuai.</li>
-                        <li>Konfirmasi dan pembayaran selesai.</li>
-                      </ol>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {['bri'].includes(selected) && (
-                <div className="space-y-4 text-sm rounded-lg p-4 bg-white">
-                  <div>
-                    <p className="text-sm font-medium">Nomor VA {selected.toUpperCase()}</p>
-                    <div className="bg-gray-100 rounded-md px-4 py-2 text-center font-mono text-lg mb-2">
-                      {selected === 'bri' && '1122334455'}
-                    </div>
-                  </div>
-
-                  <div className="text-sm">
-                    <p className="font-medium mb-1">Petunjuk Pembayaran:</p>
-                    <div className="bg-gray-200 rounded-md px-4 py-2 text-xs leading-relaxed">
-                      <ol className="list-decimal pl-5 space-y-1">
-                        <li>Buka app <strong>BRIMO</strong> anda.</li>
-                        <li>Pilih menu <strong>Pembayaran</strong>.</li>
-                        <li>Pilih <strong>BRIVA</strong>.</li>
-                        <li>Masukkan <strong>nomor VA</strong> sesuai pada kolom di atas.</li>
-                        <li>Masukkan nominal transfer yang sesuai.</li>
-                        <li>Konfirmasi dan pembayaran selesai.</li>
-                      </ol>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+          */}
 
           {/* Bank Transfer */}
-          {(selected === '' || ['bni-tf', 'mandiri-tf', 'bri-tf', 'bca'].includes(selected)) && (
+          {/* {(selected === '' || ['bni-tf', 'mandiri-tf', 'bri-tf', 'bca'].includes(selected)) && (
             <div>
               <p className="text-xs text-gray-500 mb-1">Bank Transfer</p>
               <div className="flex gap-3 items-center">
@@ -282,7 +280,7 @@ export default function DigitalPayment({ total, onConfirm, onCancel }) {
               {selected === 'bca' &&
                 renderBankTransferDetail('BCA', '5566778899', '/BCA.svg')}
             </div>
-          )}
+          )} */}
         </div>
 
         <p className="text-xs text-center text-gray-400 pt-2">Segera selesaikan pembayaran sebelum waktu habis.</p>
@@ -291,14 +289,16 @@ export default function DigitalPayment({ total, onConfirm, onCancel }) {
           <button
             onClick={onCancel}
             className="flex h-10 px-4 flex-1 justify-center items-center gap-1 rounded-lg border border-gray-300 text-black text-sm font-medium hover:bg-gray-100 transition"
+            disabled={loading}
           >
             Kembali
           </button>
           <button
-            onClick={onConfirm}
+            onClick={handleConfirm}
             className="flex h-10 px-4 flex-1 justify-center items-center gap-1 rounded-lg bg-black text-white text-sm font-medium hover:bg-gray-800 transition"
+            disabled={loading || !selected}
           >
-            Konfirmasi
+            {loading ? 'Memproses...' : 'Konfirmasi'}
           </button>
         </div>
       </div>
