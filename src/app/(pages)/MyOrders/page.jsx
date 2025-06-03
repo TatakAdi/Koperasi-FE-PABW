@@ -20,6 +20,7 @@ export default function MyOrders() {
   const [cart, setCart] = useState([]);
   const [cartItems, setCartItems] = useState([]); // Cart yang belum dibayar
   const [buyedItems, setBuyedItems] = useState([]); // Cart yang sudah dibayar + lagi diproses
+  const [processedItems, setProcessedItems] = useState([]);
   const [status, setStatus] = useState("Belum Dibayar"); // "Belum Dibayar", "Sedang Diproses", "Sedang Dikirim", "Selesai"
   const [minPrice, setMinPrice] = useInput();
   const [maxPrice, setMaxPrice] = useInput();
@@ -59,11 +60,27 @@ export default function MyOrders() {
         setProducts(items);
       }
       // Masalah di sini wak
-      if (!payedCartRes.error && payedCartRes.data && payedCartRes.data.items) {
-        const items = payedCartRes.data.carts.map((item) => ({
+      if (!payedCartRes.error && payedCartRes.data && payedCartRes.data.carts) {
+        const carts = payedCartRes.data.carts.map((item) => ({
           ...item,
         }));
-        setBuyedItems(items);
+        // const items = carts.items.map((item) => ({
+        //   ...item,
+        // }));
+        setBuyedItems(carts);
+
+        const mergedItems = carts.flatMap((cart) =>
+          (cart.items || []).map((item) => ({
+            ...item,
+            cart_id: cart.cart_id,
+            status_barang: cart.status_barang,
+            sudah_bayar: cart.sudah_bayar,
+            total_harga: cart.total_harga,
+          }))
+        );
+
+        console.log("gabungan item : ", mergedItems);
+        setProcessedItems(mergedItems);
       }
     };
     getUser();
@@ -94,7 +111,18 @@ export default function MyOrders() {
     return [];
   };
 
-  const payedCartItem = () => {};
+  const onProcessedCartItem = () => {
+    console.log("Processed Items: ", processedItems);
+    if (processedItems) {
+      const filteredContent = processedItems.filter(
+        (item) => item.status_barang === "akan dikirim"
+      );
+      console.log("filtered: ", filteredContent);
+      return filteredContent;
+    }
+    console.log("Gagal memfilter cart yang akan dikirim");
+    return [];
+  };
 
   const onPayHandle = (itemId) => {
     const selectedItem = cartItems.find((item) => item.id === itemId);
@@ -106,6 +134,8 @@ export default function MyOrders() {
     }
     console.log("Selecteditem =", selectedItems);
     console.log("cart: ", cart);
+    console.log("buyed cart = ", buyedItems);
+    console.log("processed Items: ", processedItems);
   };
 
   const onCheckoutHandle = async ({ items, payment_method }) => {
@@ -245,7 +275,7 @@ export default function MyOrders() {
               </div>
 
               <div className="divide-y">
-                {buyedItems.map((item) => (
+                {onProcessedCartItem().map((item) => (
                   <OnProcessedItem key={item.id} {...item} />
                 ))}
               </div>
