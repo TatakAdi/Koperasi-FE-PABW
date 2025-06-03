@@ -1,11 +1,4 @@
-import {
-  KeyRound,
-  List,
-  LogIn,
-  LogOut,
-  Package,
-  User
-} from "lucide-react";
+import { KeyRound, List, LogIn, LogOut, Package, User } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
 export default function ProfilePicMenu({
@@ -22,9 +15,9 @@ export default function ProfilePicMenu({
   const handleAdminOrProductPageRedirect = () => {
     if (roles === "admin" || roles === "pegawai") {
       if (pathname.startsWith("/Actors")) {
-        router.push("/"); 
+        router.push("/");
       } else {
-        router.push("/Actors"); 
+        router.push("/Actors");
       }
     } else if (roles === "penitip" || roles === "pengguna") {
       router.push("/MyProduct");
@@ -38,11 +31,12 @@ export default function ProfilePicMenu({
 
   };
 
-  const styleBox = "flex flex-row text-sm font-medium text-[#535353] p-2 cursor-pointer hover:bg-[#EDEDED] rounded-lg gap-2 m-2";
+  const styleBox =
+    "flex flex-row text-sm font-medium text-[#535353] p-2 cursor-pointer hover:bg-[#EDEDED] rounded-lg gap-2 m-2";
 
   return (
     <div className="w-[420px] flex flex-col bg-[#F2F4F7] rounded-lg">
-      {authed !== null && ( 
+      {authed !== null && (
         <div className="flex h-[74px] items-center gap-2 mx-2">
           <div className="rounded-full w-10 h-10 bg-gray-400 cursor-pointer "></div>
           <div>
@@ -56,7 +50,10 @@ export default function ProfilePicMenu({
           authed !== null ? "border-y " : "border-b "
         } border-[#E6E6E6]`}
       >
-        <div className={`${styleBox}`} onClick={() => router.push("/account-setting")}>
+        <div
+          className={`${styleBox}`}
+          onClick={() => router.push("/account-setting")}
+        >
           <User size={20} />
           <span>Account Setting</span>{" "}
         </div>
@@ -67,15 +64,18 @@ export default function ProfilePicMenu({
         </div>
 
         {authed && (
-          <div className={`${styleBox}`} onClick={handleAdminOrProductPageRedirect}>
+          <div
+            className={`${styleBox}`}
+            onClick={handleAdminOrProductPageRedirect}
+          >
             {roles === "admin" || roles === "pegawai" ? (
               <>
                 <KeyRound size={20} />
                 <span>Admin Panel</span>
               </>
-            ) : ( 
+            ) : (
               <>
-                <Package size={20} /> 
+                <Package size={20} />
                 <span>My Products</span>
               </>
             )}
@@ -83,7 +83,7 @@ export default function ProfilePicMenu({
         )}
       </div>
 
-      {authed !== null && ( 
+      {authed !== null && (
         <div className=" border-b border-[#e6e6e6]">
           <div className="flex flex-row gap-1 justify-between items-center m-2 p-2">
             <div>
@@ -91,15 +91,18 @@ export default function ProfilePicMenu({
                 Iuran Sukarela
               </p>
               <p className="font-medium text-base text-black">
-                Rp. {saldo !== null && saldo !== undefined ? saldo.toLocaleString("id-ID") : "0"}
+                Rp.{" "}
+                {saldo !== null && saldo !== undefined
+                  ? saldo.toLocaleString("id-ID")
+                  : "0"}
               </p>
               <p className="text-[#666666] font-medium text-xs">
-                Last Payment: 02/12/23 
+                Last Payment: 02/12/23
               </p>
             </div>
             <div>
               <p className="text-[#535353] font-base text-base">Iuran Wajib</p>
-              <p className="font-medium text-base text-black">Rp. 17.000</p> 
+              <p className="font-medium text-base text-black">Rp. 17.000</p>
               <p className="text-[#666666] font-medium text-xs">
                 Last Payment: 02/12/23
               </p>
@@ -109,7 +112,9 @@ export default function ProfilePicMenu({
       )}
       <div
         // Perbarui onClick untuk menggunakan fungsi baru saat logout
-        onClick={!authed ? () => router.push("/Login") : handleLogoutAndRedirect}
+        onClick={
+          !authed ? () => router.push("/Login") : handleLogoutAndRedirect
+        }
         className={` ${styleBox} `}
       >
         {!authed ? (
