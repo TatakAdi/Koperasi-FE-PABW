@@ -1,18 +1,15 @@
-export default function MyOrderNotPayItems({
+export default function OnProcessedItem({
   id,
   image,
   name,
-  category,
   subtotal,
+  category,
+  status,
   jumlah,
-  onPayHandle,
 }) {
-  // const finalPrice = price * quantity;
-
   return (
     <div
-      key={id}
-      className={`h-[120px] relative border-b border-[#e5e7eb] grid grid-cols-4 items-center`}
+      className={`h-[120px] relative border-b border-[#e5e7eb] grid grid-cols-3 items-center`}
     >
       <div className="min-h-[120px] py-7 border-r border-[#e5e7eb]  items-center gap-4">
         {/**Kolom 1: Nama Produk dan gambar */}
@@ -43,15 +40,6 @@ export default function MyOrderNotPayItems({
         <div className="w-8 text-center text-base text-neutral-900">
           {jumlah}
         </div>
-      </div>
-      {/**Kolom 4: Tombol aksi bayar */}
-      <div className=" h-full px-4 py-7 border-r border-[#e5e7eb] flex items-center justify-center">
-        <button
-          className="text-base font-medium text-[#199F48] font-['Geist'] cursor-pointer hover:underline hover:underline-offset-2"
-          onClick={() => onPayHandle(id)}
-        >
-          Bayar
-        </button>
       </div>
     </div>
   );
