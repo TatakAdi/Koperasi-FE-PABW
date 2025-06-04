@@ -252,6 +252,7 @@ export default function Home() {
           addCartItemLoad={isAddCartLoad}
           isSucced={isSuccess}
           succedMessage={successMessage}
+          imageUrl={productItem.image_url}
         />
       )}
     </div>

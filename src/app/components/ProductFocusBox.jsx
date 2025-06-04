@@ -14,6 +14,7 @@ export default function ProductFocusBox({
   addCartItemLoad,
   isSucced,
   succedMessage,
+  imageUrl
 }) {
   return (
     <div
@@ -25,7 +26,7 @@ export default function ProductFocusBox({
         <div className="bg-white w-[408px] h-[226px] rounded-3xl p-4 grid gap-1.5">
           <div className="w-full flex flex-row gap-3.5">
             <img
-              src="image.png"
+              src={imageUrl ? imageUrl.replace('local:', '/') : '/image.png'}
               alt="Pratinjau Produk"
               className="w-[184px] h-[138px] rounded-lg"
             />

@@ -2,7 +2,6 @@
 import Navbar from "@/app/components/Navbar";
 import SidePanel from "@/app/components/SidePanel";
 import CheckoutCard from "@/app/components/keranjang/CheckoutCard";
-import useInput from "app/hooks/useInput";
 import {
   deleteCartItem,
   getCartItems,
@@ -10,6 +9,7 @@ import {
 } from "@/app/lib/api/cart";
 import { getUserLogged } from "@/app/lib/api/login";
 import { logout } from "@/app/lib/api/logout";
+import useInput from "app/hooks/useInput";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -191,7 +191,7 @@ export default function KeranjangPage() {
                       <div className="flex items-center gap-4">
                         <img
                           className="w-16 h-16 rounded-lg"
-                          src={product.image || "Piscok.svg"}
+                          src={product.image_url || "Piscok.svg"}
                           alt={product.name}
                         />
                         <div className="flex flex-col gap-1">

@@ -9,7 +9,7 @@ import MyOrderNotPayItems from "app/components/myOrders/MyOrderNotPayItems";
 import Navbar from "app/components/Navbar";
 import SidePanel from "app/components/SidePanel";
 import useInput from "app/hooks/useInput";
-import { getCartItems } from "app/lib/api/cart";
+import { getCartItems, updateCartStatus } from "app/lib/api/cart";
 import { getUserLogged } from "app/lib/api/login";
 import { logout } from "app/lib/api/logout";
 import { useRouter } from "next/navigation";
@@ -27,7 +27,6 @@ export default function MyOrders() {
   const [maxPrice, setMaxPrice] = useInput();
   const [keyword, setKeyword] = useInput();
   const [sellSort, setSellSort] = useState("");
-  const [selectedItems, setSelectedItems] = useState([]);
   const [products, setProducts] = useState([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -167,9 +166,21 @@ export default function MyOrders() {
 
   const handleUpdateStatus = async (orderId) => {
     try {
-      // Add your API call here to update the status
-      // const response = await updateOrderStatus(orderId, "diterima pembeli");
+      // Get the user ID from authUser state
+      const userId = authUser?.id;
+      if (!userId) {
+        console.error("User ID not found");
+        return;
+      }
+
+      // Call the API to update the status
+      const response = await updateCartStatus(userId, "diterima pembeli");
       
+      if (response.error) {
+        console.error("Failed to update status:", response.message);
+        return;
+      }
+
       // Update local state
       setProcessedItems(prevItems => 
         prevItems.map(item => 
@@ -178,6 +189,10 @@ export default function MyOrders() {
             : item
         )
       );
+
+      // Optionally refresh the page or show success message
+      router.refresh();
+      
     } catch (error) {
       console.error("Error updating order status:", error);
     }

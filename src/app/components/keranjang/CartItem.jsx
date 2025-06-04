@@ -1,5 +1,3 @@
-import Image from 'next/image';
-
 const CartItem = ({ product, isSelected, onSelect, onQuantityChange, onDelete }) => {
   return (
     <div
@@ -14,8 +12,8 @@ const CartItem = ({ product, isSelected, onSelect, onQuantityChange, onDelete })
         className="mx-auto w-4 h-4"
       />
       <div className="flex items-center gap-3">
-        <Image
-          src={product.image}
+        <img
+          src={product.image_url}
           alt={product.name}
           width={48}
           height={48}
